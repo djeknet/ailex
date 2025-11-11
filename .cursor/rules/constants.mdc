@@ -1,0 +1,101 @@
+---
+description: Use these rules when adding or using constants in the project.
+alwaysApply: false
+---
+
+# 🔧 Constants Management Rules
+
+## 📍 Centralized Constants Location
+**Все константы должны храниться в `src/shared/constants/index.ts`**
+
+### ✅ ОБЯЗАТЕЛЬНО:
+1. **Все URL и ссылки** - только через `EXTERNAL_URLS`
+2. **API конфигурация** - только через `API_CONFIG`
+3. **UI параметры** - только через `UI_CONFIG`
+4. **Значения по умолчанию** - только через `DEFAULT_DATA`
+
+### 🚫 НЕДОПУСТИМО:
+- Хардкод ссылок напрямую в компонентах
+- Дублирование URL в разных файлах
+- Магические числа без константы
+- Конфигурация вне централизованного места
+
+## 🌐 Работа с URL и ссылками
+
+### ✅ Правильно:
+```typescript
+import { EXTERNAL_URLS } from '@shared/constants';
+
+// Статическая ссылка
+const blogUrl = EXTERNAL_URLS.SITE_SECURITY_RECOMMENDATIONS;
+
+// Динамическая ссылка с параметрами
+const subscriptionUrl = EXTERNAL_URLS.SUBSCRIPTION_MANAGEMENT(user.email);
+const mapsUrl = EXTERNAL_URLS.GOOGLE_MAPS(lat, lng);
+```
+
+### ❌ Неправильно:
+```typescript
+// НЕ ДЕЛАТЬ - хардкод в компоненте
+const subscriptionUrl = `https://fffem.com/sales_pilot?email=${email}`;
+const blogUrl = 'https://salespilot.nitiweb.net/blog/recommendations';
+```
+
+## 📋 Структура EXTERNAL_URLS:
+```typescript
+export const EXTERNAL_URLS = {
+  // Группировка по категориям
+  
+  // Blog and Documentation
+  SITE_SECURITY_RECOMMENDATIONS: 'https://...',
+  
+  // External Services  
+  GOOGLE_MAPS: (lat: number, lng: number) => `https://maps.google.com/?q=${lat},${lng}`,
+  
+  // Subscription Management
+  SUBSCRIPTION_MANAGEMENT: (email: string) => `https://fffem.com/sales_pilot?prefilled_email=${encodeURIComponent(email)}`,
+} as const;
+```
+
+## 🔄 Процесс добавления новых констант:
+
+1. **Определить категорию** (URLs, API, UI, Data)
+2. **Добавить в соответствующий объект** в `constants/index.ts`
+3. **Использовать функции для динамических параметров**
+4. **Добавить комментарии для группировки**
+5. **Обновить импорты в компонентах**
+
+## 🎯 Примеры использования:
+
+### URL с параметрами:
+```typescript
+// В constants/index.ts
+WHOIS_LOOKUP: (domain: string) => `https://whois.chromefans.org/${domain}`,
+
+// В компоненте
+import { EXTERNAL_URLS } from '@shared/constants';
+const whoisUrl = EXTERNAL_URLS.WHOIS_LOOKUP(domain);
+```
+
+### Статические значения:
+```typescript
+// В constants/index.ts
+ROBOTS_TXT: (domain: string) => `https://${domain}/robots.txt`,
+
+// В компоненте
+const robotsUrl = EXTERNAL_URLS.ROBOTS_TXT(siteDomain);
+```
+
+## ⚡ Преимущества централизации:
+- **Единая точка изменений** - изменить URL в одном месте
+- **Типизация** - автокомплит и проверка типов
+- **Консистентность** - одинаковое использование по всему проекту
+- **Легкость рефакторинга** - быстрый поиск и замена
+- **Документирование** - все ссылки в одном месте
+
+## 🔍 Проверка соблюдения правил:
+Перед коммитом проверить:
+- [ ] Нет хардкода URL в компонентах
+- [ ] Все новые ссылки добавлены в constants
+- [ ] Использованы правильные импорты
+- [ ] Добавлены комментарии для группировки

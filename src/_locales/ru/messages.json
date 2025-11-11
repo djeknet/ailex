@@ -1,0 +1,1462 @@
+{
+  "extensionName": {
+    "message": "AiLex"
+  },
+  "extensionDescription": {
+    "message": "AI-ассистент для браузера с чат-интерфейсом"
+  },
+  "chat": {
+    "message": "Чат"
+  },
+  "settings": {
+    "message": "Настройки"
+  },
+  "history": {
+    "message": "История"
+  },
+  "help": {
+    "message": "Помощь"
+  },
+  "tools": {
+    "message": "Инструменты"
+  },
+  "newChat": {
+    "message": "Новый чат"
+  },
+  "closeChat": {
+    "message": "Закрыть чат"
+  },
+  "sendMessage": {
+    "message": "Отправить"
+  },
+  "messageInputPlaceholder": {
+    "message": "Введите сообщение..."
+  },
+  "operators": {
+    "message": "Операторы"
+  },
+  "general": {
+    "message": "Общие"
+  },
+  "personalInfo": {
+    "message": "Личная информация"
+  },
+  "instructions": {
+    "message": "Инструкции"
+  },
+  "theme": {
+    "message": "Тема"
+  },
+  "language": {
+    "message": "Язык"
+  },
+  "light": {
+    "message": "Светлая"
+  },
+  "dark": {
+    "message": "Темная"
+  },
+  "system": {
+    "message": "Системная"
+  },
+  "apiKey": {
+    "message": "API ключ"
+  },
+  "testConnection": {
+    "message": "Тест"
+  },
+  "selectModel": {
+    "message": "Выберите модель"
+  },
+  "save": {
+    "message": "Сохранить"
+  },
+  "cancel": {
+    "message": "Отмена"
+  },
+  "delete": {
+    "message": "Удалить"
+  },
+  "getApiKey": {
+    "message": "Получить API ключ →"
+  },
+  "apiKeyOptional": {
+    "message": "API Key (опционально)"
+  },
+  "notRequired": {
+    "message": "Не требуется"
+  },
+  "connectionSuccess": {
+    "message": "✓ Подключение успешно"
+  },
+  "connectionError": {
+    "message": "✗ Ошибка подключения"
+  },
+  "addCustomEndpoint": {
+    "message": "+ Указать custom endpoint"
+  },
+  "endpoint": {
+    "message": "Endpoint"
+  },
+  "endpointRequired": {
+    "message": "Endpoint (обязательно)"
+  },
+  "endpointOptional": {
+    "message": "Endpoint (опционально)"
+  },
+  "hide": {
+    "message": "Скрыть"
+  },
+  "lmstudioDescription": {
+    "message": "LM Studio позволяет запускать локальные модели на вашем компьютере. Скачайте и запустите"
+  },
+  "lmstudioBeforeConnection": {
+    "message": "перед подключением."
+  },
+  "searchModel": {
+    "message": "Поиск модели..."
+  },
+  "modelNotFound": {
+    "message": "Модель не найдена"
+  },
+  "historyMode": {
+    "message": "Сохранение диалога"
+  },
+  "historyModeAll": {
+    "message": "Для всех сайтов"
+  },
+  "historyModePerSite": {
+    "message": "Для каждого сайта"
+  },
+  "historyModeSession": {
+    "message": "В рамках сессии"
+  },
+  "historyModeAllDesc": {
+    "message": "История общая для всех сайтов"
+  },
+  "historyModePerSiteDesc": {
+    "message": "История обновляется при переключении вкладок"
+  },
+  "historyModeSessionDesc": {
+    "message": "История удаляется после закрытия расширения"
+  },
+  "deleteHistory": {
+    "message": "Удалить историю диалогов"
+  },
+  "deleteHistoryWarning": {
+    "message": "Это действие удалит всю историю чатов и не может быть отменено"
+  },
+  "historyDeleted": {
+    "message": "История удалена"
+  },
+  "confirmDeletion": {
+    "message": "Подтвердите удаление"
+  },
+  "deleteDataDescription": {
+    "message": "Вы собираетесь удалить следующие данные:"
+  },
+  "chatsToDelete": {
+    "message": "Будет удалено чатов:"
+  },
+  "messagesToDelete": {
+    "message": "Сообщений:"
+  },
+  "dataSize": {
+    "message": "Размер данных:"
+  },
+  "deleting": {
+    "message": "Удаление..."
+  },
+  "historyDeletedSuccess": {
+    "message": "История чатов была удалена."
+  },
+  "close": {
+    "message": "Закрыть"
+  },
+  "personalInfoDescription": {
+    "message": "Эта информация используется для автоматического заполнения форм на сайтах"
+  },
+  "firstName": {
+    "message": "Имя"
+  },
+  "lastName": {
+    "message": "Фамилия"
+  },
+  "email": {
+    "message": "Email"
+  },
+  "phone": {
+    "message": "Телефон"
+  },
+  "country": {
+    "message": "Страна"
+  },
+  "state": {
+    "message": "Штат/Регион"
+  },
+  "city": {
+    "message": "Город"
+  },
+  "address": {
+    "message": "Адрес"
+  },
+  "addressLine2": {
+    "message": "Адрес (строка 2)"
+  },
+  "zipCode": {
+    "message": "Индекс"
+  },
+  "position": {
+    "message": "Должность"
+  },
+  "about": {
+    "message": "О себе"
+  },
+  "firstNamePlaceholder": {
+    "message": "Иван"
+  },
+  "lastNamePlaceholder": {
+    "message": "Иванов"
+  },
+  "emailPlaceholder": {
+    "message": "ivan@example.com"
+  },
+  "phonePlaceholder": {
+    "message": "+7 900 123-45-67"
+  },
+  "countryPlaceholder": {
+    "message": "Россия"
+  },
+  "statePlaceholder": {
+    "message": "Московская обл."
+  },
+  "cityPlaceholder": {
+    "message": "Москва"
+  },
+  "addressPlaceholder": {
+    "message": "ул. Пушкина, д. 10"
+  },
+  "addressLine2Placeholder": {
+    "message": "кв. 5, этаж 2"
+  },
+  "zipCodePlaceholder": {
+    "message": "123456"
+  },
+  "positionPlaceholder": {
+    "message": "Разработчик"
+  },
+  "aboutPlaceholder": {
+    "message": "Расскажите о себе..."
+  },
+  "company": {
+    "message": "Компания"
+  },
+  "workPhone": {
+    "message": "Рабочий телефон"
+  },
+  "linkedin": {
+    "message": "LinkedIn"
+  },
+  "github": {
+    "message": "GitHub"
+  },
+  "portfolio": {
+    "message": "Портфолио"
+  },
+  "resumeUrl": {
+    "message": "Ссылка на резюме"
+  },
+  "orcid": {
+    "message": "ORCID"
+  },
+  "telegram": {
+    "message": "Telegram"
+  },
+  "twitter": {
+    "message": "Twitter/X"
+  },
+  "facebook": {
+    "message": "Facebook"
+  },
+  "instagram": {
+    "message": "Instagram"
+  },
+  "youtube": {
+    "message": "YouTube"
+  },
+  "tiktok": {
+    "message": "TikTok"
+  },
+  "website": {
+    "message": "Веб-сайт"
+  },
+  "dateOfBirth": {
+    "message": "Дата рождения"
+  },
+  "idNumber": {
+    "message": "Паспорт/ID"
+  },
+  "driverLicense": {
+    "message": "Водительское удостоверение"
+  },
+  "healthInsurance": {
+    "message": "Мед. страховка"
+  },
+  "companyPlaceholder": {
+    "message": "ООО \"Компания\""
+  },
+  "workPhonePlaceholder": {
+    "message": "+7 495 123-45-67"
+  },
+  "linkedinPlaceholder": {
+    "message": "https://linkedin.com/in/username"
+  },
+  "githubPlaceholder": {
+    "message": "https://github.com/username"
+  },
+  "portfolioPlaceholder": {
+    "message": "https://myportfolio.com"
+  },
+  "resumeUrlPlaceholder": {
+    "message": "https://example.com/resume.pdf"
+  },
+  "orcidPlaceholder": {
+    "message": "0000-0001-2345-6789"
+  },
+  "telegramPlaceholder": {
+    "message": "@username"
+  },
+  "twitterPlaceholder": {
+    "message": "@username"
+  },
+  "facebookPlaceholder": {
+    "message": "https://facebook.com/username"
+  },
+  "instagramPlaceholder": {
+    "message": "@username"
+  },
+  "youtubePlaceholder": {
+    "message": "https://youtube.com/@channel"
+  },
+  "tiktokPlaceholder": {
+    "message": "@username"
+  },
+  "websitePlaceholder": {
+    "message": "https://mywebsite.com"
+  },
+  "dateOfBirthPlaceholder": {
+    "message": "01.01.1990"
+  },
+  "idNumberPlaceholder": {
+    "message": "1234 567890"
+  },
+  "driverLicensePlaceholder": {
+    "message": "12 34 567890"
+  },
+  "healthInsurancePlaceholder": {
+    "message": "1234567890123456"
+  },
+  "professionalInfo": {
+    "message": "Профессиональная информация"
+  },
+  "socialNetworks": {
+    "message": "Социальные сети"
+  },
+  "sensitiveData": {
+    "message": "Конфиденциальные данные"
+  },
+  "sensitiveDataWarning": {
+    "message": "Эти данные будут зашифрованы для безопасного хранения"
+  },
+  "generalInstruction": {
+    "message": "Общая инструкция"
+  },
+  "generalInstructionDescription": {
+    "message": "Системная инструкция, которая добавляется в начале каждого диалога с ИИ, если нет инструкции для конкретного сайта"
+  },
+  "generalInstructionPlaceholder": {
+    "message": "Введите общую инструкцию для ИИ..."
+  },
+  "customInstructions": {
+    "message": "Подключаемые инструкции"
+  },
+  "customInstructionsDescription": {
+    "message": "Создайте инструкции для конкретных сайтов. Они будут автоматически применяться при общении с ИИ"
+  },
+  "addInstruction": {
+    "message": "Добавить инструкцию"
+  },
+  "editInstruction": {
+    "message": "Редактировать инструкцию"
+  },
+  "addInstructionDescription": {
+    "message": "Создайте новую инструкцию для конкретного сайта"
+  },
+  "editInstructionDescription": {
+    "message": "Отредактируйте данные инструкции"
+  },
+  "instructionName": {
+    "message": "Название"
+  },
+  "instructionDomain": {
+    "message": "Домен"
+  },
+  "instructionContent": {
+    "message": "Инструкция"
+  },
+  "instructionNamePlaceholder": {
+    "message": "Например: Помощник разработчика"
+  },
+  "instructionDomainPlaceholder": {
+    "message": "example.com"
+  },
+  "domainAlreadyExists": {
+    "message": "Для этого домена уже есть инструкция"
+  },
+  "instructionContentPlaceholder": {
+    "message": "Введите инструкцию для ИИ..."
+  },
+  "noInstructions": {
+    "message": "Пока нет созданных инструкций"
+  },
+  "deleteInstructionConfirm": {
+    "message": "Эта инструкция будет удалена без возможности восстановления. Продолжить?"
+  },
+  "deleteInstruction": {
+    "message": "Удалить инструкцию"
+  },
+  "add": {
+    "message": "Добавить"
+  },
+  "create": {
+    "message": "Создать"
+  },
+  "noInstruction": {
+    "message": "Без инструкции"
+  },
+  "instructionConnected": {
+    "message": "Подключена инструкция к запросу"
+  },
+  "currentPage": {
+    "message": "Текущая страница"
+  },
+  "contextType": {
+    "message": "Тип контекста"
+  },
+  "textOnly": {
+    "message": "Только текст"
+  },
+  "domPage": {
+    "message": "DOM страницы"
+  },
+  "htmlPage": {
+    "message": "HTML страницы"
+  },
+  "search": {
+    "message": "Поиск"
+  },
+  "attach": {
+    "message": "Прикрепить"
+  },
+  "microphone": {
+    "message": "Микрофон"
+  },
+  "webSearch": {
+    "message": "Web Search"
+  },
+  "unavailableOnSystemPages": {
+    "message": "Недоступно на системных страницах"
+  },
+  "copy": {
+    "message": "Копировать"
+  },
+  "copyWithFormatting": {
+    "message": "Копировать с форматированием"
+  },
+  "copyWithoutFormatting": {
+    "message": "Копировать без форматирования"
+  },
+  "rewrite": {
+    "message": "Переписать"
+  },
+  "makeLonger": {
+    "message": "Сделать длиннее"
+  },
+  "improveWriting": {
+    "message": "Улучшить письмо"
+  },
+  "makeShorter": {
+    "message": "Сделать короче"
+  },
+  "simplifyLanguage": {
+    "message": "Упростить язык"
+  },
+  "rephrase": {
+    "message": "Перефразировать"
+  },
+  "compareResponses": {
+    "message": "Сравнить ответы"
+  },
+  "favorites": {
+    "message": "Избранные"
+  },
+  "askQuestion": {
+    "message": "Задайте вопрос или выберите что хотите сделать"
+  },
+  "startConversation": {
+    "message": "Начните общение с AI ассистентом"
+  },
+  "error": {
+    "message": "Ошибка"
+  },
+  "errorComparingResponses": {
+    "message": "Ошибка при сравнении ответов"
+  },
+  "errorMessageNotFound": {
+    "message": "Сообщение не найдено"
+  },
+  "errorOriginalMessageNotFound": {
+    "message": "Не найдено исходное сообщение пользователя"
+  },
+  "errorChatNotInitialized": {
+    "message": "Чат не инициализирован"
+  },
+  "errorConnectionFailedCompare": {
+    "message": "Не удалось подключиться к AI сервису. Проверьте, что сервис запущен и доступен."
+  },
+  "errorTimeoutCompare": {
+    "message": "Превышено время ожидания ответа от AI сервиса."
+  },
+  "errorAuthCompare": {
+    "message": "Ошибка авторизации. Проверьте правильность API ключа."
+  },
+  "errorRateLimitCompare": {
+    "message": "Превышен лимит запросов. Попробуйте позже."
+  },
+  "errorServerCompare": {
+    "message": "Ошибка на стороне AI сервиса. Попробуйте позже."
+  },
+  "errorUnknownCompare": {
+    "message": "Неизвестная ошибка"
+  },
+  "unknownModel": {
+    "message": "Неизвестная модель"
+  },
+  "errorEmptyResponse": {
+    "message": "Получен пустой ответ от AI. Попробуйте повторить запрос или выбрать другую модель."
+  },
+  "errorConnectionFailed": {
+    "message": "Не удалось подключиться к AI сервису. Проверьте, что сервис запущен и доступен."
+  },
+  "errorTimeout": {
+    "message": "Превышено время ожидания ответа от AI сервиса."
+  },
+  "errorAuth": {
+    "message": "Ошибка авторизации. Проверьте правильность API ключа."
+  },
+  "errorRateLimit": {
+    "message": "Превышен лимит запросов. Попробуйте позже."
+  },
+  "errorServer": {
+    "message": "Ошибка на стороне AI сервиса. Попробуйте позже."
+  },
+  "errorUnknown": {
+    "message": "Ошибка при отправке сообщения"
+  },
+  "searchChats": {
+    "message": "Поиск чатов..."
+  },
+  "newFolder": {
+    "message": "Новая папка"
+  },
+  "createFolder": {
+    "message": "Создать папку"
+  },
+  "folderName": {
+    "message": "Название папки"
+  },
+  "unnamedFolder": {
+    "message": "Безымянная папка"
+  },
+  "rename": {
+    "message": "Переименовать"
+  },
+  "moveTo": {
+    "message": "Переместить"
+  },
+  "moveToFolder": {
+    "message": "Переместить в папку"
+  },
+  "selectFolder": {
+    "message": "Выберите папку"
+  },
+  "openSite": {
+    "message": "Открыть сайт"
+  },
+  "usedOperators": {
+    "message": "Использованные операторы"
+  },
+  "usedTokens": {
+    "message": "Использованные токены"
+  },
+  "noChats": {
+    "message": "Нет чатов"
+  },
+  "noFolders": {
+    "message": "Нет папок"
+  },
+  "renameChat": {
+    "message": "Переименовать чат"
+  },
+  "deleteChat": {
+    "message": "Удалить чат"
+  },
+  "deleteChatConfirm": {
+    "message": "Вы уверены, что хотите удалить этот чат?"
+  },
+  "renameFolder": {
+    "message": "Переименовать папку"
+  },
+  "deleteFolder": {
+    "message": "Удалить папку"
+  },
+  "deleteFolderConfirm": {
+    "message": "Вы уверены, что хотите удалить эту папку? Чаты из нее не будут удалены."
+  },
+  "chatHistory": {
+    "message": "История чатов"
+  },
+  "pageContextDisconnected": {
+    "message": "Нет соединения со страницей. Обновите страницу."
+  },
+  "refreshPage": {
+    "message": "Обновить страницу"
+  },
+  "checkingConnection": {
+    "message": "Проверка соединения..."
+  },
+  "pageContextUnavailable": {
+    "message": "Не удается получить контекст страницы. Страница не обновлялась после установки расширения. Обновить страницу сейчас?"
+  },
+  "currentPageContext": {
+    "message": "Контекст текущей страницы",
+    "description": ""
+  },
+  "rewriteAnswer": {
+    "message": "Перепишите ответ",
+    "description": ""
+  },
+  "recommended": {
+    "message": "Рекомендуется",
+    "description": ""
+  },
+  "fixSpelling": {
+    "message": "Исправьте орфографию и грамматику",
+    "description": ""
+  },
+  "changeTone": {
+    "message": "Изменить тон",
+    "description": ""
+  },
+  "toneProfessional": {
+    "message": "Профессиональный",
+    "description": ""
+  },
+  "toneFriendly": {
+    "message": "Дружелюбный",
+    "description": ""
+  },
+  "toneDirect": {
+    "message": "Прямой",
+    "description": ""
+  },
+  "toneConfident": {
+    "message": "Уверенный",
+    "description": ""
+  },
+  "toneCasual": {
+    "message": "Повседневный",
+    "description": ""
+  },
+  "translateTo": {
+    "message": "Перевести на",
+    "description": ""
+  },
+  "langEnglish": {
+    "message": "Английский",
+    "description": ""
+  },
+  "langChineseSimplified": {
+    "message": "Китайский (упрощенный)",
+    "description": ""
+  },
+  "langChineseTraditional": {
+    "message": "Китайский (традиционный)",
+    "description": ""
+  },
+  "langPortuguese": {
+    "message": "Португальский",
+    "description": ""
+  },
+  "langSpanish": {
+    "message": "Испанский",
+    "description": ""
+  },
+  "langFrench": {
+    "message": "Французский",
+    "description": ""
+  },
+  "langKorean": {
+    "message": "Корейский",
+    "description": ""
+  },
+  "langVietnamese": {
+    "message": "Вьетнамский",
+    "description": ""
+  },
+  "langJapanese": {
+    "message": "Японский",
+    "description": ""
+  },
+  "langRussian": {
+    "message": "Русский",
+    "description": ""
+  },
+  "langGerman": {
+    "message": "Немецкий",
+    "description": ""
+  },
+  "langTurkish": {
+    "message": "Турецкий",
+    "description": ""
+  },
+  "langItalian": {
+    "message": "Итальянский",
+    "description": ""
+  },
+  "langMacedonian": {
+    "message": "Македонский",
+    "description": ""
+  },
+  "langPolish": {
+    "message": "Польский",
+    "description": ""
+  },
+  "langArabic": {
+    "message": "Арабский",
+    "description": ""
+  },
+  "langHebrew": {
+    "message": "Иврит",
+    "description": ""
+  },
+  "langIndonesian": {
+    "message": "Индонезия",
+    "description": ""
+  },
+  "langSwedish": {
+    "message": "Шведский",
+    "description": ""
+  },
+  "langFilipino": {
+    "message": "Филипины",
+    "description": ""
+  },
+  "langNorwegian": {
+    "message": "Норвежский",
+    "description": ""
+  },
+  "langFinnish": {
+    "message": "Финский",
+    "description": ""
+  },
+  "langCzech": {
+    "message": "Чешская Республика",
+    "description": ""
+  },
+  "langDanish": {
+    "message": "Датский",
+    "description": ""
+  },
+  "langUkrainian": {
+    "message": "Украинский",
+    "description": ""
+  },
+  "promptMakeLonger": {
+    "message": "Сделайте следующий текст длиннее:",
+    "description": ""
+  },
+  "promptImproveWriting": {
+    "message": "Улучшите следующий текст:",
+    "description": ""
+  },
+  "promptFixSpelling": {
+    "message": "Исправьте орфографию и грамматику в следующем тексте:",
+    "description": ""
+  },
+  "promptMakeShorter": {
+    "message": "Сделайте следующий текст короче:",
+    "description": ""
+  },
+  "promptSimplifyLanguage": {
+    "message": "Упростите язык в следующем тексте:",
+    "description": ""
+  },
+  "promptRephrase": {
+    "message": "Перефразируйте следующий текст:",
+    "description": ""
+  },
+  "promptChangeTone": {
+    "message": "Перепишите следующий текст с помощью тона {tone}:",
+    "description": ""
+  },
+  "promptTranslateTo": {
+    "message": "Переведите следующий текст на {language}:",
+    "description": ""
+  },
+  "contextTruncatedTitle": {
+    "message": "Контекст страницы был усечен",
+    "description": ""
+  },
+  "contextTruncatedMessage": {
+    "message": "Контекст страницы был слишком велик для вашей текущей модели. Контекст был автоматически усечен.",
+    "description": ""
+  },
+  "suggestedModelsTitle": {
+    "message": "Модели с достаточным контекстом",
+    "description": ""
+  },
+  "contextTruncatedHint": {
+    "message": "Вы можете использовать функцию Compare Response, чтобы получить полный анализ с помощью одной из этих моделей.",
+    "description": ""
+  },
+  "tokens": {
+    "message": "токены",
+    "description": ""
+  },
+  "understood": {
+    "message": "Понятно",
+    "description": ""
+  },
+  "enterNewChatName": {
+    "message": "Введите новое имя чата"
+  },
+  "enterNewFolderName": {
+    "message": "Введите новое имя папки"
+  },
+  "enterFolderName": {
+    "message": "Введите имя папки"
+  },
+  "modelContext": {
+    "message": "Контекст"
+  },
+  "modelInputModalities": {
+    "message": "Входящие данные"
+  },
+  "modelOutputModalities": {
+    "message": "Выходные данные"
+  },
+  "modelPrice": {
+    "message": "Цена"
+  },
+  "relatedQuestions": {
+    "message": "Связанные вопросы"
+  },
+  "aiSuggestions": {
+    "message": "Подсказки ИИ"
+  },
+  "aiSuggestionsEnabled": {
+    "message": "Показывать подсказки в ответах ИИ"
+  },
+  "aiSuggestionsDisabled": {
+    "message": "Не показывать подсказки"
+  },
+  "aiSuggestionsDescription": {
+    "message": "Автоматически генерировать связанные вопросы под ответами ИИ. Отключите для экономии токенов."
+  },
+  "developerMode": {
+    "message": "Режим разработчика"
+  },
+  "developerModeDescription": {
+    "message": "Включить панель логирования API для отладки запросов и ответов ИИ без открытия DevTools браузера."
+  },
+  "apiLogs": {
+    "message": "Логи API"
+  },
+  "clearLogs": {
+    "message": "Очистить логи"
+  },
+  "noLogs": {
+    "message": "Пока нет логов. Они появятся при выполнении API запросов."
+  },
+  "request": {
+    "message": "Запрос"
+  },
+  "response": {
+    "message": "Ответ"
+  },
+  "requestBody": {
+    "message": "Тело запроса"
+  },
+  "responseBody": {
+    "message": "Тело ответа"
+  },
+  "headers": {
+    "message": "Заголовки"
+  },
+  "duration": {
+    "message": "Длительность"
+  },
+  "error": {
+    "message": "Ошибка"
+  },
+  "enabled": {
+    "message": "Включено"
+  },
+  "disabled": {
+    "message": "Выключено"
+  },
+  "attachFile": {
+    "message": "Прикрепить файл"
+  },
+  "attachPhoto": {
+    "message": "Прикрепить фото"
+  },
+  "takeScreenshot": {
+    "message": "Сделать скриншот"
+  },
+  "takePhoto": {
+    "message": "Сделать фото"
+  },
+  "selectElement": {
+    "message": "Выбрать элемент"
+  },
+  "elementSelected": {
+    "message": "Элемент выбран"
+  },
+  "fileAttached": {
+    "message": "Файл прикреплён"
+  },
+  "imageAttached": {
+    "message": "Изображение прикреплено"
+  },
+  "fileTooLarge": {
+    "message": "Файл слишком большой (макс {size})"
+  },
+  "invalidFileType": {
+    "message": "Недопустимый тип файла"
+  },
+  "maxFileSize": {
+    "message": "Макс размер файла (МБ)"
+  },
+  "maxImageSize": {
+    "message": "Макс размер изображения (МБ)"
+  },
+  "clickToRemove": {
+    "message": "Нажмите для удаления"
+  },
+  "noCamera": {
+    "message": "Камера не найдена"
+  },
+  "cameraPermissionDenied": {
+    "message": "Доступ к камере запрещён"
+  },
+  "attachedFile": {
+    "message": "Прикреплен файл: {name}"
+  },
+  "attachedDomElement": {
+    "message": "Прикреплен код элемента: {name}"
+  },
+  "featureNotAvailableForModel": {
+    "message": "Недоступно для выбранной модели"
+  },
+  "pressEscToCancel": {
+    "message": "Нажмите Esc для отмены"
+  },
+  "selectingElement": {
+    "message": "Выбор элемента..."
+  },
+  "selectingScreenshotArea": {
+    "message": "Выделите область для скриншота"
+  },
+  "errorReadingFile": {
+    "message": "Ошибка чтения файла"
+  },
+  "errorCapturingScreenshot": {
+    "message": "Ошибка создания скриншота"
+  },
+  "webSearchSettings": {
+    "message": "Настройки веб-поиска"
+  },
+  "webSearchSettingsDescription": {
+    "message": "Настройте параметры веб-поиска для"
+  },
+  "maxSearchQueries": {
+    "message": "Максимум поисковых запросов"
+  },
+  "maxSearchQueriesDescription": {
+    "message": "Максимальное количество поисковых запросов в сети на один запрос (1-10)"
+  },
+  "allowedDomains": {
+    "message": "Разрешённые домены"
+  },
+  "allowedDomainsDescription": {
+    "message": "Будут использоваться только эти домены. Нажмите Enter для добавления. Нельзя использовать вместе с заблокированными доменами."
+  },
+  "allowedDomainsDescriptionOpenAI": {
+    "message": "Ограничить результаты поиска этими доменами. Нажмите Enter для добавления."
+  },
+  "liveInternetAccess": {
+    "message": "Доступ к интернету в реальном времени"
+  },
+  "liveInternetAccessDescription": {
+    "message": "Включить доступ к веб в реальном времени. Если отключено, будут использоваться только кэшированные/индексированные результаты."
+  },
+  "blockedDomains": {
+    "message": "Заблокированные домены"
+  },
+  "blockedDomainsDescription": {
+    "message": "Эти домены будут исключены. Нажмите Enter для добавления. Нельзя использовать вместе с разрешёнными доменами."
+  },
+  "cannotUseBothDomainLists": {
+    "message": "Нельзя использовать разрешённые и заблокированные домены одновременно"
+  },
+  "location": {
+    "message": "Локация"
+  },
+  "locationDescription": {
+    "message": "Локализация результатов поиска. Все поля опциональны."
+  },
+  "region": {
+    "message": "Регион"
+  },
+  "timezone": {
+    "message": "Часовой пояс"
+  },
+  "webSearchNotAvailableForOperator": {
+    "message": "Веб-поиск пока недоступен для этого оператора"
+  },
+  "comingSoon": {
+    "message": "Скоро будет доступно"
+  },
+  "allowedHandles": {
+    "message": "Разрешённые X аккаунты"
+  },
+  "excludedHandles": {
+    "message": "Исключённые X аккаунты"
+  },
+  "cannotUseBothHandleLists": {
+    "message": "Нельзя использовать разрешённые и исключённые аккаунты одновременно"
+  },
+  "imageUnderstanding": {
+    "message": "Понимание изображений"
+  },
+  "webImageUnderstandingDesc": {
+    "message": "Включает инструмент view_image (увеличивает использование токенов)"
+  },
+  "videoUnderstanding": {
+    "message": "Понимание видео"
+  },
+  "fromDate": {
+    "message": "С даты"
+  },
+  "toDate": {
+    "message": "По дату"
+  },
+  "xSearchDescription": {
+    "message": "Настройте хотя бы один параметр для активации"
+  },
+  "webSearchGrokDescription": {
+    "message": "Настройте хотя бы один параметр: домены или понимание изображений"
+  },
+  "sources": {
+    "message": "Источники"
+  },
+  "citationDisplayMode": {
+    "message": "Режим отображения цитат"
+  },
+  "citationsAtEnd": {
+    "message": "В конце"
+  },
+  "citationsInline": {
+    "message": "В тексте"
+  },
+  "citationsBoth": {
+    "message": "Оба"
+  },
+  "geminiCitationModeDescription": {
+    "message": "Gemini поддерживает inline-цитаты с markdown-ссылками в тексте"
+  },
+  "citationsAtEndDescription": {
+    "message": "Показать все цитаты в конце ответа"
+  },
+  "citationsInlineDescription": {
+    "message": "Вставить markdown-ссылки [N](url) прямо в текст"
+  },
+  "citationsBothDescription": {
+    "message": "Показать inline-ссылки в тексте И список в конце"
+  },
+  "geminiWebSearchNote": {
+    "message": "Gemini использует Google Поиск с автоматическим grounding. Дополнительные фильтры недоступны."
+  },
+  "note": {
+    "message": "Примечание"
+  },
+  "searchEngine": {
+    "message": "Поисковый движок"
+  },
+  "engineAuto": {
+    "message": "Авто (лучший доступный)"
+  },
+  "engineNative": {
+    "message": "Встроенный (провайдера)"
+  },
+  "engineExa": {
+    "message": "Exa (специализированный поиск)"
+  },
+  "searchEngineDescription": {
+    "message": "Авто выбирает лучший движок, Встроенный использует поиск провайдера (OpenAI, Anthropic), Exa использует специализированный API"
+  },
+  "maxSearchResults": {
+    "message": "Максимум результатов"
+  },
+  "maxSearchResultsDescription": {
+    "message": "Количество результатов поиска для включения (1-10)"
+  },
+  "searchContextSize": {
+    "message": "Размер контекста поиска"
+  },
+  "contextSizeLow": {
+    "message": "Низкий (дешевле)"
+  },
+  "contextSizeMedium": {
+    "message": "Средний (сбалансировано)"
+  },
+  "contextSizeHigh": {
+    "message": "Высокий (более детально)"
+  },
+  "searchContextSizeDescription": {
+    "message": "Только для встроенного движка. Влияет на стоимость и детализацию результатов поиска"
+  },
+  "searchPrompt": {
+    "message": "Промпт для поиска"
+  },
+  "searchPromptPlaceholder": {
+    "message": "Актуальная информация из интернета:"
+  },
+  "searchPromptDescription": {
+    "message": "Пользовательский текст промпта перед результатами поиска"
+  },
+  "costInformation": {
+    "message": "Информация о стоимости"
+  },
+  "perRequest": {
+    "message": "за запрос"
+  },
+  "notSupported": {
+    "message": "не поддерживается"
+  },
+  "stopGeneration": {
+    "message": "Остановить генерацию"
+  },
+  "speechRecognitionUnavailable": {
+    "message": "Распознавание голоса недоступно"
+  },
+  "speechRecognitionUnavailableDescription": {
+    "message": "Ваш браузер не поддерживает API распознавания речи. Пожалуйста, используйте последнюю версию Chrome или Edge."
+  },
+  "ok": {
+    "message": "Понятно"
+  },
+  "chatsTab": {
+    "message": "Чаты"
+  },
+  "statisticsTab": {
+    "message": "Статистика"
+  },
+  "today": {
+    "message": "Сегодня"
+  },
+  "yesterday": {
+    "message": "Вчера"
+  },
+  "daysAgo": {
+    "message": "{{count}} дней назад"
+  },
+  "totalMessages": {
+    "message": "Всего сообщений"
+  },
+  "totalTokens": {
+    "message": "Всего токенов"
+  },
+  "messagesPerDay": {
+    "message": "Сообщения за день"
+  },
+  "tokensPerDay": {
+    "message": "Токены за день"
+  },
+  "byOperators": {
+    "message": "По операторам"
+  },
+  "byModels": {
+    "message": "По моделям"
+  },
+  "currentWeek": {
+    "message": "Текущая неделя"
+  },
+  "currentMonth": {
+    "message": "Текущий месяц"
+  },
+  "previousWeek": {
+    "message": "Предыдущая неделя"
+  },
+  "previousMonth": {
+    "message": "Предыдущий месяц"
+  },
+  "dateFrom": {
+    "message": "С"
+  },
+  "dateTo": {
+    "message": "До"
+  },
+  "allOperators": {
+    "message": "Все операторы"
+  },
+  "noData": {
+    "message": "Нет данных"
+  },
+  "loading": {
+    "message": "Загрузка"
+  },
+  "noChatsYet": {
+    "message": "Пока нет чатов"
+  },
+  "previous": {
+    "message": "Назад"
+  },
+  "next": {
+    "message": "Далее"
+  },
+  "contextMenu_category_analysis": {
+    "message": "Анализ"
+  },
+  "contextMenu_category_editing": {
+    "message": "Редактирование"
+  },
+  "contextMenu_category_research": {
+    "message": "Исследование"
+  },
+  "contextMenu_category_education": {
+    "message": "Образование"
+  },
+  "contextMenu_category_translation": {
+    "message": "Перевод"
+  },
+  "contextMenu_category_combined": {
+    "message": "Комбинированные"
+  },
+  "contextMenu_category_instructions": {
+    "message": "Обработать по инструкции"
+  },
+  "contextMenu_instruction_prompt": {
+    "message": "Обработай следующий текст по инструкции:"
+  },
+  "contextMenu_checkFacts": {
+    "message": "Проверить факты"
+  },
+  "contextMenu_checkFacts_desc": {
+    "message": "Проверяет достоверность выделенного текста по данным из интернета"
+  },
+  "contextMenu_checkFacts_prompt": {
+    "message": "Проверь достоверность следующего утверждения, используя актуальные источники из сети:"
+  },
+  "contextMenu_explainText": {
+    "message": "Объяснить смысл"
+  },
+  "contextMenu_explainText_desc": {
+    "message": "Поясняет сложный текст простыми словами"
+  },
+  "contextMenu_explainText_prompt": {
+    "message": "Объясни этот текст максимально просто, как для начинающего:"
+  },
+  "contextMenu_findContext": {
+    "message": "Найти контекст"
+  },
+  "contextMenu_findContext_desc": {
+    "message": "Ищет источник или первоисточник выделенного фрагмента"
+  },
+  "contextMenu_findContext_prompt": {
+    "message": "Найди, откуда мог быть взят этот текст, и укажи источник, если найдешь:"
+  },
+  "contextMenu_analyzeTone": {
+    "message": "Определить тональность"
+  },
+  "contextMenu_analyzeTone_desc": {
+    "message": "Определяет эмоциональную окраску текста: позитив, нейтрал, негатив"
+  },
+  "contextMenu_analyzeTone_prompt": {
+    "message": "Определи тональность этого текста и кратко объясни почему:"
+  },
+  "contextMenu_checkPlagiarism": {
+    "message": "Проверить на плагиат"
+  },
+  "contextMenu_checkPlagiarism_desc": {
+    "message": "Проверяет, встречается ли текст на других сайтах"
+  },
+  "contextMenu_checkPlagiarism_prompt": {
+    "message": "Проверь, встречается ли этот текст в сети. Если да — укажи ссылки и проценты совпадения:"
+  },
+  "contextMenu_rewriteText": {
+    "message": "Переформулировать"
+  },
+  "contextMenu_rewriteText_desc": {
+    "message": "Переписывает текст в более естественном и профессиональном стиле"
+  },
+  "contextMenu_rewriteText_prompt": {
+    "message": "Перепиши текст, сохранив смысл, но сделай его более естественным и грамотным:"
+  },
+  "contextMenu_simplifyText": {
+    "message": "Упростить текст"
+  },
+  "contextMenu_simplifyText_desc": {
+    "message": "Преобразует текст в простую форму для широкой аудитории"
+  },
+  "contextMenu_simplifyText_prompt": {
+    "message": "Перепиши текст так, чтобы его понял ребенок 10 лет:"
+  },
+  "contextMenu_improvePersuasion": {
+    "message": "Сделать убедительным"
+  },
+  "contextMenu_improvePersuasion_desc": {
+    "message": "Усиливает аргументацию и добавляет убедительность"
+  },
+  "contextMenu_improvePersuasion_prompt": {
+    "message": "Сделай этот текст более убедительным и сильным, сохранив структуру:"
+  },
+  "contextMenu_fixErrors": {
+    "message": "Исправить ошибки"
+  },
+  "contextMenu_fixErrors_desc": {
+    "message": "Исправляет грамматику, орфографию и пунктуацию"
+  },
+  "contextMenu_fixErrors_prompt": {
+    "message": "Исправь все грамматические, орфографические и пунктуационные ошибки в тексте:"
+  },
+  "contextMenu_summarizeText": {
+    "message": "Сократить текст"
+  },
+  "contextMenu_summarizeText_desc": {
+    "message": "Создает краткое саммари без потери смысла"
+  },
+  "contextMenu_summarizeText_prompt": {
+    "message": "Создай краткое саммари из этого текста (2-3 предложения):"
+  },
+  "contextMenu_expandText": {
+    "message": "Развернуть текст"
+  },
+  "contextMenu_expandText_desc": {
+    "message": "Расширяет идею, добавляет примеры и детали"
+  },
+  "contextMenu_expandText_prompt": {
+    "message": "Раскрой эту мысль, добавив детали, примеры и контекст:"
+  },
+  "contextMenu_findSimilar": {
+    "message": "Найти похожие материалы"
+  },
+  "contextMenu_findSimilar_desc": {
+    "message": "Находит статьи и источники по теме выделенного текста"
+  },
+  "contextMenu_findSimilar_prompt": {
+    "message": "Найди похожие материалы или статьи по этому тексту:"
+  },
+  "contextMenu_checkRelevance": {
+    "message": "Проверить актуальность"
+  },
+  "contextMenu_checkRelevance_desc": {
+    "message": "Определяет, устарела ли информация"
+  },
+  "contextMenu_checkRelevance_prompt": {
+    "message": "Проверь, актуальна ли эта информация на сегодняшний день:"
+  },
+  "contextMenu_updateStats": {
+    "message": "Обновить данные"
+  },
+  "contextMenu_updateStats_desc": {
+    "message": "Находит свежие цифры и статистику в тексте"
+  },
+  "contextMenu_updateStats_prompt": {
+    "message": "Найди обновленные цифры или статистику по этим данным:"
+  },
+  "contextMenu_makeOutline": {
+    "message": "Сделать конспект"
+  },
+  "contextMenu_makeOutline_desc": {
+    "message": "Сжимает текст до ключевых пунктов"
+  },
+  "contextMenu_makeOutline_prompt": {
+    "message": "Создай краткий конспект из этого текста в виде маркированного списка:"
+  },
+  "contextMenu_generateQuestions": {
+    "message": "Составить вопросы"
+  },
+  "contextMenu_generateQuestions_desc": {
+    "message": "Создает вопросы для проверки понимания текста"
+  },
+  "contextMenu_generateQuestions_prompt": {
+    "message": "Составь 5 вопросов по содержанию текста, чтобы проверить понимание:"
+  },
+  "contextMenu_explainAsTeacher": {
+    "message": "Объяснить как учитель"
+  },
+  "contextMenu_explainAsTeacher_desc": {
+    "message": "Объясняет материал простыми словами в образовательном формате"
+  },
+  "contextMenu_explainAsTeacher_prompt": {
+    "message": "Объясни этот текст как учитель, доступно и интересно:"
+  },
+  "contextMenu_makeFlashcards": {
+    "message": "Создать флеш-карточки"
+  },
+  "contextMenu_makeFlashcards_desc": {
+    "message": "Выделяет термины и определения для запоминания"
+  },
+  "contextMenu_makeFlashcards_prompt": {
+    "message": "Создай флеш-карточки в формате JSON [{term, definition}] из этого текста:"
+  },
+  "contextMenu_translateText": {
+    "message": "Перевести"
+  },
+  "contextMenu_translateText_desc": {
+    "message": "Переводит выделенный текст на язык интерфейса"
+  },
+  "contextMenu_translateText_prompt": {
+    "message": "Переведи этот текст на"
+  },
+  "contextMenu_compareVersions": {
+    "message": "Сравнить с актуальной версией"
+  },
+  "contextMenu_compareVersions_desc": {
+    "message": "Находит свежую версию новости и показывает различия"
+  },
+  "contextMenu_compareVersions_prompt": {
+    "message": "Найди актуальную версию этого текста в сети и сравни отличия:"
+  },
+  "contextMenu_continueText": {
+    "message": "Продолжить мысль"
+  },
+  "contextMenu_continueText_desc": {
+    "message": "Генерирует логичное продолжение текста в том же стиле"
+  },
+  "contextMenu_continueText_prompt": {
+    "message": "Продолжи этот текст в том же стиле:"
+  },
+  "contextMenu_findQuoteSource": {
+    "message": "Найти источник цитаты"
+  },
+  "contextMenu_findQuoteSource_desc": {
+    "message": "Определяет автора и источник цитаты из текста"
+  },
+  "contextMenu_findQuoteSource_prompt": {
+    "message": "Найди оригинальный источник или автора этой цитаты:"
+  }
+}

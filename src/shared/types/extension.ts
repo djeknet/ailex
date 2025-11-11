@@ -1,0 +1,80 @@
+import { Theme, SupportedLanguage } from './common';
+import { AIOperatorConfig } from './ai';
+
+export type { AIOperatorConfig, AIOperator } from './ai';
+export type HistoryMode = 'all' | 'per-site' | 'session';
+export type PageContextType = 'text' | 'dom' | 'html';
+
+export interface Instruction {
+  id: string;
+  name: string;
+  domain: string;
+  content: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ExtensionSettings {
+  theme: Theme;
+  language: SupportedLanguage;
+  historyMode: HistoryMode;
+  operators: AIOperatorConfig[];
+  personalInfo?: PersonalInfo;
+  generalInstruction?: string;
+  instructions: Instruction[];
+  showAISuggestions: boolean; // Show AI-generated follow-up questions in responses
+  maxFileSize?: number; // Maximum file size in MB (default: 10)
+  maxImageSize?: number; // Maximum image size in MB (default: 5)
+  developerMode?: boolean; // Enable developer mode with API logs panel
+}
+
+export interface PersonalInfo {
+  // Basic info
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  
+  // Location
+  country?: string;
+  state?: string; // State/Province/Region
+  city?: string;
+  address?: string;
+  addressLine2?: string; // Apartment, suite, unit, floor, etc.
+  zipCode?: string;
+  
+  // Professional
+  position?: string;
+  company?: string;
+  workPhone?: string;
+  linkedin?: string;
+  github?: string;
+  portfolio?: string;
+  resumeUrl?: string;
+  orcid?: string;
+  
+  // Social
+  telegram?: string;
+  twitter?: string;
+  facebook?: string;
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  website?: string;
+  
+  // Personal
+  about?: string;
+  
+  // Sensitive data (encrypted)
+  dateOfBirth?: string; // encrypted
+  idNumber?: string; // encrypted (passport/ID)
+  driverLicense?: string; // encrypted
+  healthInsurance?: string; // encrypted
+}
+
+export interface UIState {
+  activeView: 'chat' | 'settings' | 'history' | 'help' | 'tools';
+  isLoading: boolean;
+  activeModal?: string;
+}
+

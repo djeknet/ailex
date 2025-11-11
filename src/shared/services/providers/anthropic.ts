@@ -1,0 +1,473 @@
+import { AIProvider } from './base';
+import { AIMessage, AIResponse, ClaudeWebSearchSettings, Citation } from '@shared/types/ai';
+import { loggedFetch } from '@shared/utils/apiLogger';
+
+export class AnthropicProvider implements AIProvider {
+  async chat(
+    messages: AIMessage[],
+    model: string,
+    apiKey: string,
+    endpoint?: string,
+    onChunk?: (chunk: string) => void,
+    webSearchEnabled?: boolean,
+    webSearchSettings?: ClaudeWebSearchSettings,
+    signal?: AbortSignal
+  ): Promise<AIResponse> {
+    console.log('[Anthropic] Starting chat request');
+    console.log('[Anthropic] Model:', model);
+    console.log('[Anthropic] Messages count:', messages.length);
+    console.log('[Anthropic] Endpoint:', endpoint || 'default');
+    console.log('[Anthropic] API Key length:', apiKey?.length || 0);
+    console.log('[Anthropic] Streaming:', !!onChunk);
+
+    const baseUrl = endpoint || 'https://api.anthropic.com/v1';
+    const url = `${baseUrl}/messages`;
+
+    // Separate system message from other messages
+    const systemMessage = messages.find(msg => msg.role === 'system');
+    const chatMessages = messages.filter(msg => msg.role !== 'system');
+
+    console.log('[Anthropic] System message:', systemMessage ? 'present' : 'none');
+    console.log('[Anthropic] Chat messages count:', chatMessages.length);
+
+    // Convert messages to Anthropic format
+    const anthropicMessages = chatMessages.map(msg => {
+      const role = msg.role === 'user' ? 'user' : 'assistant';
+      
+      // Handle both string content and array content (multimodal)
+      let content;
+      if (typeof msg.content === 'string') {
+        content = msg.content;
+      } else if (Array.isArray(msg.content)) {
+        // Multimodal content
+        content = msg.content.map(item => {
+          if (item.type === 'text') {
+            return {
+              type: 'text',
+              text: item.text || ''
+            };
+          } else if (item.type === 'image_url' && item.image_url) {
+            // Convert to Anthropic image format
+            const dataUrl = item.image_url.url;
+            
+            // Extract MIME type from data URL
+            let mediaType = 'image/png'; // default
+            const mimeMatch = dataUrl.match(/^data:(image\/[a-z]+);base64,/);
+            if (mimeMatch) {
+              mediaType = mimeMatch[1];
+            }
+            
+            // Extract base64 data
+            const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+            
+            return {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: base64Data
+              }
+            };
+          } else if (item.type === 'document' && item.document) {
+            // Document (PDF, etc.)
+            const dataUrl = item.document.url;
+            
+            // Extract MIME type
+            let mediaType = 'application/pdf'; // default
+            const mimeMatch = dataUrl.match(/^data:([^;]+);base64,/);
+            if (mimeMatch) {
+              mediaType = mimeMatch[1];
+            }
+            
+            // Extract base64 data
+            const base64Data = dataUrl.replace(/^data:[^;]+;base64,/, '');
+            
+            return {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: base64Data
+              }
+            };
+          }
+          return { type: 'text', text: '' };
+        });
+      } else {
+        content = String(msg.content);
+      }
+      
+      return { role, content };
+    });
+
+    const requestBody = {
+      model,
+      max_tokens: 4096,
+      system: typeof systemMessage?.content === 'string' ? systemMessage.content : undefined,
+      messages: anthropicMessages,
+      stream: !!onChunk,
+      ...(webSearchEnabled && webSearchSettings ? {
+        tools: [{
+          type: "web_search_20250305",
+          name: "web_search",
+          max_uses: webSearchSettings.maxUses,
+          ...(webSearchSettings.allowedDomains.length > 0 ? {
+            allowed_domains: webSearchSettings.allowedDomains
+          } : {}),
+          ...(webSearchSettings.blockedDomains.length > 0 ? {
+            blocked_domains: webSearchSettings.blockedDomains
+          } : {}),
+          ...(webSearchSettings.location && (
+            webSearchSettings.location.city || 
+            webSearchSettings.location.region || 
+            webSearchSettings.location.country || 
+            webSearchSettings.location.timezone
+          ) ? {
+            user_location: {
+              type: "approximate",
+              ...(webSearchSettings.location.city ? { city: webSearchSettings.location.city } : {}),
+              ...(webSearchSettings.location.region ? { region: webSearchSettings.location.region } : {}),
+              ...(webSearchSettings.location.country ? { country: webSearchSettings.location.country } : {}),
+              ...(webSearchSettings.location.timezone ? { timezone: webSearchSettings.location.timezone } : {})
+            }
+          } : {})
+        }]
+      } : {})
+    };
+
+    console.log('[Anthropic] Request body:', JSON.stringify(requestBody, null, 2));
+
+    try {
+      console.log('[Anthropic] Sending request to:', url);
+      
+      const response = await loggedFetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify(requestBody),
+        signal
+      });
+
+      console.log('[Anthropic] Response status:', response.status);
+      console.log('[Anthropic] Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Anthropic] Error response text:', errorText);
+        
+        try {
+          const error = JSON.parse(errorText);
+          console.error('[Anthropic] Error JSON:', error);
+          throw new Error(error.error?.message || `Anthropic API error: ${response.status}`);
+        } catch (parseError) {
+          console.error('[Anthropic] Failed to parse error response:', parseError);
+          throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+        }
+      }
+
+      if (onChunk && response.body) {
+        console.log('[Anthropic] Processing streaming response');
+        
+        // Streaming response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullContent = '';
+        let inputTokens = 0;
+        let outputTokens = 0;
+        let chunkCount = 0;
+        const citations: Citation[] = [];
+        const contentBlocks: any[] = []; // Store all content blocks
+        let currentBlockIndex = -1;
+        let buffer = ''; // Buffer for incomplete lines
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              console.log('[Anthropic] Stream ended');
+              break;
+            }
+
+            const chunk = decoder.decode(value, { stream: true });
+            chunkCount++;
+            
+            // Add to buffer
+            buffer += chunk;
+            
+            // Split by newlines but keep the last incomplete line in buffer
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep last incomplete line
+            
+            for (const line of lines) {
+              if (!line.trim()) continue;
+              
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                
+                // Skip if it's just a ping or empty
+                if (data === '[DONE]' || !data.trim()) continue;
+
+                try {
+                  const json = JSON.parse(data);
+                  
+                  // Full event logging for debugging
+                  if (json.type && json.type !== 'content_block_delta' && json.type !== 'ping') {
+                    console.log('[Anthropic] Event:', json.type, JSON.stringify(json, null, 2));
+                  }
+
+                  if (json.type === 'content_block_delta') {
+                    const content = json.delta?.text;
+                    if (content) {
+                      fullContent += content;
+                      onChunk(content);
+                    }
+                  }
+
+                  if (json.type === 'message_delta') {
+                    if (json.usage) {
+                      outputTokens = json.usage.output_tokens;
+                    }
+                  }
+
+                  if (json.type === 'message_start') {
+                    if (json.message?.usage) {
+                      inputTokens = json.message.usage.input_tokens;
+                    }
+                  }
+
+                  // Extract citations from tool_use events
+                  if (json.type === 'content_block_start' && json.content_block) {
+                    console.log('[Anthropic] content_block_start:', json.content_block.type);
+                    currentBlockIndex++;
+                    contentBlocks[currentBlockIndex] = { ...json.content_block };
+                    
+                    // Check for web_search_tool_result
+                    if (json.content_block.type === 'web_search_tool_result') {
+                      const content = json.content_block.content;
+                      if (Array.isArray(content)) {
+                        content.forEach((item: any) => {
+                          if (item.type === 'web_search_result') {
+                            citations.push({
+                              url: item.url || '',
+                              title: item.title || item.url || '',
+                              cited_text: '' // We'll get this from citations in text blocks
+                            });
+                          }
+                        });
+                      }
+                      console.log('[Anthropic] Web search results found:', citations.length);
+                    }
+                  }
+
+                  // Update content blocks as deltas arrive
+                  if (json.type === 'content_block_delta' && currentBlockIndex >= 0) {
+                    if (!contentBlocks[currentBlockIndex].delta) {
+                      contentBlocks[currentBlockIndex].delta = {};
+                    }
+                    Object.assign(contentBlocks[currentBlockIndex].delta, json.delta);
+                  }
+
+                  // When content block stops, check for citations
+                  if (json.type === 'content_block_stop' && currentBlockIndex >= 0) {
+                    const block = contentBlocks[currentBlockIndex];
+                    console.log('[Anthropic] content_block_stop, block:', block.type);
+                    
+                    // Check if this text block has citations
+                    if (block.type === 'text' && block.citations) {
+                      block.citations.forEach((citation: any) => {
+                        const existingIndex = citations.findIndex(c => c.url === citation.url);
+                        if (existingIndex >= 0) {
+                          // Update with cited_text
+                          citations[existingIndex].cited_text = citation.cited_text || '';
+                        } else {
+                          citations.push({
+                            url: citation.url || '',
+                            title: citation.title || citation.url || '',
+                            cited_text: citation.cited_text || ''
+                          });
+                        }
+                      });
+                      console.log('[Anthropic] Citations from text block:', citations.length);
+                    }
+                  }
+                } catch (e) {
+                  // Only log if it's not a buffer issue
+                  if (data.length > 100) {
+                    console.error('[Anthropic] Error parsing JSON (line may be incomplete):', e);
+                  }
+                }
+              }
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
+
+        console.log('[Anthropic] Stream complete. Total chunks:', chunkCount);
+        console.log('[Anthropic] Full content length:', fullContent.length);
+        console.log('[Anthropic] Content blocks collected:', contentBlocks.length);
+        console.log('[Anthropic] Tokens - Input:', inputTokens, 'Output:', outputTokens);
+        console.log('[Anthropic] Citations found:', citations.length);
+        
+        // Log all content blocks for debugging
+        contentBlocks.forEach((block, idx) => {
+          console.log(`[Anthropic] Block ${idx}:`, block.type, block.citations ? `(${block.citations.length} citations)` : '');
+        });
+
+        return {
+          content: fullContent,
+          tokens: {
+            total: inputTokens + outputTokens,
+            input: inputTokens,
+            output: outputTokens
+          },
+          model,
+          operator: 'anthropic',
+          citations: citations.length > 0 ? citations : undefined
+        };
+      } else {
+        console.log('[Anthropic] Processing non-streaming response');
+        
+        // Non-streaming response
+        const data = await response.json();
+        console.log('[Anthropic] Response data:', JSON.stringify(data, null, 2));
+        
+        const content = data.content[0]?.text || '';
+        console.log('[Anthropic] Extracted content length:', content.length);
+
+        // Extract citations from content blocks
+        const citations: Citation[] = [];
+        if (data.content) {
+          data.content.forEach((block: any) => {
+            console.log('[Anthropic] Non-streaming block:', block.type);
+            
+            // Check for web_search_tool_result blocks that contain search results
+            if (block.type === 'web_search_tool_result' && Array.isArray(block.content)) {
+              block.content.forEach((item: any) => {
+                if (item.type === 'web_search_result') {
+                  citations.push({
+                    url: item.url || '',
+                    title: item.title || item.url || '',
+                    cited_text: '' // Will be updated from text blocks with citations
+                  });
+                }
+              });
+            }
+            
+            // Check text blocks with citations field
+            if (block.type === 'text' && block.citations) {
+              block.citations.forEach((citation: any) => {
+                const existingIndex = citations.findIndex((c: Citation) => c.url === citation.url);
+                if (existingIndex >= 0) {
+                  // Update existing citation with cited_text
+                  citations[existingIndex].cited_text = citation.cited_text || '';
+                  citations[existingIndex].title = citation.title || citations[existingIndex].title;
+                } else {
+                  // Add new citation
+                  citations.push({
+                    url: citation.url || '',
+                    title: citation.title || citation.url || '',
+                    cited_text: citation.cited_text || ''
+                  });
+                }
+              });
+            }
+          });
+        }
+        console.log('[Anthropic] Citations found:', citations.length);
+
+        return {
+          content,
+          tokens: data.usage ? {
+            total: data.usage.input_tokens + data.usage.output_tokens,
+            input: data.usage.input_tokens,
+            output: data.usage.output_tokens
+          } : undefined,
+          model,
+          operator: 'anthropic',
+          citations: citations.length > 0 ? citations : undefined
+        };
+      }
+    } catch (error) {
+      console.error('[Anthropic] Chat error:', error);
+      console.error('[Anthropic] Error stack:', error instanceof Error ? error.stack : 'No stack');
+      throw error;
+    }
+  }
+ // Метод рабочий! Не менять!
+  async listModels(apiKey: string, endpoint?: string): Promise<any[]> {
+    console.log('[Anthropic] listModels - Starting');
+    console.log('[Anthropic] listModels - API Key length:', apiKey?.length || 0);
+    console.log('[Anthropic] listModels - Endpoint:', endpoint || 'default');
+    
+    const baseUrl = endpoint || 'https://api.anthropic.com/v1';
+    const url = `${baseUrl}/models`;
+
+    console.log('[Anthropic] listModels - Fetching from:', url);
+
+    try {
+      const response = await loggedFetch(url, {
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        }
+      });
+
+      console.log('[Anthropic] listModels - Response status:', response.status);
+      console.log('[Anthropic] listModels - Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Anthropic] listModels - Error response:', errorText);
+        throw new Error('Failed to fetch Anthropic models');
+      }
+
+      const data = await response.json();
+      console.log('[Anthropic] listModels - Response data:', JSON.stringify(data, null, 2));
+      
+      const models = data.data.map((model: any) => ({
+        id: model.id,
+        name: model.display_name || model.id,
+        operator: 'anthropic'
+      }));
+      
+      console.log('[Anthropic] listModels - Mapped models:', models.length);
+      return models;
+    } catch (error) {
+      console.error('[Anthropic] listModels - Error:', error);
+      console.error('[Anthropic] listModels - Error stack:', error instanceof Error ? error.stack : 'No stack');
+      throw error;
+    }
+  }
+
+  async testConnection(apiKey: string, endpoint?: string): Promise<boolean> {
+    console.log('[Anthropic] testConnection - Starting');
+    console.log('[Anthropic] testConnection - API Key length:', apiKey?.length || 0);
+    console.log('[Anthropic] testConnection - Endpoint:', endpoint || 'default');
+    
+    try {
+      // Test with a simple message using the most recent model
+      console.log('[Anthropic] testConnection - Testing with claude-sonnet-4-5');
+      
+      await this.chat(
+        [{ role: 'user', content: 'Hello' }],
+        'claude-sonnet-4-5',
+        apiKey,
+        endpoint
+      );
+      
+      console.log('[Anthropic] testConnection - Success');
+      return true;
+    } catch (error) {
+      console.error('[Anthropic] testConnection - Failed:', error);
+      console.error('[Anthropic] testConnection - Error message:', error instanceof Error ? error.message : 'Unknown');
+      return false;
+    }
+  }
+}
+
