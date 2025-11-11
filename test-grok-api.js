@@ -11,7 +11,7 @@
  * 2. Запусти: node test-grok-api.js
  */
 
-const API_KEY = process.env.XAI_API_KEY || 'xai-uF2q3OznXKR3VSsjbNOTuNZ7QRFtMYsgDWQl2OGOdUb6YWl74cWxKPcgdKvHBQ0qxWIOrFk580ZunYwf';
+const API_KEY = process.env.XAI_API_KEY || '';
 const API_URL = 'https://api.x.ai/v1/responses'; // Not /chat/completions!
 
 // Тестовые конфигурации
