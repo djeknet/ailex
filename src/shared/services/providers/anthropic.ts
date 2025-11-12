@@ -1,5 +1,6 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, ClaudeWebSearchSettings, Citation } from '@shared/types/ai';
+import { AIMessage, AIResponse, ClaudeWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
 export class AnthropicProvider implements AIProvider {
@@ -11,7 +12,9 @@ export class AnthropicProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     webSearchSettings?: ClaudeWebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     console.log('[Anthropic] Starting chat request');
     console.log('[Anthropic] Model:', model);
@@ -19,6 +22,8 @@ export class AnthropicProvider implements AIProvider {
     console.log('[Anthropic] Endpoint:', endpoint || 'default');
     console.log('[Anthropic] API Key length:', apiKey?.length || 0);
     console.log('[Anthropic] Streaming:', !!onChunk);
+    console.log('[Anthropic] onChunk type:', typeof onChunk);
+    console.log('[Anthropic] onChunk value:', onChunk);
 
     const baseUrl = endpoint || 'https://api.anthropic.com/v1';
     const url = `${baseUrl}/messages`;
@@ -106,36 +111,44 @@ export class AnthropicProvider implements AIProvider {
       system: typeof systemMessage?.content === 'string' ? systemMessage.content : undefined,
       messages: anthropicMessages,
       stream: !!onChunk,
-      ...(webSearchEnabled && webSearchSettings ? {
-        tools: [{
-          type: "web_search_20250305",
-          name: "web_search",
-          max_uses: webSearchSettings.maxUses,
-          ...(webSearchSettings.allowedDomains.length > 0 ? {
-            allowed_domains: webSearchSettings.allowedDomains
-          } : {}),
-          ...(webSearchSettings.blockedDomains.length > 0 ? {
-            blocked_domains: webSearchSettings.blockedDomains
-          } : {}),
-          ...(webSearchSettings.location && (
-            webSearchSettings.location.city || 
-            webSearchSettings.location.region || 
-            webSearchSettings.location.country || 
-            webSearchSettings.location.timezone
-          ) ? {
-            user_location: {
-              type: "approximate",
-              ...(webSearchSettings.location.city ? { city: webSearchSettings.location.city } : {}),
-              ...(webSearchSettings.location.region ? { region: webSearchSettings.location.region } : {}),
-              ...(webSearchSettings.location.country ? { country: webSearchSettings.location.country } : {}),
-              ...(webSearchSettings.location.timezone ? { timezone: webSearchSettings.location.timezone } : {})
-            }
-          } : {})
-        }]
+      ...(webSearchEnabled && webSearchSettings || tools && tools.length > 0 ? {
+        tools: [
+          // Add web search tool if enabled
+          ...(webSearchEnabled && webSearchSettings ? [{
+            type: "web_search_20250305",
+            name: "web_search",
+            max_uses: webSearchSettings.maxUses,
+            ...(webSearchSettings.allowedDomains.length > 0 ? {
+              allowed_domains: webSearchSettings.allowedDomains
+            } : {}),
+            ...(webSearchSettings.blockedDomains.length > 0 ? {
+              blocked_domains: webSearchSettings.blockedDomains
+            } : {}),
+            ...(webSearchSettings.location && (
+              webSearchSettings.location.city || 
+              webSearchSettings.location.region || 
+              webSearchSettings.location.country || 
+              webSearchSettings.location.timezone
+            ) ? {
+              user_location: {
+                type: "approximate",
+                ...(webSearchSettings.location.city ? { city: webSearchSettings.location.city } : {}),
+                ...(webSearchSettings.location.region ? { region: webSearchSettings.location.region } : {}),
+                ...(webSearchSettings.location.country ? { country: webSearchSettings.location.country } : {}),
+                ...(webSearchSettings.location.timezone ? { timezone: webSearchSettings.location.timezone } : {})
+              }
+            } : {})
+          }] : []),
+          // Add custom tools
+          ...(tools || [])
+        ]
       } : {})
     };
 
     console.log('[Anthropic] Request body:', JSON.stringify(requestBody, null, 2));
+    if (tools && tools.length > 0) {
+      console.log('[Anthropic] Added tools:', tools.length);
+    }
 
     try {
       console.log('[Anthropic] Sending request to:', url);
@@ -181,6 +194,7 @@ export class AnthropicProvider implements AIProvider {
         let chunkCount = 0;
         const citations: Citation[] = [];
         const contentBlocks: any[] = []; // Store all content blocks
+        const toolCalls: ToolCall[] = []; // Store tool calls
         let currentBlockIndex = -1;
         let buffer = ''; // Buffer for incomplete lines
 
@@ -194,6 +208,7 @@ export class AnthropicProvider implements AIProvider {
 
             const chunk = decoder.decode(value, { stream: true });
             chunkCount++;
+            console.log('[Anthropic] Raw chunk received #', chunkCount, 'length:', chunk.length);
             
             // Add to buffer
             buffer += chunk;
@@ -201,6 +216,8 @@ export class AnthropicProvider implements AIProvider {
             // Split by newlines but keep the last incomplete line in buffer
             const lines = buffer.split('\n');
             buffer = lines.pop() || ''; // Keep last incomplete line
+            
+            console.log('[Anthropic] Processing', lines.length, 'lines from chunk');
             
             for (const line of lines) {
               if (!line.trim()) continue;
@@ -220,10 +237,16 @@ export class AnthropicProvider implements AIProvider {
                   }
 
                   if (json.type === 'content_block_delta') {
+                    console.log('[Anthropic] content_block_delta received:', json.delta);
                     const content = json.delta?.text;
+                    console.log('[Anthropic] Delta text:', content);
                     if (content) {
                       fullContent += content;
+                      console.log('[Anthropic] Calling onChunk with content:', content.substring(0, 50));
                       onChunk(content);
+                      console.log('[Anthropic] onChunk called successfully');
+                    } else {
+                      console.log('[Anthropic] No text in delta');
                     }
                   }
 
@@ -245,6 +268,17 @@ export class AnthropicProvider implements AIProvider {
                     currentBlockIndex++;
                     contentBlocks[currentBlockIndex] = { ...json.content_block };
                     
+                    // Initialize tool_use block
+                    if (json.content_block.type === 'tool_use') {
+                      contentBlocks[currentBlockIndex] = {
+                        type: 'tool_use',
+                        id: json.content_block.id,
+                        name: json.content_block.name,
+                        inputJson: ''
+                      };
+                      console.log('[Anthropic] Tool use block started:', json.content_block.name);
+                    }
+                    
                     // Check for web_search_tool_result
                     if (json.content_block.type === 'web_search_tool_result') {
                       const content = json.content_block.content;
@@ -265,16 +299,56 @@ export class AnthropicProvider implements AIProvider {
 
                   // Update content blocks as deltas arrive
                   if (json.type === 'content_block_delta' && currentBlockIndex >= 0) {
+                    // Handle tool input accumulation
+                    const block = contentBlocks[currentBlockIndex];
+                    if (block?.type === 'tool_use' && json.delta?.type === 'input_json_delta') {
+                      block.inputJson = (block.inputJson || '') + (json.delta.partial_json || '');
+                      console.log('[Anthropic] Accumulated tool input length:', block.inputJson.length);
+                    }
+                    
+                    // Store delta for other block types
                     if (!contentBlocks[currentBlockIndex].delta) {
                       contentBlocks[currentBlockIndex].delta = {};
                     }
                     Object.assign(contentBlocks[currentBlockIndex].delta, json.delta);
                   }
 
-                  // When content block stops, check for citations
+                  // When content block stops, check for citations and tool calls
                   if (json.type === 'content_block_stop' && currentBlockIndex >= 0) {
                     const block = contentBlocks[currentBlockIndex];
                     console.log('[Anthropic] content_block_stop, block:', block.type);
+                    
+                    // Finalize tool_use block
+                    if (block.type === 'tool_use' && block.inputJson) {
+                      try {
+                        const input = JSON.parse(block.inputJson);
+                        delete block.inputJson;
+                        
+                        // Convert to standard ToolCall format
+                        const toolCall: ToolCall = {
+                          id: block.id,
+                          type: 'function',
+                          function: {
+                            name: block.name,
+                            arguments: JSON.stringify(input)
+                          }
+                        };
+                        toolCalls.push(toolCall);
+                        console.log('[Anthropic] Tool call finalized:', toolCall.function.name);
+                        
+                        // Execute tool if callback provided
+                        if (onToolCall) {
+                          console.log('[Anthropic] Executing tool:', toolCall.function.name);
+                          try {
+                            await onToolCall(toolCall);
+                          } catch (error) {
+                            console.error('[Anthropic] Tool execution error:', error);
+                          }
+                        }
+                      } catch (error) {
+                        console.error('[Anthropic] Failed to parse tool input:', error);
+                      }
+                    }
                     
                     // Check if this text block has citations
                     if (block.type === 'text' && block.citations) {
@@ -310,6 +384,7 @@ export class AnthropicProvider implements AIProvider {
         console.log('[Anthropic] Stream complete. Total chunks:', chunkCount);
         console.log('[Anthropic] Full content length:', fullContent.length);
         console.log('[Anthropic] Content blocks collected:', contentBlocks.length);
+        console.log('[Anthropic] Tool calls:', toolCalls.length);
         console.log('[Anthropic] Tokens - Input:', inputTokens, 'Output:', outputTokens);
         console.log('[Anthropic] Citations found:', citations.length);
         
@@ -327,7 +402,10 @@ export class AnthropicProvider implements AIProvider {
           },
           model,
           operator: 'anthropic',
-          citations: citations.length > 0 ? citations : undefined
+          citations: citations.length > 0 ? citations : undefined,
+          inlineCitations: true,
+          tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+          finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop'
         };
       } else {
         console.log('[Anthropic] Processing non-streaming response');

@@ -1,12 +1,14 @@
 import { Tool, ToolRegistry } from '@shared/types/tools';
 import { summarizeTool } from './summarize';
 import { collectContactsTool } from './collectContacts';
-import { fillFormTool } from './fillForm';
+import { fillFormTool, getFormFieldsTool, fillFormFieldsTool } from './fillForm';
 
 export const toolRegistry: ToolRegistry = {
   [summarizeTool.id]: summarizeTool,
   [collectContactsTool.id]: collectContactsTool,
-  [fillFormTool.id]: fillFormTool
+  [fillFormTool.id]: fillFormTool,
+  [getFormFieldsTool.id]: getFormFieldsTool,
+  [fillFormFieldsTool.id]: fillFormFieldsTool
 };
 
 export function getTool(id: string): Tool | undefined {
@@ -40,4 +42,3 @@ export async function executeTool(toolId: string, params: any): Promise<any> {
 
   return await tool.execute(params);
 }
-

@@ -55,24 +55,6 @@ export default function ModelSelect() {
     return getModelInfo(currentModel.id, selectedOperator.operator);
   }, [currentModel?.id, selectedOperator?.operator]);
 
-  // Log when model changes
-  if (selectedOperator && currentModel) {
-    console.log('[ModelSelect] Current model info:', {
-      operator: selectedOperator.operator,
-      modelId: currentModel.id,
-      modelName: currentModel.name,
-      hasModelInfo: !!modelInfo,
-      modelInfo: modelInfo ? {
-        id: modelInfo.id,
-        name: modelInfo.name,
-        contextLength: modelInfo.context_length,
-        inputModalities: modelInfo.architecture?.input_modalities,
-        outputModalities: modelInfo.architecture?.output_modalities,
-        pricing: modelInfo.pricing
-      } : null
-    });
-  }
-
   // Format context length
   const formatContextLength = (length: number) => {
     if (length >= 1000000) {

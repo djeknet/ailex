@@ -4,6 +4,7 @@ import { getTranslationLanguages } from '@shared/constants';
 import type { AIOperatorConfig, AIOperator } from '@shared/types/extension';
 import type { MessageBranch } from './MessageItem';
 import { useWebSearchStore } from '@shared/stores/webSearchStore';
+import ToolExecutionDisplay from './ToolExecutionDisplay';
 import {
   Copy,
   Check,
@@ -389,6 +390,15 @@ export default function AIMessage({
           {[
             /* Page 0: Original message */
             <div key="original">
+              {/* Show tool executions if any */}
+              {message.toolCalls && message.toolCalls.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {message.toolCalls.map((toolExecution) => (
+                    <ToolExecutionDisplay key={toolExecution.id} toolExecution={toolExecution} />
+                  ))}
+                </div>
+              )}
+              
               <div className="rounded-lg p-4 text-base" style={{ paddingLeft: '6px' }}>
                 {renderMessageWithCitations(message.text, message.citations, message.operator)}
               </div>
@@ -449,6 +459,15 @@ export default function AIMessage({
   // Render normal AI message without branches
   return (
     <>
+      {/* Show tool executions if any */}
+      {message.toolCalls && message.toolCalls.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {message.toolCalls.map((toolExecution) => (
+            <ToolExecutionDisplay key={toolExecution.id} toolExecution={toolExecution} />
+          ))}
+        </div>
+      )}
+      
       <div className="rounded-lg p-4 text-base" style={{ paddingLeft: '6px' }}>
         {renderMessageWithCitations(message.text, message.citations, message.operator)}
       </div>

@@ -1,4 +1,5 @@
-import { AIMessage, AIResponse, AIOperator, AIOperatorConfig, WebSearchSettings } from '@shared/types/ai';
+import { AIMessage, AIResponse, AIOperator, AIOperatorConfig, WebSearchSettings, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { OpenAIProvider } from './providers/openai';
 import { AnthropicProvider } from './providers/anthropic';
 import { OpenRouterProvider } from './providers/openrouter';
@@ -22,11 +23,16 @@ export async function sendMessage(
   onChunk?: (chunk: string) => void,
   webSearchEnabled?: boolean,
   webSearchSettings?: WebSearchSettings,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  tools?: ToolDefinition[],
+  onToolCall?: (toolCall: ToolCall) => Promise<any>
 ): Promise<AIResponse> {
   console.log('[aiService] sendMessage - Starting');
   console.log('[aiService] sendMessage - Operator:', config.operator);
   console.log('[aiService] sendMessage - Selected Model:', config.selectedModel);
+  console.log('[aiService] sendMessage - onChunk:', typeof onChunk, onChunk);
+  console.log('[aiService] sendMessage - Streaming enabled:', !!onChunk);
+  console.log('[aiService] sendMessage - Tools count:', tools?.length || 0);
   console.log('[aiService] sendMessage - Config:', {
     operator: config.operator,
     hasApiKey: !!config.apiKey,
@@ -53,7 +59,9 @@ export async function sendMessage(
     onChunk,
     webSearchEnabled,
     webSearchSettings,
-    signal
+    signal,
+    tools,
+    onToolCall
   );
 }
 

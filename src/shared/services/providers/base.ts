@@ -1,4 +1,5 @@
-import { AIMessage, AIResponse, WebSearchSettings } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 
 export interface AIProvider {
   chat(
@@ -9,9 +10,12 @@ export interface AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     webSearchSettings?: WebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[], // Доступные инструменты
+    onToolCall?: (toolCall: ToolCall) => Promise<any> // Callback при вызове инструмента
   ): Promise<AIResponse>;
   listModels(apiKey: string, endpoint?: string): Promise<any[]>;
   testConnection(apiKey: string, endpoint?: string): Promise<boolean>;
 }
+
 

@@ -3,43 +3,67 @@ import { Tool } from '@shared/types/tools';
 export const collectContactsTool: Tool = {
   id: 'collect-contacts',
   name: 'Собрать контакты',
-  description: 'Собирает email, телефоны или telegram со страницы',
+  description: 'ВАЖНО: Сначала ОБЯЗАТЕЛЬНО уточни у пользователя: 1) Какой тип контактов собрать (all/email/phone/telegram)? 2) В каком формате вернуть (text/json/csv)? Только после получения ответов вызывай этот инструмент с указанными параметрами.',
   icon: '📧',
+  command: '/contacts',
+  urlPattern: undefined, // Работает на всех сайтах
+  isBuiltIn: true,
+  
+  parameters: {
+    type: 'object',
+    properties: {
+      contactType: {
+        type: 'string',
+        description: 'Тип контактов для сбора. Пользователь ДОЛЖЕН указать явно',
+        enum: ['all', 'email', 'phone', 'telegram']
+      },
+      format: {
+        type: 'string',
+        description: 'Формат вывода. Пользователь ДОЛЖЕН указать явно',
+        enum: ['text', 'json', 'csv']
+      }
+    },
+    required: ['contactType', 'format']
+  },
 
   async execute(params: { tabId: number; contactType?: string; format?: string }) {
     try {
-      // Get page content
-      const response = await chrome.tabs.sendMessage(params.tabId, {
-        type: 'GET_PAGE_CONTEXT',
-        data: { type: 'text' }
-      });
+      // Get page content using executeDOMFunction
+      const { executeDOMFunction } = await import('@shared/services/toolExecutor');
+      
+      // Get text content from page
+      const pageContent = await executeDOMFunction('getText', undefined, params.tabId);
+      
+      console.log('[collectContacts] Page content type:', typeof pageContent);
+      console.log('[collectContacts] Page content length:', pageContent?.length);
+      console.log('[collectContacts] Page content preview:', pageContent?.substring(0, 200));
 
-      if (!response.success) {
-        throw new Error('Failed to get page content');
+      if (!pageContent || typeof pageContent !== 'string' || pageContent.trim().length === 0) {
+        return 'Страница не содержит текстового контента или контент недоступен.';
       }
 
-      const pageContent = response.data;
       const contactType = params.contactType || 'all';
       const format = params.format || 'text';
 
       // Extract contacts using regex
       const contacts = extractContacts(pageContent, contactType);
 
+      const totalCount = Object.values(contacts).reduce((sum: number, arr: any) => sum + arr.length, 0);
+
+      console.log('[collectContacts] Found contacts:', contacts);
+      console.log('[collectContacts] Total count:', totalCount);
+
+      if (totalCount === 0) {
+        return `На странице не найдено контактов типа: ${contactType}. Проверьте, что страница содержит контактную информацию.`;
+      }
+
       // Format results
       const formattedResult = formatContacts(contacts, format);
 
-      return {
-        success: true,
-        contacts,
-        formatted: formattedResult,
-        count: Object.values(contacts).reduce((sum: number, arr: any) => sum + arr.length, 0)
-      };
+      return `Найдено контактов: ${totalCount}\n\n${formattedResult}`;
     } catch (error) {
       console.error('Error in collect contacts tool:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+      return `Ошибка при сборе контактов: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   }
 };

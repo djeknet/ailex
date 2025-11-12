@@ -1,5 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
-import { Chat, ChatMessage, ChatFolder, Statistics, ApiLogEntry } from '@shared/types/database';
+import { Chat, ChatMessage, ChatFolder, Statistics, ApiLogEntry, CustomTool } from '@shared/types/database';
 
 interface AiLexDB extends DBSchema {
   chats: {
@@ -27,10 +27,15 @@ interface AiLexDB extends DBSchema {
     value: ApiLogEntry;
     indexes: { 'by-timestamp': number };
   };
+  customTools: {
+    key: string;
+    value: CustomTool;
+    indexes: { 'by-created': number; 'by-enabled': number };
+  };
 }
 
 const DB_NAME = 'ailex-db';
-const DB_VERSION = 2; // Увеличиваем версию для добавления новой таблицы
+const DB_VERSION = 3; // Увеличиваем версию для добавления customTools
 
 let dbInstance: IDBPDatabase<AiLexDB> | null = null;
 
@@ -72,6 +77,13 @@ async function getDB(): Promise<IDBPDatabase<AiLexDB>> {
       if (!db.objectStoreNames.contains('apiLogs')) {
         const apiLogsStore = db.createObjectStore('apiLogs', { keyPath: 'id' });
         apiLogsStore.createIndex('by-timestamp', 'timestamp');
+      }
+
+      // Custom Tools store
+      if (!db.objectStoreNames.contains('customTools')) {
+        const toolsStore = db.createObjectStore('customTools', { keyPath: 'id' });
+        toolsStore.createIndex('by-created', 'createdAt');
+        toolsStore.createIndex('by-enabled', 'enabled');
       }
     }
   });
@@ -262,3 +274,44 @@ export async function clearApiLogs(): Promise<void> {
   const db = await getDB();
   await db.clear('apiLogs');
 }
+
+// Custom Tools operations
+export async function saveCustomTool(tool: CustomTool): Promise<void> {
+  const db = await getDB();
+  await db.put('customTools', tool);
+}
+
+export async function getCustomTool(id: string): Promise<CustomTool | undefined> {
+  const db = await getDB();
+  return await db.get('customTools', id);
+}
+
+export async function getAllCustomTools(): Promise<CustomTool[]> {
+  const db = await getDB();
+  const tools = await db.getAll('customTools');
+  return tools.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export async function getEnabledCustomTools(): Promise<CustomTool[]> {
+  const db = await getDB();
+  const allTools = await db.getAll('customTools');
+  return allTools.filter(tool => tool.enabled);
+}
+
+export async function updateCustomTool(id: string, updates: Partial<CustomTool>): Promise<void> {
+  const db = await getDB();
+  const existing = await db.get('customTools', id);
+  
+  if (!existing) {
+    throw new Error(`CustomTool with id ${id} not found`);
+  }
+  
+  const updated = { ...existing, ...updates, updatedAt: Date.now() };
+  await db.put('customTools', updated);
+}
+
+export async function deleteCustomTool(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete('customTools', id);
+}
+

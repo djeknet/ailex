@@ -14,14 +14,10 @@ export async function handleContextMenuClick(
   const commandId = String(info.menuItemId);
   const selectedText = info.selectionText;
 
-  if (!selectedText) {
-    console.error('[ContextMenu] No text selected');
-    return;
-  }
-
   console.log('[ContextMenu] Opening side panel and executing command:', {
     commandId,
-    textLength: selectedText.length,
+    hasText: !!selectedText,
+    textLength: selectedText?.length || 0,
     tabId: tab.id
   });
 
@@ -31,6 +27,13 @@ export async function handleContextMenuClick(
     if (commandId.startsWith('instruction_')) {
       instructionId = commandId.replace('instruction_', '');
       console.log('[ContextMenu] Instruction command detected:', instructionId);
+    }
+    
+    // Check if this is a tool command
+    let toolId: string | undefined;
+    if (commandId.startsWith('tool_')) {
+      toolId = commandId.replace('tool_', '');
+      console.log('[ContextMenu] Tool command detected:', toolId);
     }
 
     // Always open side panel (idempotent operation - no-op if already open)
@@ -45,7 +48,8 @@ export async function handleContextMenuClick(
       data: {
         commandId,
         selectedText,
-        instructionId // Pass instruction ID if it's an instruction command
+        instructionId, // Pass instruction ID if it's an instruction command
+        toolId // Pass tool ID if it's a tool command
       }
     });
 

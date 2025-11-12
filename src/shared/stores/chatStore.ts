@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Chat, ChatMessage, ChatFolder } from '@shared/types/database';
-import { AIOperatorConfig, AIOperator, AIMessage } from '@shared/types/ai';
+import { AIOperatorConfig, AIOperator, AIMessage, ToolCall } from '@shared/types/ai';
 import { chatAPI, historyAPI, folderAPI } from '@shared/utils/messaging';
 import { sendMessage as sendAIMessage } from '@shared/services/aiService';
 import { PageContextType, HistoryMode } from '@shared/types/extension';
@@ -9,6 +9,9 @@ import { AIServiceError, AIErrorCode, detectErrorType } from '@shared/types/erro
 import { getTranslation } from '@shared/i18n/useTranslation';
 import { i18nService } from '@shared/i18n/i18nService';
 import { getAILanguageName } from '@shared/constants';
+import { getAllAvailableTools, toolsToDefinitions } from '@shared/services/toolsService';
+import { executeToolCall } from '@shared/services/toolExecutor';
+import { ToolExecution } from '@shared/types/tools';
 
 interface ChatStore {
   currentChat: Chat | null;
@@ -22,6 +25,7 @@ interface ChatStore {
   folders: ChatFolder[];
   chats: Chat[];
   generatingQuestionsForMessage: string | null;
+  activeToolExecutions: ToolExecution[]; // Текущие выполняемые инструменты
   contextTruncationInfo: {
     wasTruncated: boolean;
     originalTokenCount: number;
@@ -88,6 +92,7 @@ export const useChatStore = create<ChatStore>()(
       chats: [],
       contextTruncationInfo: null,
       generatingQuestionsForMessage: null,
+      activeToolExecutions: [], // Инициализация
       loadingChats: new Set<string>(),
       activeRequestController: null,
 
@@ -283,7 +288,19 @@ export const useChatStore = create<ChatStore>()(
           // Add context only if it's new or changed
           if (!lastWithSameContext) {
             console.log('[chatStore] Adding page context for message:', m.id);
-            messageContent += `\n\nPage context:\n${pageContext}`;
+            
+            // Очистка контекста страницы
+            let cleanedContext = pageContext;
+            // Убираем множественные пробелы и табы
+            cleanedContext = cleanedContext.replace(/[ \t]+/g, ' ');
+            // Убираем множественные переносы строк (оставляем максимум 2 подряд)
+            cleanedContext = cleanedContext.replace(/\n{3,}/g, '\n\n');
+            // Убираем пробелы в начале и конце строк
+            cleanedContext = cleanedContext.split('\n').map(line => line.trim()).join('\n');
+            // Убираем пустые строки в начале и конце
+            cleanedContext = cleanedContext.trim();
+            
+            messageContent += `\n\nPage context:\n${cleanedContext}`;
           }
         }
         
@@ -410,8 +427,43 @@ export const useChatStore = create<ChatStore>()(
         ? (await import('@shared/stores/webSearchStore')).useWebSearchStore.getState().getSettings(selectedOperator.operator)
         : undefined;
 
-      // Send to AI with streaming
-      const response = await sendAIMessage(
+      // Get available tools for current URL (reuse tab from above)
+      const availableTools = await getAllAvailableTools(currentUrl);
+      
+      // Фильтруем инструменты: скрываем fill-form (он только для UI команды /fillform)
+      // но показываем get-form-fields и fill-form-fields для AI
+      const toolsForAI = availableTools.filter(tool => tool.id !== 'fill-form');
+      const toolDefinitions = toolsToDefinitions(toolsForAI);
+      
+      console.log('[chatStore] Available tools for AI:', toolDefinitions.length);
+      
+      // Add tool usage instructions to system message if tools are available
+      if (toolDefinitions.length > 0 && aiMessages.length > 0 && aiMessages[0].role === 'system') {
+        const systemMsg = aiMessages[0];
+        const toolInstructions = `\n\nWhen using tools:\n1. ALWAYS call tools with proper parameters - never use empty objects {}\n2. For fill-form-fields: the fieldsToFill parameter MUST contain actual field mappings from the data you received\n3. Read each tool's description and example carefully\n4. Extract and use data from previous tool responses to fill required parameters`;
+        
+        systemMsg.content = (typeof systemMsg.content === 'string' ? systemMsg.content : '') + toolInstructions;
+      }
+
+      // Track tool executions
+      const toolExecutions: ToolExecution[] = [];
+      
+      // Callback for tool execution progress
+      const onToolProgress = (execution: ToolExecution) => {
+        console.log('[chatStore] Tool execution progress:', execution);
+        const existingIndex = toolExecutions.findIndex(e => e.id === execution.id);
+        if (existingIndex >= 0) {
+          toolExecutions[existingIndex] = execution;
+        } else {
+          toolExecutions.push(execution);
+        }
+        
+        // Update store for real-time UI updates
+        set({ activeToolExecutions: [...toolExecutions] });
+      };
+
+      // Send to AI with streaming and tools
+      let response = await sendAIMessage(
         aiMessages,
         selectedOperator,
         (chunk) => {
@@ -420,8 +472,76 @@ export const useChatStore = create<ChatStore>()(
         },
         webSearchEnabled,
         webSearchSettings,
-        controller.signal
+        controller.signal,
+        toolDefinitions.length > 0 ? toolDefinitions : undefined,
+        undefined // Don't execute tools during first call
       );
+      
+      // If AI called tools, execute them and send results back
+      // Keep looping until AI stops calling tools
+      let maxToolIterations = 5; // Prevent infinite loops
+      let currentIteration = 0;
+      
+      while (response.tool_calls && response.tool_calls.length > 0 && currentIteration < maxToolIterations) {
+        currentIteration++;
+        console.log('[chatStore] AI called tools (iteration ' + currentIteration + '), executing:', response.tool_calls.length);
+        
+        // Execute all tools
+        for (const toolCall of response.tool_calls) {
+          console.log('[chatStore] Executing tool:', toolCall.function.name);
+          const result = await executeToolCall(toolCall, tab?.id!, controller.signal, onToolProgress);
+          
+          // Store execution result
+          const execution = toolExecutions.find(e => e.id === toolCall.id);
+          if (execution && result.output) {
+            execution.output = result.output;
+          }
+        }
+        
+        // Add assistant message with tool calls
+        aiMessages.push({
+          role: 'assistant',
+          content: response.content || '',
+          tool_calls: response.tool_calls
+        });
+        
+        // Add tool results as tool messages
+        for (const toolCall of response.tool_calls) {
+          const execution = toolExecutions.find(e => e.id === toolCall.id);
+          if (execution?.output) {
+            aiMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              name: toolCall.function.name,
+              content: typeof execution.output === 'string' ? execution.output : JSON.stringify(execution.output)
+            });
+          }
+        }
+        
+        console.log('[chatStore] Sending results back to AI, total messages:', aiMessages.length);
+        
+        // Send again to get final response from AI
+        assistantContent = ''; // Reset content for new response
+        set({ streamingContent: '', isLoading: true }); // Keep loading state with empty content
+        
+        response = await sendAIMessage(
+          aiMessages,
+          selectedOperator,
+          (chunk) => {
+            assistantContent += chunk;
+            set({ streamingContent: assistantContent });
+          },
+          webSearchEnabled,
+          webSearchSettings,
+          controller.signal,
+          toolDefinitions.length > 0 ? toolDefinitions : undefined, // Pass tools again for follow-up calls
+          undefined
+        );
+      }
+      
+      if (currentIteration >= maxToolIterations) {
+        console.warn('[chatStore] Max tool iterations reached, stopping');
+      }
 
       // Check if response is empty
       const finalContent = assistantContent || response.content;
@@ -438,7 +558,7 @@ export const useChatStore = create<ChatStore>()(
         citationsCount: response.citations?.length || 0
       });
 
-      // Save assistant message with citations
+      // Save assistant message with citations and tool executions
       const assistantMessage: ChatMessage = {
         id: assistantMessageId,
         createdAt: Date.now(),
@@ -448,7 +568,8 @@ export const useChatStore = create<ChatStore>()(
         model: selectedOperator.selectedModel,
         text: finalContent,
         tokens: response.tokens?.total || 0,
-        citations: response.citations
+        citations: response.citations,
+        toolCalls: toolExecutions.length > 0 ? toolExecutions : undefined
       };
 
       await addMessage(assistantMessage);
@@ -551,6 +672,7 @@ export const useChatStore = create<ChatStore>()(
       set({ 
         isLoading: false, 
         streamingContent: '',
+        activeToolExecutions: [], // Очищаем после завершения
         loadingChats: newLoadingChats,
         activeRequestController: null
       });
@@ -604,6 +726,7 @@ export const useChatStore = create<ChatStore>()(
             loadingChats: newLoadingChats,
             isLoading: false,
             streamingContent: '',
+            activeToolExecutions: [], // Очищаем
             activeRequestController: null
           });
         }

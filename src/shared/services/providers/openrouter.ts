@@ -1,5 +1,6 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, WebSearchSettings, OpenRouterWebSearchSettings, Citation } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, OpenRouterWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
 export class OpenRouterProvider implements AIProvider {
@@ -31,7 +32,9 @@ export class OpenRouterProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     webSearchSettings?: WebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://openrouter.ai/api/v1';
     const url = `${baseUrl}/chat/completions`;
@@ -39,7 +42,8 @@ export class OpenRouterProvider implements AIProvider {
     console.log('[OpenRouter] Starting chat request', { 
       model, 
       webSearchEnabled,
-      hasSettings: !!webSearchSettings 
+      hasSettings: !!webSearchSettings,
+      toolsCount: tools?.length || 0
     });
 
     // Build plugins array
@@ -120,11 +124,20 @@ export class OpenRouterProvider implements AIProvider {
           
           return {
             role: msg.role,
-            content
+            content,
+            ...(msg.tool_calls ? { tool_calls: msg.tool_calls } : {}),
+            ...(msg.tool_call_id ? { tool_call_id: msg.tool_call_id } : {}),
+            ...(msg.name ? { name: msg.name } : {})
           };
         }),
         stream: !!onChunk
       };
+    
+    // Add tools if provided
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools;
+      console.log('[OpenRouter] Added tools:', tools.length);
+    }
     
     // Add plugins if any
     if (plugins.length > 0) {
@@ -168,6 +181,9 @@ export class OpenRouterProvider implements AIProvider {
       let inputTokens = 0;
       let outputTokens = 0;
       const citations: Citation[] = [];
+      const toolCalls: ToolCall[] = [];
+      let currentToolCallIndex = -1;
+      let currentToolCall: any = {};
 
       try {
         while (true) {
@@ -184,11 +200,43 @@ export class OpenRouterProvider implements AIProvider {
 
               try {
                 const json = JSON.parse(data);
-                const content = json.choices[0]?.delta?.content;
+                const delta = json.choices[0]?.delta;
                 
-                if (content) {
-                  fullContent += content;
-                  onChunk(content);
+                // Handle regular content
+                if (delta?.content) {
+                  fullContent += delta.content;
+                  onChunk(delta.content);
+                }
+                
+                // Handle tool calls
+                if (delta?.tool_calls) {
+                  delta.tool_calls.forEach((tc: any) => {
+                    const index = tc.index;
+                    
+                    if (index > currentToolCallIndex) {
+                      // New tool call
+                      if (currentToolCallIndex >= 0) {
+                        toolCalls.push(currentToolCall as ToolCall);
+                      }
+                      currentToolCallIndex = index;
+                      currentToolCall = {
+                        id: tc.id || `call_${Date.now()}_${index}`,
+                        type: 'function',
+                        function: {
+                          name: tc.function?.name || '',
+                          arguments: tc.function?.arguments || ''
+                        }
+                      };
+                    } else {
+                      // Continue existing tool call
+                      if (tc.function?.name) {
+                        currentToolCall.function.name += tc.function.name;
+                      }
+                      if (tc.function?.arguments) {
+                        currentToolCall.function.arguments += tc.function.arguments;
+                      }
+                    }
+                  });
                 }
 
                 // Capture usage info if available
@@ -198,10 +246,18 @@ export class OpenRouterProvider implements AIProvider {
                   outputTokens = json.usage.completion_tokens || 0;
                 }
                 
-                // Extract citations from annotations (if available in streaming)
+                // Extract citations from annotations
                 const message = json.choices[0]?.message;
                 if (message?.annotations) {
                   this.extractCitationsFromAnnotations(message.annotations, citations);
+                }
+                
+                // Check finish reason
+                if (json.choices[0]?.finish_reason === 'tool_calls') {
+                  // Save last tool call
+                  if (currentToolCallIndex >= 0) {
+                    toolCalls.push(currentToolCall as ToolCall);
+                  }
                 }
               } catch (e) {
                 console.error('[OpenRouter] Error parsing streaming response:', e);
@@ -216,7 +272,8 @@ export class OpenRouterProvider implements AIProvider {
       console.log('[OpenRouter] Streaming completed', {
         contentLength: fullContent.length,
         totalTokens,
-        citationsCount: citations.length
+        citationsCount: citations.length,
+        toolCallsCount: toolCalls.length
       });
 
       return {
@@ -227,6 +284,8 @@ export class OpenRouterProvider implements AIProvider {
           output: outputTokens
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'openrouter'
       };
@@ -245,13 +304,15 @@ export class OpenRouterProvider implements AIProvider {
       console.log('[OpenRouter] Extracted citations:', citations.length);
       
       return {
-        content: data.choices[0].message.content,
+        content: data.choices[0].message.content || '',
         tokens: data.usage ? {
           total: data.usage.total_tokens,
           input: data.usage.prompt_tokens,
           output: data.usage.completion_tokens
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
+        tool_calls: message?.tool_calls || undefined,
+        finish_reason: data.choices[0]?.finish_reason || 'stop',
         model,
         operator: 'openrouter'
       };

@@ -26,6 +26,8 @@ import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import ContextTruncatedDialog from './ContextTruncatedDialog';
 import MessageItem, { type MessageBranch } from './MessageItem';
+import ToolsGrid from './ToolsGrid';
+import ToolExecutionDisplay from './ToolExecutionDisplay';
 import type { AIOperatorConfig } from '@shared/types/extension';
 
 export default function MessageList() {
@@ -33,7 +35,8 @@ export default function MessageList() {
   const { operators } = useSettingsStore();
   const { 
     messages, 
-    streamingContent, 
+    streamingContent,
+    activeToolExecutions, // Добавил
     isLoading, 
     error, 
     clearError, 
@@ -539,10 +542,21 @@ export default function MessageList() {
 
   if (messages.length === 0 && !error) {
     return (
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="text-center text-muted-foreground">
-          <p className="text-lg mb-2">{t('askQuestion')}</p>
-          <p className="text-sm">{t('startConversation')}</p>
+      <div className="flex-1 flex flex-col overflow-auto">
+        <div className="flex-1 flex flex-col items-center justify-center p-4">
+          <div className="text-center text-muted-foreground mb-6">
+            <p className="text-lg mb-2">{t('askQuestion')}</p>
+            <p className="text-sm">{t('startConversation')}</p>
+          </div>
+          
+          <div className="w-full max-w-4xl">
+            <ToolsGrid 
+              onToolSelect={(tool) => {
+                // Вставляем команду инструмента в чат
+                sendUserMessage(tool.command, undefined, undefined, undefined, [], false);
+              }} 
+            />
+          </div>
         </div>
       </div>
     );
@@ -602,6 +616,15 @@ export default function MessageList() {
 
         {isLoading && streamingContent && (
           <div className="flex flex-col">
+            {/* Show active tool executions */}
+            {activeToolExecutions.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {activeToolExecutions.map((execution) => (
+                  <ToolExecutionDisplay key={execution.id} toolExecution={execution} />
+                ))}
+              </div>
+            )}
+            
             <div className="rounded-lg p-4 max-w-[80%] text-base">
               <Response>{streamingContent}</Response>
             </div>
@@ -609,7 +632,17 @@ export default function MessageList() {
         )}
 
         {isLoading && !streamingContent && !error && (
-          <div className="flex justify-start">
+          <div className="flex flex-col gap-2">
+            {/* Show active tool executions even without streaming content */}
+            {activeToolExecutions.length > 0 && (
+              <div className="w-full space-y-2">
+                {activeToolExecutions.map((execution) => (
+                  <ToolExecutionDisplay key={execution.id} toolExecution={execution} />
+                ))}
+              </div>
+            )}
+            
+            {/* Always show loader when loading */}
             <div className="bg-muted rounded-lg p-4">
               <div className="flex gap-1">
                 <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>

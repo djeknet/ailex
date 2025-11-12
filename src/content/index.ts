@@ -4,6 +4,7 @@ import { fillForm } from './formFiller';
 import { startElementSelector, stopElementSelector } from './elementSelector';
 import { startScreenshotSelector, stopScreenshotSelector } from './screenshotSelector';
 import { getElementByXPath, getCleanInnerHTML } from '@shared/utils/domSelector';
+import * as domFunctions from './domFunctions';
 
 // Content script entry point
 
@@ -52,6 +53,43 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         case 'FILL_FORM':
           const result = await fillForm(message.data.personalInfo);
           sendResponse({ success: true, data: result });
+          break;
+
+        case 'FILL_FORM_FIELDS':
+          try {
+            const fieldsToFill = message.data.fieldsToFill as Record<string, string>;
+            let filled = 0;
+            let total = 0;
+
+            for (const [fieldIdentifier, value] of Object.entries(fieldsToFill)) {
+              total++;
+              
+              // Пытаемся найти элемент по id, name или placeholder
+              let element = document.getElementById(fieldIdentifier) as HTMLInputElement;
+              
+              if (!element) {
+                element = document.querySelector(`[name="${fieldIdentifier}"]`) as HTMLInputElement;
+              }
+              
+              if (!element) {
+                element = document.querySelector(`input[placeholder="${fieldIdentifier}"], textarea[placeholder="${fieldIdentifier}"]`) as HTMLInputElement;
+              }
+              
+              if (element && value) {
+                element.value = value;
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+                filled++;
+              }
+            }
+
+            sendResponse({ success: true, data: { filled, total } });
+          } catch (error) {
+            sendResponse({ 
+              success: false, 
+              error: error instanceof Error ? error.message : 'Failed to fill form fields' 
+            });
+          }
           break;
 
         case 'STOP_PROCESSING':
@@ -110,6 +148,27 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             sendResponse({ success: true, data: { innerHTML } });
           } else {
             sendResponse({ success: false, error: 'Element not found' });
+          }
+          break;
+
+        case 'EXECUTE_DOM_FUNCTION':
+          const { functionName, params } = message.data;
+          
+          // Проверяем, существует ли функция
+          if (typeof (domFunctions as any)[functionName] !== 'function') {
+            sendResponse({ success: false, error: `Function ${functionName} not found` });
+            break;
+          }
+          
+          try {
+            // Вызываем функцию
+            const result = await (domFunctions as any)[functionName](params);
+            sendResponse({ success: true, result });
+          } catch (error) {
+            sendResponse({ 
+              success: false, 
+              error: error instanceof Error ? error.message : 'Function execution failed' 
+            });
           }
           break;
 

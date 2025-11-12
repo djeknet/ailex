@@ -15,7 +15,7 @@ export interface AIOperatorConfig {
 }
 
 export interface AIMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'tool';
   content: string | Array<{
     type: 'text' | 'image_url' | 'document';
     text?: string;
@@ -28,6 +28,19 @@ export interface AIMessage {
     };
   }>;
   timestamp?: number;
+  tool_calls?: ToolCall[]; // Вызовы инструментов от assistant
+  tool_call_id?: string; // ID вызова для role: 'tool'
+  name?: string; // Имя инструмента для role: 'tool'
+}
+
+// Tool calling types
+export interface ToolCall {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string; // JSON string
+  };
 }
 
 export interface StreamChunk {
@@ -46,6 +59,8 @@ export interface AIResponse {
   operator: AIOperator;
   citations?: Citation[];
   inlineCitations?: boolean; // Whether to show citations inline in text
+  tool_calls?: ToolCall[]; // Вызовы инструментов
+  finish_reason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
 }
 
 // Web Search Types

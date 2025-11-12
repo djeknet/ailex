@@ -1,4 +1,5 @@
 import { AIOperator, Citation } from './ai';
+import { ToolExecution } from './tools';
 
 export interface Chat {
   id: string;
@@ -26,6 +27,9 @@ export interface ChatMessage {
   suggestedQuestions?: string[]; // Array of related follow-up questions for AI responses
   citations?: Citation[]; // Web search citations from AI responses
   webSearch?: boolean; // Whether web search was used for this message
+  
+  // Tool calling информация
+  toolCalls?: ToolExecution[]; // Информация о выполненных инструментах
   
   // Attachment metadata
   attach_type?: 'file' | 'image' | 'dom'; // Type of attached content
@@ -75,5 +79,19 @@ export interface ApiLogEntry {
   headers?: Record<string, string>;
   duration?: number;
   error?: string;
+}
+
+// Custom Tools (пользовательские инструменты)
+export interface CustomTool {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  command: string;
+  urlPattern?: string; // Паттерн URL для фильтрации
+  prompt: string; // Промпт для AI
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
 }
 

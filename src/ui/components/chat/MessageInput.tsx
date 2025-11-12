@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useChatStore } from '@shared/stores/chatStore';
 import { useSettingsStore } from '@shared/stores/settingsStore';
+import { useToolsStore } from '@shared/stores/toolsStore';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { getModelContextLimit, getModelCapabilities } from '@shared/constants';
 import { readFileAsBase64, readTextFile, isTextFile, validateFileSize } from '@shared/utils/fileUtils';
@@ -70,6 +71,7 @@ interface ImageAttachment {
 export default function MessageInput() {
   const { t } = useTranslation();
   const { maxFileSize = 10, maxImageSize = 5, instructions } = useSettingsStore();
+  const { getToolsForUrl, availableTools } = useToolsStore();
   const [text, setText] = useState('');
   const [useWebSearch, setUseWebSearch] = useState(false);
   const [webSearchSettingsOpen, setWebSearchSettingsOpen] = useState(false);
@@ -80,6 +82,12 @@ export default function MessageInput() {
   const [siteFavicon, setSiteFavicon] = useState<string | null>(null);
   const [isSystemPage, setIsSystemPage] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  
+  // Tools dropdown state
+  const [showToolsDropdown, setShowToolsDropdown] = useState(false);
+  const [filteredTools, setFilteredTools] = useState<any[]>([]);
+  const [selectedToolIndex, setSelectedToolIndex] = useState(0);
+  const [currentUrl, setCurrentUrl] = useState('');
   
   // Attachment state
   const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);

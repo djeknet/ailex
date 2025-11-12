@@ -82,6 +82,19 @@ async function createContextMenu(language: string) {
   // Загружаем инструкции из sync storage
   const storageData = await chrome.storage.sync.get(['instructions']);
   const instructions = storageData.instructions || [];
+  
+  // Загружаем доступные инструменты
+  let availableTools: any[] = [];
+  try {
+    // Import только когда действительно нужно (при создании меню)
+    // Избегаем импорта во время инициализации из-за возможных DOM зависимостей
+    const toolsModule = await import('@shared/services/toolsService');
+    availableTools = await toolsModule.getAllAvailableTools();
+    console.log('[Background] Loaded tools for context menu:', availableTools.length);
+  } catch (error) {
+    console.warn('[Background] Could not load tools for context menu (this is OK):', error);
+    // Продолжаем без инструментов в меню - это не критично
+  }
 
   // Удаляем все существующие пункты меню
   chrome.contextMenus.removeAll(() => {
@@ -135,6 +148,29 @@ async function createContextMenu(language: string) {
           contexts: ['selection']
         });
       });
+    }
+
+    // Создаем категорию для инструментов, если они есть
+    if (availableTools.length > 0) {
+      const toolsCategoryId = 'category_tools';
+      
+      chrome.contextMenus.create({
+        id: toolsCategoryId,
+        title: '🔧 Tools',
+        contexts: ['page', 'selection']
+      });
+
+      // Добавляем каждый инструмент как отдельный пункт
+      availableTools.forEach((tool: any) => {
+        chrome.contextMenus.create({
+          id: `tool_${tool.id}`,
+          parentId: toolsCategoryId,
+          title: `${tool.icon} ${tool.name}`,
+          contexts: ['page', 'selection']
+        });
+      });
+      
+      console.log('[Background] Added', availableTools.length, 'tools to context menu');
     }
 
     console.log('[Background] Context menu created successfully');
