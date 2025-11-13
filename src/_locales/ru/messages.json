@@ -30,7 +30,7 @@
     "message": "Отправить"
   },
   "messageInputPlaceholder": {
-    "message": "Введите сообщение..."
+    "message": "Введите сообщение или выберите команду через /"
   },
   "operators": {
     "message": "Операторы"
@@ -1458,5 +1458,221 @@
   },
   "contextMenu_findQuoteSource_prompt": {
     "message": "Найди оригинальный источник или автора этой цитаты:"
+  },
+  "toolsPageTitle": {
+    "message": "Инструменты"
+  },
+  "toolsPageDescription": {
+    "message": "Управление встроенными и пользовательскими инструментами"
+  },
+  "createTool": {
+    "message": "Создать инструмент"
+  },
+  "builtInTools": {
+    "message": "Встроенные инструменты"
+  },
+  "customTools": {
+    "message": "Пользовательские инструменты"
+  },
+  "noCustomTools": {
+    "message": "Нет пользовательских инструментов"
+  },
+  "createFirstTool": {
+    "message": "Создать первый инструмент"
+  },
+  "editTool": {
+    "message": "Редактировать инструмент"
+  },
+  "createToolDescription": {
+    "message": "Заполните форму для создания пользовательского инструмента"
+  },
+  "toolName": {
+    "message": "Название"
+  },
+  "toolNameRequired": {
+    "message": "Название *"
+  },
+  "toolNamePlaceholder": {
+    "message": "Название инструмента"
+  },
+  "toolDescription": {
+    "message": "Описание"
+  },
+  "toolDescriptionRequired": {
+    "message": "Описание *"
+  },
+  "toolDescriptionPlaceholder": {
+    "message": "Краткое описание функционала"
+  },
+  "toolIcon": {
+    "message": "Иконка"
+  },
+  "toolCommand": {
+    "message": "Команда"
+  },
+  "toolCommandRequired": {
+    "message": "Команда *"
+  },
+  "toolCommandPlaceholder": {
+    "message": "/mycommand"
+  },
+  "toolCommandNote": {
+    "message": "Начинается с /"
+  },
+  "toolUrlPattern": {
+    "message": "URL паттерн (опционально)"
+  },
+  "toolUrlPatternPlaceholder": {
+    "message": "https://example.com/"
+  },
+  "toolUrlPatternNote": {
+    "message": "Инструмент будет доступен только на страницах, начинающихся с этого URL"
+  },
+  "toolPrompt": {
+    "message": "Промпт для AI"
+  },
+  "toolPromptRequired": {
+    "message": "Промпт для AI *"
+  },
+  "toolPromptPlaceholder": {
+    "message": "Инструкция для AI о том, что нужно сделать..."
+  },
+  "toolPromptNote": {
+    "message": "Этот промпт будет отправлен AI при вызове инструмента"
+  },
+  "deleteToolConfirm": {
+    "message": "Вы уверены, что хотите удалить этот инструмент?"
+  },
+  "fillPersonalInfo": {
+    "message": "Заполните личную информацию в настройках"
+  },
+  "fillPersonalInfoTooltip": {
+    "message": "Заполните личную информацию в настройках расширения для этой функции"
+  },
+  "tool_fillForm": {
+    "message": "Заполнить форму"
+  },
+  "tool_fillForm_desc": {
+    "message": "Автоматически заполняет форму на странице. Этот инструмент служит точкой входа для команды /fillform."
+  },
+  "tool_getFormFields": {
+    "message": "Получить поля формы"
+  },
+  "tool_getFormFields_desc": {
+    "message": "Получает список всех полей формы на странице с их метаданными (id, name, type, label, placeholder, required). Используй этот инструмент ПЕРВЫМ перед заполнением формы."
+  },
+  "tool_fillFormFields": {
+    "message": "Заполнить поля формы"
+  },
+  "tool_fillFormFields_desc": {
+    "message": "Заполняет конкретные поля формы указанными значениями. ВАЖНО: Параметр fieldsToFill должен содержать объект где ключи - это id или name полей из get-form-fields, а значения - данные для заполнения из availableUserInfo."
+  },
+  "tool_summarize": {
+    "message": "Саммари страницы"
+  },
+  "tool_summarize_desc": {
+    "message": "Получает текстовый контент текущей страницы для создания краткого содержания"
+  },
+  "tool_collectContacts": {
+    "message": "Собрать контакты"
+  },
+  "tool_collectContacts_desc": {
+    "message": "Собрать контакты со страницы: email, phone, telegram"
+  },
+  "formFieldsNotFound": {
+    "message": "На странице не найдено полей формы."
+  },
+  "formFieldsNextStep": {
+    "message": "СЛЕДУЮЩИЙ ШАГ: Вызови fill-form-fields с параметром fieldsToFill. Создай объект сопоставления полей и данных пользователя. Например: {example}"
+  },
+  "formFieldsNotSpecified": {
+    "message": "Не указаны поля для заполнения"
+  },
+  "formFillSuccess": {
+    "message": "Форма успешно заполнена. Заполнено полей: {filled} из {total}"
+  },
+  "formFillError": {
+    "message": "Ошибка при заполнении формы"
+  },
+  "formFillFailed": {
+    "message": "Не удалось заполнить форму"
+  },
+  "unknownError": {
+    "message": "Неизвестная ошибка"
+  },
+  "contactsNotFound": {
+    "message": "На странице не найдено контактов"
+  },
+  "contactsFound": {
+    "message": "Найдено контактов: {count}"
+  },
+  "pageContentNotAvailable": {
+    "message": "Страница не содержит текстового контента или контент недоступен."
+  },
+  "createPageSummary": {
+    "message": "Создай краткое содержание (саммари) этой страницы."
+  },
+  "pageContentForSummary": {
+    "message": "Контент страницы для саммари:"
+  },
+  "errorGettingPageContent": {
+    "message": "Ошибка при получении контента страницы"
+  },
+  "contactsNotFoundType": {
+    "message": "На странице не найдено контактов типа: {type}. Проверьте, что страница содержит контактную информацию."
+  },
+  "contactsFoundCount": {
+    "message": "Найдено контактов: {count}"
+  },
+  "errorCollectingContacts": {
+    "message": "Ошибка при сборе контактов"
+  },
+  "tool_setCheckbox": {
+    "message": "Отметить чекбокс"
+  },
+  "tool_setCheckbox_desc": {
+    "message": "Установить или снять галочку в чекбоксе на странице"
+  },
+  "tool_submitForm": {
+    "message": "Отправить форму"
+  },
+  "tool_submitForm_desc": {
+    "message": "Отправить форму нажатием кнопки submit"
+  },
+  "checked": {
+    "message": "отмечен"
+  },
+  "unchecked": {
+    "message": "снят"
+  },
+  "checkboxSuccess": {
+    "message": "Чекбокс {action}: {selector}"
+  },
+  "checkboxNotFound": {
+    "message": "Чекбокс не найден: {selector}"
+  },
+  "checkboxError": {
+    "message": "Ошибка при работе с чекбоксом"
+  },
+  "formSubmitSuccess": {
+    "message": "Форма успешно отправлена"
+  },
+  "formNotFound": {
+    "message": "Форма не найдена на странице"
+  },
+  "formSubmitError": {
+    "message": "Ошибка при отправке формы"
+  },
+  "availableTools": {
+    "message": "Доступные инструменты"
+  },
+  "toolsNavigation": {
+    "message": "↑↓ Навигация"
+  },
+  "toolsSelect": {
+    "message": "Enter/Tab Выбрать"
+  },
+  "tool_noAvailable": {
+    "message": "Нет доступных инструментов"
   }
 }

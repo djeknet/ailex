@@ -53,6 +53,7 @@ import ModelSelect from './ModelSelect';
 import AttachmentBadge from './AttachmentBadge';
 import ImagePreview from './ImagePreview';
 import WebSearchSettingsDialog from './WebSearchSettingsDialog';
+import ToolsCommandDropdown from './ToolsCommandDropdown';
 
 type PageContextType = 'text' | 'dom' | 'html';
 
@@ -71,7 +72,7 @@ interface ImageAttachment {
 export default function MessageInput() {
   const { t } = useTranslation();
   const { maxFileSize = 10, maxImageSize = 5, instructions } = useSettingsStore();
-  const { getToolsForUrl, availableTools } = useToolsStore();
+  const { availableTools, loadTools } = useToolsStore();
   const [text, setText] = useState('');
   const [useWebSearch, setUseWebSearch] = useState(false);
   const [webSearchSettingsOpen, setWebSearchSettingsOpen] = useState(false);
@@ -85,9 +86,6 @@ export default function MessageInput() {
   
   // Tools dropdown state
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
-  const [filteredTools, setFilteredTools] = useState<any[]>([]);
-  const [selectedToolIndex, setSelectedToolIndex] = useState(0);
-  const [currentUrl, setCurrentUrl] = useState('');
   
   // Attachment state
   const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);
@@ -105,6 +103,11 @@ export default function MessageInput() {
   const modelCapabilities = selectedOperator?.selectedModel 
     ? getModelCapabilities(selectedOperator.selectedModel, selectedOperator.operator)
     : { supportsFiles: true, supportsImages: true };
+
+  // Load tools on mount
+  useEffect(() => {
+    loadTools();
+  }, [loadTools]);
 
   // Listen for voice input capture
   useEffect(() => {
@@ -286,6 +289,12 @@ export default function MessageInput() {
     chrome.runtime.onMessage.addListener(handleMessage);
     return () => chrome.runtime.onMessage.removeListener(handleMessage);
   }, []);
+
+  // Track "/" command input for tools dropdown
+  useEffect(() => {
+    const shouldShow = text.startsWith('/') && text.length > 0;
+    setShowToolsDropdown(shouldShow);
+  }, [text]);
 
   const handleCancelSelection = async () => {
     if (isSelectingElement) {
@@ -486,12 +495,18 @@ export default function MessageInput() {
     setAttachedImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleToolSelect = (tool: any) => {
+    setText(tool.command);
+    setShowToolsDropdown(false);
+  };
+
   const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     if (!hasText || isLoading) return;
 
     const content = message.text!.trim();
     setText('');
+    setShowToolsDropdown(false); // Скрыть dropdown при отправке
     
     // Prepare instruction data if selected
     let instructionData: { id: string; content: string } | undefined;
@@ -680,7 +695,15 @@ export default function MessageInput() {
 
   return (
     <TooltipProvider>
-      <div className="border-t p-4 bg-card">
+      <div className="border-t p-4 bg-card relative">
+        {/* Tools Command Dropdown */}
+        <ToolsCommandDropdown
+          text={text}
+          tools={availableTools}
+          onSelect={handleToolSelect}
+          visible={showToolsDropdown}
+        />
+        
         {/* Hidden file inputs */}
         <input
           ref={fileInputRef}

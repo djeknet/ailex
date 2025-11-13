@@ -289,8 +289,11 @@ export const useChatStore = create<ChatStore>()(
           if (!lastWithSameContext) {
             console.log('[chatStore] Adding page context for message:', m.id);
             
+            // Убедимся что pageContext - строка
+            let contextStr = typeof pageContext === 'string' ? pageContext : JSON.stringify(pageContext);
+            
             // Очистка контекста страницы
-            let cleanedContext = pageContext;
+            let cleanedContext = contextStr;
             // Убираем множественные пробелы и табы
             cleanedContext = cleanedContext.replace(/[ \t]+/g, ' ');
             // Убираем множественные переносы строк (оставляем максимум 2 подряд)
@@ -430,19 +433,71 @@ export const useChatStore = create<ChatStore>()(
       // Get available tools for current URL (reuse tab from above)
       const availableTools = await getAllAvailableTools(currentUrl);
       
+      // Check if user message is a tool command (starts with /)
+      const isToolCommand = content.trim().startsWith('/');
+      const commandMatch = isToolCommand ? content.trim().match(/^\/(\S+)/) : null;
+      const commandName = commandMatch ? commandMatch[1] : null;
+      
+      // Find matching tool by command
+      const matchingTool = commandName 
+        ? availableTools.find(t => t.command === `/${commandName}`)
+        : null;
+      
+      // Check if AI has already used tools in this conversation
+      const hasToolHistory = aiMessages.some(msg => msg.tool_calls && msg.tool_calls.length > 0);
+      
+      // Decide whether to include tools in the request
+      // Tools are included only when:
+      // 1. User explicitly called a tool command (starts with /)
+      // 2. AI has already used tools in this chat (conversation context)
+      const shouldIncludeTools = isToolCommand || hasToolHistory;
+      
+      console.log('[chatStore] Tools decision:', {
+        isToolCommand,
+        commandName,
+        matchingTool: matchingTool?.id,
+        hasToolHistory,
+        shouldIncludeTools,
+        availableToolsCount: availableTools.length
+      });
+      
       // Фильтруем инструменты: скрываем fill-form (он только для UI команды /fillform)
       // но показываем get-form-fields и fill-form-fields для AI
-      const toolsForAI = availableTools.filter(tool => tool.id !== 'fill-form');
+      // Передаем только если shouldIncludeTools = true
+      const toolsForAI = shouldIncludeTools 
+        ? availableTools.filter(tool => tool.id !== 'fill-form')
+        : [];
       const toolDefinitions = toolsToDefinitions(toolsForAI);
       
-      console.log('[chatStore] Available tools for AI:', toolDefinitions.length);
+      console.log('[chatStore] Tools to send to AI:', toolDefinitions.length);
       
       // Add tool usage instructions to system message if tools are available
       if (toolDefinitions.length > 0 && aiMessages.length > 0 && aiMessages[0].role === 'system') {
         const systemMsg = aiMessages[0];
-        const toolInstructions = `\n\nWhen using tools:\n1. ALWAYS call tools with proper parameters - never use empty objects {}\n2. For fill-form-fields: the fieldsToFill parameter MUST contain actual field mappings from the data you received\n3. Read each tool's description and example carefully\n4. Extract and use data from previous tool responses to fill required parameters`;
+        let toolInstructions = '';
         
-        systemMsg.content = (typeof systemMsg.content === 'string' ? systemMsg.content : '') + toolInstructions;
+        // Collect system instructions from all tools
+        const toolsWithInstructions = availableTools.filter(t => t.systemInstructions);
+        if (toolsWithInstructions.length > 0) {
+          toolInstructions += '\n\nTool-specific instructions:';
+          toolsWithInstructions.forEach(tool => {
+            toolInstructions += `\n- ${tool.id}: ${tool.systemInstructions}`;
+          });
+        }
+        
+        // Add special instruction if user sent a tool command
+        if (isToolCommand && matchingTool) {
+          toolInstructions += `\n\nIMPORTANT: User sent command "${content}". `;
+          if (matchingTool.systemInstructions) {
+            toolInstructions += matchingTool.systemInstructions;
+          } else {
+            toolInstructions += `This is a tool command for "${matchingTool.id}". You MUST call this tool immediately.`;
+          }
+        }
+        
+        if (toolInstructions) {
+          systemMsg.content = (typeof systemMsg.content === 'string' ? systemMsg.content : '') + toolInstructions;
+        }
       }
 
       // Track tool executions
@@ -610,9 +665,15 @@ export const useChatStore = create<ChatStore>()(
       }
 
       // Generate suggested questions (asynchronously, non-blocking)
+      // Skip if:
+      // 1. Tools were used - suggestions are not relevant when working with tools
+      // 2. User sent a tool command - even if AI didn't call tool yet (like asking clarifying questions)
       const { useSettingsStore } = await import('./settingsStore');
       const { showAISuggestions } = useSettingsStore.getState();
-      if (showAISuggestions && selectedOperator) {
+      const hasToolCalls = toolExecutions.length > 0;
+      const shouldSkipSuggestions = hasToolCalls || isToolCommand;
+      
+      if (showAISuggestions && !shouldSkipSuggestions && selectedOperator) {
         setTimeout(() => {
           get().generateSuggestedQuestions(
             assistantMessageId,

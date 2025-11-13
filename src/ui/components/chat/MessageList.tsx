@@ -551,9 +551,41 @@ export default function MessageList() {
           
           <div className="w-full max-w-4xl">
             <ToolsGrid 
-              onToolSelect={(tool) => {
-                // Вставляем команду инструмента в чат
-                sendUserMessage(tool.command, undefined, undefined, undefined, [], false);
+              onToolSelect={async (tool) => {
+                // Если инструмент требует контекст страницы, автоматически включаем его
+                let pageContext: string | undefined;
+                if (tool.requiresPageContext) {
+                  try {
+                    // Получаем текущую вкладку
+                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                    if (tab?.id) {
+                      // Получаем контекст страницы
+                      const response = await chrome.tabs.sendMessage(tab.id, {
+                        type: 'GET_PAGE_CONTEXT',
+                        data: { type: 'text' }
+                      });
+                      // Обрабатываем ответ - может быть строкой или объектом с полем content
+                      if (typeof response === 'string') {
+                        pageContext = response;
+                      } else if (response?.content) {
+                        pageContext = response.content;
+                      } else if (response) {
+                        // Если ответ - объект, пробуем stringify
+                        pageContext = typeof response === 'object' ? JSON.stringify(response) : String(response);
+                      }
+                      console.log('[MessageList] Page context retrieved for tool:', { 
+                        toolId: tool.id, 
+                        length: pageContext?.length,
+                        type: typeof pageContext 
+                      });
+                    }
+                  } catch (error) {
+                    console.error('[MessageList] Error getting page context for tool:', error);
+                  }
+                }
+                
+                // Вставляем команду инструмента в чат с контекстом если нужен
+                sendUserMessage(tool.command, pageContext, undefined, undefined, [], false);
               }} 
             />
           </div>

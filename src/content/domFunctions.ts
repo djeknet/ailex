@@ -119,6 +119,64 @@ export function focusElement(selector: string): boolean {
   }
 }
 
+export function setCheckbox(selector: string, checked: boolean): boolean {
+  try {
+    const element = document.querySelector(selector) as HTMLInputElement;
+    
+    if (!element || element.type !== 'checkbox') {
+      throw new Error('Checkbox element not found');
+    }
+    
+    if (element.checked !== checked) {
+      element.checked = checked;
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+      element.dispatchEvent(new Event('click', { bubbles: true }));
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in setCheckbox:', error);
+    return false;
+  }
+}
+
+export function submitForm(selector?: string): boolean {
+  try {
+    let form: HTMLFormElement | null = null;
+    
+    if (selector) {
+      form = document.querySelector(selector) as HTMLFormElement;
+    } else {
+      // Try to find any form on the page
+      form = document.querySelector('form') as HTMLFormElement;
+    }
+    
+    if (!form || form.tagName !== 'FORM') {
+      throw new Error('Form element not found');
+    }
+    
+    // Try to find and click submit button first (more reliable)
+    const submitButton = form.querySelector('button[type="submit"], input[type="submit"]') as HTMLElement;
+    if (submitButton) {
+      submitButton.click();
+      return true;
+    }
+    
+    // Fallback to form.submit()
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    const shouldSubmit = form.dispatchEvent(submitEvent);
+    
+    if (shouldSubmit) {
+      form.submit();
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in submitForm:', error);
+    return false;
+  }
+}
+
 export function hoverElement(selector: string): boolean {
   try {
     const element = document.querySelector(selector) as HTMLElement;

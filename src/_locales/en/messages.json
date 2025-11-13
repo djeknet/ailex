@@ -30,7 +30,7 @@
     "message": "Send"
   },
   "messageInputPlaceholder": {
-    "message": "Type your message..."
+    "message": "Type your message or select a command via /"
   },
   "operators": {
     "message": "Operators"
@@ -1387,6 +1387,225 @@
   },
   "contextMenu_findQuoteSource_prompt": {
     "message": "Find the original source or author of this quote:"
+  },
+  "toolsPageTitle": {
+    "message": "Tools"
+  },
+  "toolsPageDescription": {
+    "message": "Manage built-in and custom tools"
+  },
+  "createTool": {
+    "message": "Create Tool"
+  },
+  "builtInTools": {
+    "message": "Built-in Tools"
+  },
+  "customTools": {
+    "message": "Custom Tools"
+  },
+  "noCustomTools": {
+    "message": "No custom tools"
+  },
+  "createFirstTool": {
+    "message": "Create first tool"
+  },
+  "editTool": {
+    "message": "Edit Tool"
+  },
+  "createToolDescription": {
+    "message": "Fill out the form to create a custom tool"
+  },
+  "toolName": {
+    "message": "Name"
+  },
+  "toolNameRequired": {
+    "message": "Name *"
+  },
+  "toolNamePlaceholder": {
+    "message": "Tool name"
+  },
+  "toolDescription": {
+    "message": "Description"
+  },
+  "toolDescriptionRequired": {
+    "message": "Description *"
+  },
+  "toolDescriptionPlaceholder": {
+    "message": "Brief description of functionality"
+  },
+  "toolIcon": {
+    "message": "Icon"
+  },
+  "toolCommand": {
+    "message": "Command"
+  },
+  "toolCommandRequired": {
+    "message": "Command *"
+  },
+  "toolCommandPlaceholder": {
+    "message": "/mycommand"
+  },
+  "toolCommandNote": {
+    "message": "Starts with /"
+  },
+  "toolUrlPattern": {
+    "message": "URL pattern (optional)"
+  },
+  "toolUrlPatternPlaceholder": {
+    "message": "https://example.com/"
+  },
+  "toolUrlPatternNote": {
+    "message": "Tool will only be available on pages starting with this URL"
+  },
+  "toolPrompt": {
+    "message": "AI Prompt"
+  },
+  "toolPromptRequired": {
+    "message": "AI Prompt *"
+  },
+  "toolPromptPlaceholder": {
+    "message": "Instruction for AI on what to do..."
+  },
+  "toolPromptNote": {
+    "message": "This prompt will be sent to AI when the tool is invoked"
+  },
+  "deleteToolConfirm": {
+    "message": "Are you sure you want to delete this tool?"
+  },
+  "fillPersonalInfo": {
+    "message": "Fill in personal information in settings"
+  },
+  "fillPersonalInfoTooltip": {
+    "message": "Fill in personal information in extension settings for this feature"
+  },
+  "tool_fillForm": {
+    "message": "Fill Form"
+  },
+  "tool_fillForm_desc": {
+    "message": "Automatically fills form on the page. This tool serves as entry point for /fillform command."
+  },
+  "tool_getFormFields": {
+    "message": "Get Form Fields"
+  },
+  "tool_getFormFields_desc": {
+    "message": "Gets list of all form fields on the page with their metadata (id, name, type, label, placeholder, required). Use this tool FIRST before filling the form."
+  },
+  "tool_fillFormFields": {
+    "message": "Fill Form Fields"
+  },
+  "tool_fillFormFields_desc": {
+    "message": "Fills specific form fields with provided values. IMPORTANT: fieldsToFill parameter must contain an object where keys are id or name of fields from get-form-fields, and values are data to fill from availableUserInfo."
+  },
+  "tool_summarize": {
+    "message": "Page Summary"
+  },
+  "tool_summarize_desc": {
+    "message": "Gets text content of the current page to create a summary"
+  },
+  "tool_collectContacts": {
+    "message": "Collect Contacts"
+  },
+  "tool_collectContacts_desc": {
+    "message": "IMPORTANT: First MUST ask the user: 1) What type of contacts to collect (all/email/phone/telegram)? 2) What format to return (text/json/csv)? Only after receiving answers call this tool with specified parameters."
+  },
+  "formFieldsNotFound": {
+    "message": "No form fields found on the page."
+  },
+  "formFieldsNextStep": {
+    "message": "NEXT STEP: Call fill-form-fields with fieldsToFill parameter. Create a mapping object of fields and user data. Example: {example}"
+  },
+  "formFieldsNotSpecified": {
+    "message": "No fields specified for filling"
+  },
+  "formFillSuccess": {
+    "message": "Form successfully filled. Filled fields: {filled} of {total}"
+  },
+  "formFillError": {
+    "message": "Error filling form"
+  },
+  "formFillFailed": {
+    "message": "Failed to fill form"
+  },
+  "unknownError": {
+    "message": "Unknown error"
+  },
+  "createPageSummary": {
+    "message": "Create a summary of this page."
+  },
+  "contactsNotFound": {
+    "message": "No contacts found on the page"
+  },
+  "contactsFound": {
+    "message": "Contacts found: {count}"
+  },
+  "pageContentNotAvailable": {
+    "message": "Page contains no text content or content is unavailable."
+  },
+  "pageContentForSummary": {
+    "message": "Page content for summary:"
+  },
+  "errorGettingPageContent": {
+    "message": "Error getting page content"
+  },
+  "contactsNotFoundType": {
+    "message": "No contacts of type {type} found on the page. Check that the page contains contact information."
+  },
+  "contactsFoundCount": {
+    "message": "Contacts found: {count}"
+  },
+  "errorCollectingContacts": {
+    "message": "Error collecting contacts"
+  },
+  "tool_setCheckbox": {
+    "message": "Set Checkbox"
+  },
+  "tool_setCheckbox_desc": {
+    "message": "Check or uncheck a checkbox on the page"
+  },
+  "tool_submitForm": {
+    "message": "Submit Form"
+  },
+  "tool_submitForm_desc": {
+    "message": "Submit a form by clicking the submit button"
+  },
+  "checked": {
+    "message": "checked"
+  },
+  "unchecked": {
+    "message": "unchecked"
+  },
+  "checkboxSuccess": {
+    "message": "Checkbox {action}: {selector}"
+  },
+  "checkboxNotFound": {
+    "message": "Checkbox not found: {selector}"
+  },
+  "checkboxError": {
+    "message": "Error working with checkbox"
+  },
+  "formSubmitSuccess": {
+    "message": "Form submitted successfully"
+  },
+  "formNotFound": {
+    "message": "Form not found on the page"
+  },
+  "formSubmitError": {
+    "message": "Error submitting form"
+  },
+  "availableTools": {
+    "message": "Available Tools"
+  },
+  "toolsNavigation": {
+    "message": "↑↓ Navigation"
+  },
+  "toolsSelect": {
+    "message": "Enter/Tab Select"
+  },
+  "tool_noAvailable": {
+    "message": "No available tools"
+  },
+  "requiresPersonalInfo": {
+    "message": "requires personal information"
   }
 }
 

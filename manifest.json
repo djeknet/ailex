@@ -53,7 +53,6 @@
     "sidePanel",
     "unlimitedStorage",
     "scripting",
-    "microphone",
     "contextMenus"
   ],
   "host_permissions": [

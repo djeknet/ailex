@@ -6,12 +6,10 @@ import { Button } from '@/ui/components/ui/button';
 import { Input } from '@/ui/components/ui/input';
 import { Label } from '@/ui/components/ui/label';
 import { Textarea } from '@/ui/components/ui/textarea';
-import { Switch } from '@/ui/components/ui/switch';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/ui/components/ui/card';
@@ -22,10 +20,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/ui/components/ui/dialog';
-import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, FileText, Mail, Edit3, ClipboardList, LucideIcon, Wrench } from 'lucide-react';
 import { Alert, AlertDescription } from '@/ui/components/ui/alert';
+
+const toolIconMap: Record<string, { icon: LucideIcon; color: string }> = {
+  'summarize': { icon: FileText, color: 'text-blue-500' },
+  'collect-contacts': { icon: Mail, color: 'text-green-500' },
+  'fill-form': { icon: Edit3, color: 'text-orange-500' },
+  'get-form-fields': { icon: ClipboardList, color: 'text-purple-500' },
+  'fill-form-fields': { icon: Edit3, color: 'text-amber-500' },
+};
 
 export default function Tools() {
   const { t } = useTranslation();
@@ -114,27 +119,23 @@ export default function Tools() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Вы уверены, что хотите удалить этот инструмент?')) {
+    if (confirm(t('deleteToolConfirm'))) {
       await deleteCustomTool(id);
     }
   };
 
-  const handleToggleEnabled = async (tool: CustomTool) => {
-    await updateCustomTool(tool.id, { enabled: !tool.enabled });
-  };
-
-  const builtInTools = availableTools.filter(t => t.isBuiltIn);
+  const builtInTools = availableTools.filter(t => t.isBuiltIn && !t.hiddenFromUI);
 
   return (
     <div className="flex flex-col h-full p-4 overflow-auto">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Инструменты</h1>
-          <p className="text-muted-foreground">Управление встроенными и пользовательскими инструментами</p>
+          <h1 className="text-2xl font-bold">{t('toolsPageTitle')}</h1>
+          <p className="text-muted-foreground">{t('toolsPageDescription')}</p>
         </div>
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Создать инструмент
+          {t('createTool')}
         </Button>
       </div>
 
@@ -146,93 +147,82 @@ export default function Tools() {
 
       {/* Built-in Tools */}
       <section className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Встроенные инструменты</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {builtInTools.map(tool => (
-            <Card key={tool.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{tool.icon}</span>
-                    <CardTitle className="text-lg">{tool.name}</CardTitle>
+        <h2 className="text-xl font-semibold mb-4">{t('builtInTools')}</h2>
+        <div className="flex flex-wrap gap-2">
+          {builtInTools.map(tool => {
+            const iconConfig = toolIconMap[tool.id] || { icon: Wrench, color: 'text-gray-500' };
+            const IconComponent = iconConfig.icon;
+            const toolName = tool.nameKey ? t(tool.nameKey) : tool.name;
+            
+            return (
+              <Card key={tool.id} className="w-auto inline-flex">
+                <CardHeader className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`${iconConfig.color}`}>
+                      <IconComponent className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">{toolName}</CardTitle>
+                      <CardDescription className="text-xs mt-1">
+                        <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{tool.command}</code>
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
-                <CardDescription>{tool.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground">
-                  <div>Команда: <code className="bg-muted px-1.5 py-0.5 rounded">{tool.command}</code></div>
-                  {tool.urlPattern && (
-                    <div className="mt-1">URL: {tool.urlPattern}</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
       {/* Custom Tools */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Пользовательские инструменты</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('customTools')}</h2>
         {customTools.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">Нет пользовательских инструментов</p>
+              <p className="text-muted-foreground mb-4">{t('noCustomTools')}</p>
               <Button onClick={() => handleOpenDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
-                Создать первый инструмент
+                {t('createFirstTool')}
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex flex-wrap gap-2">
             {customTools.map(tool => (
-              <Card key={tool.id} className={!tool.enabled ? 'opacity-60' : ''}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{tool.icon}</span>
-                      <CardTitle className="text-lg">{tool.name}</CardTitle>
+              <Card key={tool.id} className={`w-auto inline-flex ${!tool.enabled ? 'opacity-60' : ''}`}>
+                <CardHeader className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="text-gray-600">
+                      <Wrench className="h-5 w-5" />
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex-1">
+                      <CardTitle className="text-base">{tool.name}</CardTitle>
+                      <CardDescription className="text-xs mt-1">
+                        <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{tool.command}</code>
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-1 ml-2">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={() => handleOpenDialog(tool)}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={() => handleDelete(tool.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
-                  <CardDescription>{tool.description}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <div>Команда: <code className="bg-muted px-1.5 py-0.5 rounded">{tool.command}</code></div>
-                    {tool.urlPattern && (
-                      <div>URL: {tool.urlPattern}</div>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={tool.enabled}
-                      onCheckedChange={() => handleToggleEnabled(tool)}
-                    />
-                    <Label className="text-sm">{tool.enabled ? 'Включен' : 'Выключен'}</Label>
-                  </div>
-                </CardFooter>
               </Card>
             ))}
           </div>
@@ -243,37 +233,37 @@ export default function Tools() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingTool ? 'Редактировать инструмент' : 'Создать инструмент'}</DialogTitle>
+            <DialogTitle>{editingTool ? t('editTool') : t('createTool')}</DialogTitle>
             <DialogDescription>
-              Заполните форму для создания пользовательского инструмента
+              {t('createToolDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Название *</Label>
+              <Label htmlFor="name">{t('toolNameRequired')}</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Название инструмента"
+                placeholder={t('toolNamePlaceholder')}
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="description">Описание *</Label>
+              <Label htmlFor="description">{t('toolDescriptionRequired')}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Краткое описание функционала"
+                placeholder={t('toolDescriptionPlaceholder')}
                 rows={2}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="icon">Иконка</Label>
+                <Label htmlFor="icon">{t('toolIcon')}</Label>
                 <Input
                   id="icon"
                   value={formData.icon}
@@ -284,41 +274,41 @@ export default function Tools() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="command">Команда *</Label>
+                <Label htmlFor="command">{t('toolCommandRequired')}</Label>
                 <Input
                   id="command"
                   value={formData.command}
                   onChange={(e) => setFormData({ ...formData, command: e.target.value })}
-                  placeholder="/mycommand"
+                  placeholder={t('toolCommandPlaceholder')}
                 />
-                <p className="text-xs text-muted-foreground">Начинается с /</p>
+                <p className="text-xs text-muted-foreground">{t('toolCommandNote')}</p>
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="urlPattern">URL паттерн (опционально)</Label>
+              <Label htmlFor="urlPattern">{t('toolUrlPattern')}</Label>
               <Input
                 id="urlPattern"
                 value={formData.urlPattern}
                 onChange={(e) => setFormData({ ...formData, urlPattern: e.target.value })}
-                placeholder="https://example.com/"
+                placeholder={t('toolUrlPatternPlaceholder')}
               />
               <p className="text-xs text-muted-foreground">
-                Инструмент будет доступен только на страницах, начинающихся с этого URL
+                {t('toolUrlPatternNote')}
               </p>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="prompt">Промпт для AI *</Label>
+              <Label htmlFor="prompt">{t('toolPromptRequired')}</Label>
               <Textarea
                 id="prompt"
                 value={formData.prompt}
                 onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
-                placeholder="Инструкция для AI о том, что нужно сделать..."
+                placeholder={t('toolPromptPlaceholder')}
                 rows={6}
               />
               <p className="text-xs text-muted-foreground">
-                Этот промпт будет отправлен AI при вызове инструмента
+                {t('toolPromptNote')}
               </p>
             </div>
 
@@ -332,14 +322,14 @@ export default function Tools() {
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseDialog}>
               <X className="mr-2 h-4 w-4" />
-              Отмена
+              {t('cancel')}
             </Button>
             <Button 
               onClick={handleSave} 
               disabled={!formData.name || !formData.description || !formData.command || !formData.prompt || isLoading}
             >
               <Save className="mr-2 h-4 w-4" />
-              {editingTool ? 'Сохранить' : 'Создать'}
+              {editingTool ? t('save') : t('create')}
             </Button>
           </DialogFooter>
         </DialogContent>

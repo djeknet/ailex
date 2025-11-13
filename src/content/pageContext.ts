@@ -81,11 +81,31 @@ function extractTextContent(): string {
   
   // Try to extract main content first
   const mainContent = clone.querySelector('main, article, [role="main"], .main-content, #content, #main');
+  let rawText = '';
+  
   if (mainContent) {
-    return (mainContent as HTMLElement).innerText || (mainContent as HTMLElement).textContent || '';
+    rawText = (mainContent as HTMLElement).innerText || (mainContent as HTMLElement).textContent || '';
+  } else {
+    rawText = clone.innerText || clone.textContent || '';
   }
   
-  return clone.innerText || clone.textContent || '';
+  // Clean up the text:
+  // 1. Remove multiple consecutive blank lines (more than 2 newlines in a row)
+  rawText = rawText.replace(/\n{3,}/g, '\n\n');
+  
+  // 2. Remove lines that contain only whitespace
+  rawText = rawText.split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('\n');
+  
+  // 3. Collapse multiple spaces into single space
+  rawText = rawText.replace(/ {2,}/g, ' ');
+  
+  // 4. Remove excessive newlines again after trimming
+  rawText = rawText.replace(/\n{2,}/g, '\n\n');
+  
+  return rawText.trim();
 }
 
 // Extract full DOM structure (simplified)

@@ -1,25 +1,29 @@
 import { Tool } from '@shared/types/tools';
+import { getTranslation } from '@shared/i18n/useTranslation';
 
 export const collectContactsTool: Tool = {
   id: 'collect-contacts',
-  name: 'Собрать контакты',
-  description: 'ВАЖНО: Сначала ОБЯЗАТЕЛЬНО уточни у пользователя: 1) Какой тип контактов собрать (all/email/phone/telegram)? 2) В каком формате вернуть (text/json/csv)? Только после получения ответов вызывай этот инструмент с указанными параметрами.',
+  name: 'Collect contacts',
+  description: 'Collect contacts from a page',
+  nameKey: 'tool_collectContacts',
+  descriptionKey: 'tool_collectContacts_desc',
   icon: '📧',
   command: '/contacts',
   urlPattern: undefined, // Работает на всех сайтах
   isBuiltIn: true,
+  systemInstructions: 'IMPORTANT: First, you MUST ask the user: 1) What type of contacts to collect (all/email/phone/telegram)? 2) In what format to return (text/json/csv)? Only after receiving the answers, call this tool with the specified parameters. When you receive the result from the tool, return it AS IS without any modifications or reformatting - the result is already properly formatted with markdown code blocks.',
   
   parameters: {
     type: 'object',
     properties: {
       contactType: {
         type: 'string',
-        description: 'Тип контактов для сбора. Пользователь ДОЛЖЕН указать явно',
+        description: 'The type of contacts to collect. The user MUST specify explicitly.',
         enum: ['all', 'email', 'phone', 'telegram']
       },
       format: {
         type: 'string',
-        description: 'Формат вывода. Пользователь ДОЛЖЕН указать явно',
+        description: 'The format to return the contacts in. The user MUST specify explicitly.',
         enum: ['text', 'json', 'csv']
       }
     },
@@ -39,7 +43,7 @@ export const collectContactsTool: Tool = {
       console.log('[collectContacts] Page content preview:', pageContent?.substring(0, 200));
 
       if (!pageContent || typeof pageContent !== 'string' || pageContent.trim().length === 0) {
-        return 'Страница не содержит текстового контента или контент недоступен.';
+        return getTranslation('pageContentNotAvailable');
       }
 
       const contactType = params.contactType || 'all';
@@ -54,16 +58,17 @@ export const collectContactsTool: Tool = {
       console.log('[collectContacts] Total count:', totalCount);
 
       if (totalCount === 0) {
-        return `На странице не найдено контактов типа: ${contactType}. Проверьте, что страница содержит контактную информацию.`;
+        return getTranslation('contactsNotFoundType').replace('{type}', contactType);
       }
 
       // Format results
       const formattedResult = formatContacts(contacts, format);
 
-      return `Найдено контактов: ${totalCount}\n\n${formattedResult}`;
+      return `${getTranslation('contactsFoundCount').replace('{count}', totalCount.toString())}\n\n${formattedResult}`;
     } catch (error) {
       console.error('Error in collect contacts tool:', error);
-      return `Ошибка при сборе контактов: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      const errorMsg = error instanceof Error ? error.message : getTranslation('unknownError');
+      return `${getTranslation('errorCollectingContacts')}: ${errorMsg}`;
     }
   }
 };
@@ -111,10 +116,12 @@ function extractContacts(content: string, type: string) {
 
 function formatContacts(contacts: any, format: string): string {
   if (format === 'json') {
-    return JSON.stringify(contacts, null, 2);
+    // Wrap JSON in markdown code block
+    return '```json\n' + JSON.stringify(contacts, null, 2) + '\n```';
   }
 
   if (format === 'csv') {
+    // Wrap CSV in markdown code block
     let csv = 'Type,Value\n';
     contacts.emails?.forEach((email: string) => {
       csv += `Email,${email}\n`;
@@ -125,19 +132,31 @@ function formatContacts(contacts: any, format: string): string {
     contacts.telegrams?.forEach((telegram: string) => {
       csv += `Telegram,@${telegram}\n`;
     });
-    return csv;
+    return '```csv\n' + csv + '```';
   }
 
-  // text format
+  // text format - use markdown list
   let text = '';
   if (contacts.emails?.length > 0) {
-    text += 'Emails:\n' + contacts.emails.join('\n') + '\n\n';
+    text += '**Emails:**\n';
+    contacts.emails.forEach((email: string) => {
+      text += `- ${email}\n`;
+    });
+    text += '\n';
   }
   if (contacts.phones?.length > 0) {
-    text += 'Phones:\n' + contacts.phones.join('\n') + '\n\n';
+    text += '**Phones:**\n';
+    contacts.phones.forEach((phone: string) => {
+      text += `- ${phone}\n`;
+    });
+    text += '\n';
   }
   if (contacts.telegrams?.length > 0) {
-    text += 'Telegram:\n' + contacts.telegrams.map((t: string) => '@' + t).join('\n') + '\n\n';
+    text += '**Telegram:**\n';
+    contacts.telegrams.forEach((t: string) => {
+      text += `- @${t}\n`;
+    });
+    text += '\n';
   }
   return text;
 }

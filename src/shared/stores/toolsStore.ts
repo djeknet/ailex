@@ -70,11 +70,14 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
   getFilteredTools: () => {
     const { availableTools, currentUrl } = get();
     
+    // Фильтруем скрытые инструменты для UI
+    let filtered = availableTools.filter(tool => !tool.hiddenFromUI);
+    
     if (!currentUrl) {
-      return availableTools;
+      return filtered;
     }
     
-    return toolsService.filterToolsByUrl(availableTools, currentUrl);
+    return toolsService.filterToolsByUrl(filtered, currentUrl);
   },
   
   // Add execution

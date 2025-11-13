@@ -8,7 +8,12 @@ export interface Tool {
   isBuiltIn: boolean; // Встроенный или пользовательский
   execute: (params: any) => Promise<any>;
   requiresPersonalInfo?: boolean;
+  requiresPageContext?: boolean; // Автоматически включает передачу контекста страницы
   parameters?: ToolParameters; // JSON Schema параметров для AI
+  hiddenFromUI?: boolean; // Скрыть из UI (инструмент доступен только для AI)
+  nameKey?: string; // Ключ локализации для name
+  descriptionKey?: string; // Ключ локализации для description
+  systemInstructions?: string; // Дополнительные инструкции для AI при вызове этого инструмента
 }
 
 export interface ToolRegistry {

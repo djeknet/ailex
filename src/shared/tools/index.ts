@@ -2,13 +2,17 @@ import { Tool, ToolRegistry } from '@shared/types/tools';
 import { summarizeTool } from './summarize';
 import { collectContactsTool } from './collectContacts';
 import { fillFormTool, getFormFieldsTool, fillFormFieldsTool } from './fillForm';
+import { setCheckboxTool, submitFormTool } from './formActions';
+import { getTranslation } from '@shared/i18n/useTranslation';
 
 export const toolRegistry: ToolRegistry = {
   [summarizeTool.id]: summarizeTool,
   [collectContactsTool.id]: collectContactsTool,
   [fillFormTool.id]: fillFormTool,
   [getFormFieldsTool.id]: getFormFieldsTool,
-  [fillFormFieldsTool.id]: fillFormFieldsTool
+  [fillFormFieldsTool.id]: fillFormFieldsTool,
+  [setCheckboxTool.id]: setCheckboxTool,
+  [submitFormTool.id]: submitFormTool
 };
 
 export function getTool(id: string): Tool | undefined {
@@ -26,7 +30,7 @@ export function getToolsDescriptions(): string {
   return tools.map(tool => {
     let desc = `- ${tool.name}: ${tool.description}`;
     if (tool.requiresPersonalInfo) {
-      desc += ' (требуется личная информация)';
+      desc += ` (${getTranslation('requiresPersonalInfo')})`;
     }
     return desc;
   }).join('\n');

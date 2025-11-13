@@ -1,5 +1,6 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, OpenAIWebSearchSettings, Citation } from '@shared/types/ai';
+import { AIMessage, AIResponse, OpenAIWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
 export class OpenAIProvider implements AIProvider {
@@ -11,7 +12,9 @@ export class OpenAIProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     webSearchSettings?: OpenAIWebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.openai.com/v1';
     
@@ -23,9 +26,9 @@ export class OpenAIProvider implements AIProvider {
     
     // Use new /responses API for documents and web search
     if (hasDocuments || webSearchEnabled) {
-      return this.chatWithResponses(messages, model, apiKey, baseUrl, onChunk, webSearchEnabled, webSearchSettings, signal);
+      return this.chatWithResponses(messages, model, apiKey, baseUrl, onChunk, webSearchEnabled, webSearchSettings, signal, tools, onToolCall);
     } else {
-      return this.chatStandard(messages, model, apiKey, baseUrl, onChunk, signal);
+      return this.chatStandard(messages, model, apiKey, baseUrl, onChunk, signal, tools, onToolCall);
     }
   }
 
@@ -36,9 +39,53 @@ export class OpenAIProvider implements AIProvider {
     apiKey: string,
     baseUrl: string,
     onChunk?: (chunk: string) => void,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     const url = `${baseUrl}/chat/completions`;
+
+    const requestBody: any = {
+      model,
+      messages: messages.map(msg => {
+        // OpenAI supports content as string or array (multimodal)
+        let content = msg.content;
+        
+        // If content is array, ensure proper format
+        if (Array.isArray(msg.content)) {
+          content = msg.content.map(item => {
+            if (item.type === 'text') {
+              return { type: 'text', text: item.text || '' };
+            } else if (item.type === 'image_url' && item.image_url) {
+              return {
+                type: 'image_url',
+                image_url: item.image_url
+              };
+            }
+            return item;
+          });
+        }
+        
+        return {
+          role: msg.role,
+          content,
+          ...(msg.tool_calls ? { tool_calls: msg.tool_calls } : {}),
+          ...(msg.tool_call_id ? { tool_call_id: msg.tool_call_id } : {}),
+          ...(msg.name ? { name: msg.name } : {})
+        };
+      }),
+      stream: !!onChunk,
+      // Enable token usage in streaming mode
+      ...(onChunk && { stream_options: { include_usage: true } })
+    };
+
+    // Add tools if provided
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools;
+      console.log('[OpenAI] Added tools:', tools.length);
+    }
+
+    console.log('[OpenAI] Request body:', JSON.stringify(requestBody, null, 2));
 
     const response = await loggedFetch(url, {
       method: 'POST',
@@ -47,36 +94,7 @@ export class OpenAIProvider implements AIProvider {
         'Authorization': `Bearer ${apiKey}`
       },
       signal,
-      body: JSON.stringify({
-        model,
-        messages: messages.map(msg => {
-          // OpenAI supports content as string or array (multimodal)
-          let content = msg.content;
-          
-          // If content is array, ensure proper format
-          if (Array.isArray(msg.content)) {
-            content = msg.content.map(item => {
-              if (item.type === 'text') {
-                return { type: 'text', text: item.text || '' };
-              } else if (item.type === 'image_url' && item.image_url) {
-                return {
-                  type: 'image_url',
-                  image_url: item.image_url
-                };
-              }
-              return item;
-            });
-          }
-          
-          return {
-            role: msg.role,
-            content
-          };
-        }),
-        stream: !!onChunk,
-        // Enable token usage in streaming mode
-        ...(onChunk && { stream_options: { include_usage: true } })
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -92,6 +110,9 @@ export class OpenAIProvider implements AIProvider {
       let totalTokens = 0;
       let inputTokens = 0;
       let outputTokens = 0;
+      const toolCalls: ToolCall[] = [];
+      let currentToolCallIndex = -1;
+      let currentToolCall: any = {};
 
       try {
         while (true) {
@@ -108,11 +129,43 @@ export class OpenAIProvider implements AIProvider {
 
               try {
                 const json = JSON.parse(data);
-                const content = json.choices[0]?.delta?.content;
+                const delta = json.choices[0]?.delta;
                 
-                if (content) {
-                  fullContent += content;
-                  onChunk(content);
+                // Handle regular content
+                if (delta?.content) {
+                  fullContent += delta.content;
+                  onChunk(delta.content);
+                }
+
+                // Handle tool calls
+                if (delta?.tool_calls) {
+                  delta.tool_calls.forEach((tc: any) => {
+                    const index = tc.index;
+                    
+                    if (index > currentToolCallIndex) {
+                      // New tool call
+                      if (currentToolCallIndex >= 0) {
+                        toolCalls.push(currentToolCall as ToolCall);
+                      }
+                      currentToolCallIndex = index;
+                      currentToolCall = {
+                        id: tc.id || `call_${Date.now()}_${index}`,
+                        type: 'function',
+                        function: {
+                          name: tc.function?.name || '',
+                          arguments: tc.function?.arguments || ''
+                        }
+                      };
+                    } else {
+                      // Continue existing tool call
+                      if (tc.function?.name) {
+                        currentToolCall.function.name += tc.function.name;
+                      }
+                      if (tc.function?.arguments) {
+                        currentToolCall.function.arguments += tc.function.arguments;
+                      }
+                    }
+                  });
                 }
 
                 if (json.usage) {
@@ -125,8 +178,16 @@ export class OpenAIProvider implements AIProvider {
                     output: outputTokens
                   });
                 }
+
+                // Check finish reason
+                if (json.choices[0]?.finish_reason === 'tool_calls') {
+                  // Save last tool call
+                  if (currentToolCallIndex >= 0) {
+                    toolCalls.push(currentToolCall as ToolCall);
+                  }
+                }
               } catch (e) {
-                console.error('Error parsing streaming response:', e);
+                console.error('[OpenAI] Error parsing streaming response:', e);
               }
             }
           }
@@ -135,6 +196,12 @@ export class OpenAIProvider implements AIProvider {
         reader.releaseLock();
       }
 
+      console.log('[OpenAI] Streaming completed', {
+        contentLength: fullContent.length,
+        totalTokens,
+        toolCallsCount: toolCalls.length
+      });
+
       return {
         content: fullContent,
         tokens: totalTokens > 0 ? {
@@ -142,6 +209,8 @@ export class OpenAIProvider implements AIProvider {
           input: inputTokens,
           output: outputTokens
         } : undefined,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'openai'
       };
@@ -149,13 +218,18 @@ export class OpenAIProvider implements AIProvider {
       // Non-streaming response
       const data = await response.json();
       console.log('[OpenAI] Non-streaming response tokens:', data.usage);
+      
+      const message = data.choices[0]?.message;
+      
       return {
-        content: data.choices[0].message.content,
+        content: message?.content || '',
         tokens: data.usage ? {
           total: data.usage.total_tokens,
           input: data.usage.prompt_tokens,
           output: data.usage.completion_tokens
         } : undefined,
+        tool_calls: message?.tool_calls || undefined,
+        finish_reason: data.choices[0]?.finish_reason || 'stop',
         model,
         operator: 'openai'
       };
@@ -171,7 +245,9 @@ export class OpenAIProvider implements AIProvider {
     _onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     webSearchSettings?: OpenAIWebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     const url = `${baseUrl}/responses`;
     
@@ -184,12 +260,18 @@ export class OpenAIProvider implements AIProvider {
       if (typeof msg.content === 'string') {
         return {
           role: msg.role,
-          content: [{ type: 'input_text', text: msg.content }]
+          content: [{ 
+            type: msg.role === 'assistant' ? 'output_text' : 'input_text', 
+            text: msg.content 
+          }]
         };
       } else if (Array.isArray(msg.content)) {
         const content = msg.content.map(item => {
           if (item.type === 'text') {
-            return { type: 'input_text', text: item.text || '' };
+            return { 
+              type: msg.role === 'assistant' ? 'output_text' : 'input_text', 
+              text: item.text || '' 
+            };
           } else if (item.type === 'image_url' && item.image_url) {
             return {
               type: 'input_image',
@@ -216,13 +298,16 @@ export class OpenAIProvider implements AIProvider {
       } else {
         return {
           role: msg.role,
-          content: [{ type: 'input_text', text: String(msg.content) }]
+          content: [{ 
+            type: msg.role === 'assistant' ? 'output_text' : 'input_text', 
+            text: String(msg.content) 
+          }]
         };
       }
     });
 
-    // Build tools array
-    const tools: any[] = [];
+    // Build tools array for Responses API
+    const responsesTools: any[] = [];
     
     if (webSearchEnabled && webSearchSettings) {
       const webSearchTool: any = {
@@ -255,8 +340,14 @@ export class OpenAIProvider implements AIProvider {
         webSearchTool.external_web_access = false;
       }
 
-      tools.push(webSearchTool);
+      responsesTools.push(webSearchTool);
       console.log('[OpenAI] Web search tool configured:', webSearchTool);
+    }
+
+    // Add custom tools if provided
+    if (tools && tools.length > 0) {
+      responsesTools.push(...tools);
+      console.log('[OpenAI] Added custom tools:', tools.length);
     }
 
     const requestBody: any = {
@@ -264,8 +355,8 @@ export class OpenAIProvider implements AIProvider {
       input
     };
 
-    if (tools.length > 0) {
-      requestBody.tools = tools;
+    if (responsesTools.length > 0) {
+      requestBody.tools = responsesTools;
       requestBody.tool_choice = 'auto';
       // Include sources in response
       requestBody.include = ['web_search_call.action.sources'];
