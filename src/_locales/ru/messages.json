@@ -838,6 +838,54 @@
     "message": "Понятно",
     "description": ""
   },
+  "tool_parsePages": {
+    "message": "Парсинг страниц",
+    "description": ""
+  },
+  "tool_parsePages_desc": {
+    "message": "Циклический сбор данных с нескольких страниц",
+    "description": ""
+  },
+  "tool_findElements": {
+    "message": "Найти элементы",
+    "description": ""
+  },
+  "tool_findElements_desc": {
+    "message": "Автоматический поиск CSS-селектора по описанию",
+    "description": ""
+  },
+  "parsingInProgress": {
+    "message": "Парсинг в процессе...",
+    "description": ""
+  },
+  "parsingPageProgress": {
+    "message": "Страница $1 из $2",
+    "description": ""
+  },
+  "parsingCompleted": {
+    "message": "Парсинг завершен: $1 страниц, $2 элементов",
+    "description": ""
+  },
+  "parsingPaused": {
+    "message": "Парсинг приостановлен. Продолжить?",
+    "description": ""
+  },
+  "parsingContinuePrompt": {
+    "message": "Обработано $1 страниц. Продолжить парсинг?",
+    "description": ""
+  },
+  "stopParsing": {
+    "message": "Остановить парсинг",
+    "description": ""
+  },
+  "selectorFound": {
+    "message": "Найден селектор: $1 ($2 элементов)",
+    "description": ""
+  },
+  "createPageSummary": {
+    "message": "Создайте краткое содержание страницы на основе предоставленного контекста",
+    "description": ""
+  },
   "enterNewChatName": {
     "message": "Введите новое имя чата"
   },
@@ -906,9 +954,6 @@
   },
   "duration": {
     "message": "Длительность"
-  },
-  "error": {
-    "message": "Ошибка"
   },
   "enabled": {
     "message": "Включено"
@@ -1582,6 +1627,9 @@
   "formFieldsNotFound": {
     "message": "На странице не найдено полей формы."
   },
+  "formFieldsFound": {
+    "message": "Найдено {count} полей формы. Заполняю..."
+  },
   "formFieldsNextStep": {
     "message": "СЛЕДУЮЩИЙ ШАГ: Вызови fill-form-fields с параметром fieldsToFill. Создай объект сопоставления полей и данных пользователя. Например: {example}"
   },
@@ -1608,9 +1656,6 @@
   },
   "pageContentNotAvailable": {
     "message": "Страница не содержит текстового контента или контент недоступен."
-  },
-  "createPageSummary": {
-    "message": "Создай краткое содержание (саммари) этой страницы."
   },
   "pageContentForSummary": {
     "message": "Контент страницы для саммари:"
@@ -1674,5 +1719,344 @@
   },
   "tool_noAvailable": {
     "message": "Нет доступных инструментов"
+  },
+  "toolApiUrl": {
+    "message": "API URL (опционально)"
+  },
+  "toolApiMethod": {
+    "message": "HTTP метод"
+  },
+  "toolApiHeaders": {
+    "message": "API заголовки (опционально)"
+  },
+  "toolApiUrlPlaceholder": {
+    "message": "https://api.example.com/endpoint"
+  },
+  "toolApiHeadersPlaceholder": {
+    "message": "{\"Authorization\": \"Bearer YOUR_TOKEN\"}"
+  },
+  "toolApiNote": {
+    "message": "Если указан, ИИ будет вызывать этот API и обрабатывать ответ"
+  },
+  "domFunctionsTitle": {
+    "message": "Встроенные DOM функции"
+  },
+  "domFunctionsDescription": {
+    "message": "Список функций для использования в промпте инструмента"
+  },
+  "viewDomFunctions": {
+    "message": "Встроенные функции"
+  },
+  "availableToolsTitle": {
+    "message": "Доступные инструменты для ИИ"
+  },
+  "availableToolsDescription": {
+    "message": "Список AI tools с примерами использования в промптах"
+  },
+  "viewAvailableTools": {
+    "message": "Доступные инструменты"
+  },
+  "examples": {
+    "message": "Примеры"
+  },
+  "toolEnabled": {
+    "message": "Инструмент включён"
+  },
+  "toolEnabledNote": {
+    "message": "Только включённые инструменты доступны для использования"
+  },
+  "errorLoadingTools": {
+    "message": "Не удалось загрузить инструменты"
+  },
+  "errorLoadingCustomTools": {
+    "message": "Не удалось загрузить пользовательские инструменты"
+  },
+  "errorInvalidCommandFormat": {
+    "message": "Неверный формат команды. Команда должна начинаться с / и содержать только строчные буквы, цифры и дефисы."
+  },
+  "errorCommandExists": {
+    "message": "Команда {command} уже существует"
+  },
+  "errorCreatingCustomTool": {
+    "message": "Не удалось создать пользовательский инструмент"
+  },
+  "errorUpdatingCustomTool": {
+    "message": "Не удалось обновить пользовательский инструмент"
+  },
+  "errorDeletingCustomTool": {
+    "message": "Не удалось удалить пользовательский инструмент"
+  },
+  "searchDomFunctions": {
+    "message": "Поиск функций..."
+  },
+  "domCategory_navigation": {
+    "message": "Навигация и DOM"
+  },
+  "domCategory_getData": {
+    "message": "Получение данных"
+  },
+  "domCategory_manipulation": {
+    "message": "Манипуляция DOM"
+  },
+  "domCategory_scrolling": {
+    "message": "Скроллинг"
+  },
+  "domCategory_utilities": {
+    "message": "Утилиты"
+  },
+  "domFunc_getElements": {
+    "message": "Получить элементы по selector"
+  },
+  "domFunc_clickElement": {
+    "message": "Кликнуть элемент"
+  },
+  "domFunc_setValue": {
+    "message": "Установить значение input/textarea"
+  },
+  "domFunc_selectOption": {
+    "message": "Выбрать опцию в select"
+  },
+  "domFunc_focusElement": {
+    "message": "Фокус на элемент"
+  },
+  "domFunc_setCheckbox": {
+    "message": "Установить чекбокс"
+  },
+  "domFunc_submitForm": {
+    "message": "Отправить форму"
+  },
+  "domFunc_hoverElement": {
+    "message": "Hover на элемент"
+  },
+  "domFunc_scrollToElement": {
+    "message": "Скролл к элементу"
+  },
+  "domFunc_getCurrentUrl": {
+    "message": "Получить текущий URL"
+  },
+  "domFunc_getPageMetadata": {
+    "message": "Получить метаданные страницы"
+  },
+  "domFunc_waitForPageLoad": {
+    "message": "Ждать загрузки страницы"
+  },
+  "domFunc_getSimplifiedHTML": {
+    "message": "Получить упрощенный HTML"
+  },
+  "domFunc_getLinks": {
+    "message": "Получить ссылки"
+  },
+  "domFunc_getText": {
+    "message": "Получить текст страницы"
+  },
+  "domFunc_getHTML": {
+    "message": "Получить полный HTML"
+  },
+  "domFunc_getDOMTree": {
+    "message": "Получить дерево DOM"
+  },
+  "domFunc_getMeta": {
+    "message": "Получить мета-теги"
+  },
+  "domFunc_getSelection": {
+    "message": "Получить выделенный текст"
+  },
+  "domFunc_getTableData": {
+    "message": "Получить данные таблицы"
+  },
+  "domFunc_getFormData": {
+    "message": "Получить данные формы"
+  },
+  "domFunc_getFormFields": {
+    "message": "Получить поля формы"
+  },
+  "domFunc_hideElements": {
+    "message": "Скрыть элементы"
+  },
+  "domFunc_addStyles": {
+    "message": "Добавить стили"
+  },
+  "domFunc_replaceStyles": {
+    "message": "Заменить стили"
+  },
+  "domFunc_injectHTML": {
+    "message": "Вставить HTML"
+  },
+  "domFunc_removeElements": {
+    "message": "Удалить элементы"
+  },
+  "domFunc_highlightElements": {
+    "message": "Подсветить элементы"
+  },
+  "domFunc_replaceText": {
+    "message": "Заменить текст"
+  },
+  "domFunc_scrollDown": {
+    "message": "Скролл вниз"
+  },
+  "domFunc_scrollUp": {
+    "message": "Скролл вверх"
+  },
+  "domFunc_scrollToTop": {
+    "message": "Скролл наверх"
+  },
+  "domFunc_scrollToBottom": {
+    "message": "Скролл вниз до конца"
+  },
+  "domFunc_isElementVisible": {
+    "message": "Проверить видимость элемента"
+  },
+  "domFunc_downloadFile": {
+    "message": "Скачать файл"
+  },
+  "domFunc_getImages": {
+    "message": "Получить изображения"
+  },
+  "domFunc_getElementCode": {
+    "message": "Получить код элемента"
+  },
+  "domFunc_getElementPosition": {
+    "message": "Получить позицию элемента"
+  },
+  "domFunc_waitForElement": {
+    "message": "Ждать появления элемента"
+  },
+  "domFunc_executeJS": {
+    "message": "Выполнить JS код"
+  },
+  "domFunc_getViewportInfo": {
+    "message": "Получить информацию о viewport"
+  },
+  "toolCategory_domManipulation": {
+    "message": "Манипуляция DOM"
+  },
+  "toolCategory_formAutomation": {
+    "message": "Автоматизация форм"
+  },
+  "toolCategory_contentAnalysis": {
+    "message": "Анализ контента"
+  },
+  "toolCategory_dataExtraction": {
+    "message": "Извлечение данных"
+  },
+  "toolCategory_elementDiscovery": {
+    "message": "Поиск элементов"
+  },
+  "tool_executeDOMFunction": {
+    "message": "Выполнить DOM функцию"
+  },
+  "tool_executeDOMFunction_desc": {
+    "message": "Выполняет любую DOM функцию на странице для прямых манипуляций с элементами"
+  },
+  "toolExample_setValue_desc": {
+    "message": "Установить значение в поле"
+  },
+  "toolExample_setValue_prompt": {
+    "message": "Вызови execute-dom-function с functionName: \"setValue\" и params: {\"selector\": \"#email\", \"value\": \"test@mail.com\"}"
+  },
+  "toolExample_clickElement_desc": {
+    "message": "Кликнуть по элементу"
+  },
+  "toolExample_clickElement_prompt": {
+    "message": "Вызови execute-dom-function с functionName: \"clickElement\" и params: {\"selector\": \".submit-button\", \"index\": 0}"
+  },
+  "toolExample_getText_desc": {
+    "message": "Получить текст элемента"
+  },
+  "toolExample_getText_prompt": {
+    "message": "Вызови execute-dom-function с functionName: \"getText\" и params: {\"selector\": \".result\"}"
+  },
+  "toolExample_selectOption_desc": {
+    "message": "Выбрать опцию в select"
+  },
+  "toolExample_selectOption_prompt": {
+    "message": "Вызови execute-dom-function с functionName: \"selectOption\" и params: {\"selector\": \"#country\", \"value\": \"USA\"}"
+  },
+  "tool_fillFormFields": {
+    "message": "Заполнить поля формы"
+  },
+  "toolExample_fillMultipleFields_desc": {
+    "message": "Заполнить несколько полей"
+  },
+  "toolExample_fillMultipleFields_prompt": {
+    "message": "Вызови fill-form-fields с fieldsToFill: {\"email\": \"user@mail.com\", \"name\": \"John Doe\", \"phone\": \"+1234567890\"}"
+  },
+  "toolExample_fillSingleField_desc": {
+    "message": "Заполнить одно поле"
+  },
+  "toolExample_fillSingleField_prompt": {
+    "message": "Вызови fill-form-fields с fieldsToFill: {\"lastName\": \"Smith\"}"
+  },
+  "toolExample_getFormFields_desc": {
+    "message": "Получить поля формы"
+  },
+  "toolExample_getFormFields_prompt": {
+    "message": "Вызови get-form-fields чтобы увидеть все поля формы на странице"
+  },
+  "toolExample_checkCheckbox_desc": {
+    "message": "Установить галочку"
+  },
+  "toolExample_checkCheckbox_prompt": {
+    "message": "Вызови set-checkbox с selector: \"#agree\" и checked: true"
+  },
+  "toolExample_uncheckCheckbox_desc": {
+    "message": "Снять галочку"
+  },
+  "toolExample_uncheckCheckbox_prompt": {
+    "message": "Вызови set-checkbox с selector: \".newsletter\" и checked: false"
+  },
+  "toolExample_submitSpecificForm_desc": {
+    "message": "Отправить конкретную форму"
+  },
+  "toolExample_submitSpecificForm_prompt": {
+    "message": "Вызови submit-form с selector: \"#contact-form\""
+  },
+  "toolExample_submitFirstForm_desc": {
+    "message": "Отправить первую форму"
+  },
+  "toolExample_submitFirstForm_prompt": {
+    "message": "Вызови submit-form без параметров для отправки первой формы"
+  },
+  "toolExample_summarize_desc": {
+    "message": "Создать саммари"
+  },
+  "toolExample_summarize_prompt": {
+    "message": "Вызови summarize чтобы создать краткое содержание этой страницы"
+  },
+  "toolExample_collectEmails_desc": {
+    "message": "Собрать все email"
+  },
+  "toolExample_collectEmails_prompt": {
+    "message": "Вызови collect-contacts с contactType: \"email\" и format: \"json\""
+  },
+  "toolExample_collectAllContacts_desc": {
+    "message": "Собрать все контакты"
+  },
+  "toolExample_collectAllContacts_prompt": {
+    "message": "Вызови collect-contacts с contactType: \"all\" и format: \"text\""
+  },
+  "toolExample_findLoginButton_desc": {
+    "message": "Найти кнопку входа"
+  },
+  "toolExample_findLoginButton_prompt": {
+    "message": "Вызови find-elements с description: \"кнопка входа\" или \"login button\""
+  },
+  "toolExample_findEmailField_desc": {
+    "message": "Найти поле email"
+  },
+  "toolExample_findEmailField_prompt": {
+    "message": "Вызови find-elements с description: \"email input field\""
+  },
+  "toolExample_parsePages_desc": {
+    "message": "Парсинг страниц"
+  },
+  "toolExample_parsePages_prompt": {
+    "message": "Используй parse-pages для сбора данных с нескольких страниц. Следуй workflow: init -> get-links -> filter-links -> navigate -> find-elements -> save-selector -> extract-data -> finish"
+  },
+  "selectElementForPrompt": {
+    "message": "Выбрать элемент"
+  },
+  "selectElementNote": {
+    "message": "Кликните на элемент страницы, чтобы вставить его селектор"
   }
 }

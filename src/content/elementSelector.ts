@@ -1,16 +1,120 @@
 // Element selector with visual feedback
 import { getElementXPath, getElementName, getCleanInnerHTML, isElementVisible } from '@shared/utils/domSelector';
 
+// Generate unique CSS selector for an element
+function generateUniqueSelector(element: HTMLElement): string {
+  // Priority 1: ID
+  if (element.id) {
+    const selector = `#${CSS.escape(element.id)}`;
+    if (document.querySelectorAll(selector).length === 1) {
+      return selector;
+    }
+  }
+
+  // Priority 2: Unique attributes
+  const uniqueAttrs = ['data-testid', 'data-test-id', 'data-test', 'data-cy', 'data-qa'];
+  for (const attr of uniqueAttrs) {
+    const value = element.getAttribute(attr);
+    if (value) {
+      const selector = `[${attr}="${CSS.escape(value)}"]`;
+      if (document.querySelectorAll(selector).length === 1) {
+        return selector;
+      }
+    }
+  }
+
+  // name attribute
+  const name = element.getAttribute('name');
+  if (name) {
+    const selector = `${element.tagName.toLowerCase()}[name="${CSS.escape(name)}"]`;
+    if (document.querySelectorAll(selector).length === 1) {
+      return selector;
+    }
+  }
+
+  // type attribute for inputs/buttons
+  const type = element.getAttribute('type');
+  if (type && (element.tagName === 'INPUT' || element.tagName === 'BUTTON')) {
+    const selector = `${element.tagName.toLowerCase()}[type="${CSS.escape(type)}"]`;
+    if (document.querySelectorAll(selector).length === 1) {
+      return selector;
+    }
+  }
+
+  // Priority 3: Class + nth-child
+  if (element.className && typeof element.className === 'string') {
+    const classes = element.className.trim().split(/\s+/).filter(c => c);
+    if (classes.length > 0) {
+      // Try first class
+      const firstClass = classes[0];
+      const classSelector = `.${CSS.escape(firstClass)}`;
+      const matches = document.querySelectorAll(classSelector);
+      
+      if (matches.length === 1) {
+        return classSelector;
+      }
+      
+      // Try class with nth-child
+      const parent = element.parentElement;
+      if (parent) {
+        const siblings = Array.from(parent.children);
+        const index = siblings.indexOf(element) + 1;
+        const selector = `${classSelector}:nth-child(${index})`;
+        if (document.querySelectorAll(selector).length === 1) {
+          return selector;
+        }
+      }
+    }
+  }
+
+  // Priority 4: Path from parent with ID or unique class
+  let current: HTMLElement | null = element;
+  const path: string[] = [];
+  
+  while (current && current !== document.body) {
+    let selector = current.tagName.toLowerCase();
+    
+    // Add nth-child if needed
+    if (current.parentElement) {
+      const siblings = Array.from(current.parentElement.children);
+      const sameTagSiblings = siblings.filter(s => s.tagName === current!.tagName);
+      if (sameTagSiblings.length > 1) {
+        const index = siblings.indexOf(current) + 1;
+        selector += `:nth-child(${index})`;
+      }
+    }
+    
+    path.unshift(selector);
+    
+    // Check if parent has ID - we can stop here
+    if (current.parentElement?.id) {
+      const parentSelector = `#${CSS.escape(current.parentElement.id)}`;
+      const fullSelector = `${parentSelector} > ${path.join(' > ')}`;
+      if (document.querySelectorAll(fullSelector).length === 1) {
+        return fullSelector;
+      }
+    }
+    
+    current = current.parentElement;
+  }
+
+  // Priority 5: Full path with nth-child
+  const fullPath = path.join(' > ');
+  const fullSelector = `body > ${fullPath}`;
+  
+  return fullSelector;
+}
+
 let isActive = false;
 let overlay: HTMLDivElement | null = null;
 let highlightBox: HTMLDivElement | null = null;
 let currentElement: HTMLElement | null = null;
-let onSelectCallback: ((data: { xpath: string; name: string; innerHTML: string }) => void) | null = null;
+let onSelectCallback: ((data: { xpath: string; name: string; innerHTML: string; cssSelector: string }) => void) | null = null;
 let onCancelCallback: (() => void) | null = null;
 
 // Start element selector mode
 export function startElementSelector(
-  onSelect: (data: { xpath: string; name: string; innerHTML: string }) => void,
+  onSelect: (data: { xpath: string; name: string; innerHTML: string; cssSelector: string }) => void,
   onCancel: () => void
 ) {
   if (isActive) return;
@@ -132,8 +236,9 @@ function handleClick(e: MouseEvent) {
     const xpath = getElementXPath(currentElement);
     const name = getElementName(currentElement);
     const innerHTML = getCleanInnerHTML(currentElement);
+    const cssSelector = generateUniqueSelector(currentElement);
     
-    onSelectCallback({ xpath, name, innerHTML });
+    onSelectCallback({ xpath, name, innerHTML, cssSelector });
   }
   
   stopElementSelector();

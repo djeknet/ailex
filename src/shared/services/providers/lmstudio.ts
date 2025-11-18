@@ -1,5 +1,6 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, WebSearchSettings } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
 export class LMStudioProvider implements AIProvider {
@@ -11,7 +12,9 @@ export class LMStudioProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     _webSearchSettings?: WebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     console.log('[LMStudio] chat - Starting');
     console.log('[LMStudio] chat - Model:', model);
@@ -59,12 +62,21 @@ export class LMStudioProvider implements AIProvider {
         
         return {
           role: msg.role,
-          content
+          content,
+          ...(msg.tool_calls ? { tool_calls: msg.tool_calls } : {}),
+          ...(msg.tool_call_id ? { tool_call_id: msg.tool_call_id } : {}),
+          ...(msg.name ? { name: msg.name } : {})
         };
       }),
       stream: !!onChunk,
       temperature: 0.7
     };
+
+    // Add tools if provided
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools;
+      console.log('[LMStudio] chat - Added tools:', tools.length);
+    }
 
     console.log('[LMStudio] chat - Request body:', JSON.stringify(requestBody, null, 2));
 
@@ -99,6 +111,9 @@ export class LMStudioProvider implements AIProvider {
         let totalTokens = 0;
         let inputTokens = 0;
         let outputTokens = 0;
+        const toolCalls: ToolCall[] = [];
+        let currentToolCallIndex = -1;
+        let currentToolCall: any = {};
 
         try {
           while (true) {
@@ -115,11 +130,43 @@ export class LMStudioProvider implements AIProvider {
 
                 try {
                   const json = JSON.parse(data);
-                  const content = json.choices[0]?.delta?.content;
+                  const delta = json.choices[0]?.delta;
                   
-                  if (content) {
-                    fullContent += content;
-                    onChunk(content);
+                  // Handle regular content
+                  if (delta?.content) {
+                    fullContent += delta.content;
+                    onChunk(delta.content);
+                  }
+
+                  // Handle tool calls
+                  if (delta?.tool_calls) {
+                    delta.tool_calls.forEach((tc: any) => {
+                      const index = tc.index;
+                      
+                      if (index > currentToolCallIndex) {
+                        // New tool call
+                        if (currentToolCallIndex >= 0) {
+                          toolCalls.push(currentToolCall as ToolCall);
+                        }
+                        currentToolCallIndex = index;
+                        currentToolCall = {
+                          id: tc.id || `call_${Date.now()}_${index}`,
+                          type: 'function',
+                          function: {
+                            name: tc.function?.name || '',
+                            arguments: tc.function?.arguments || ''
+                          }
+                        };
+                      } else {
+                        // Continue existing tool call
+                        if (tc.function?.name) {
+                          currentToolCall.function.name += tc.function.name;
+                        }
+                        if (tc.function?.arguments) {
+                          currentToolCall.function.arguments += tc.function.arguments;
+                        }
+                      }
+                    });
                   }
 
                   // Capture usage info if available in streaming response
@@ -127,6 +174,14 @@ export class LMStudioProvider implements AIProvider {
                     totalTokens = json.usage.total_tokens || 0;
                     inputTokens = json.usage.prompt_tokens || 0;
                     outputTokens = json.usage.completion_tokens || 0;
+                  }
+
+                  // Check finish reason
+                  if (json.choices[0]?.finish_reason === 'tool_calls') {
+                    // Save last tool call
+                    if (currentToolCallIndex >= 0) {
+                      toolCalls.push(currentToolCall as ToolCall);
+                    }
                   }
                 } catch (e) {
                   console.error('[LMStudio] chat - Error parsing streaming response:', e);
@@ -140,6 +195,7 @@ export class LMStudioProvider implements AIProvider {
 
         console.log('[LMStudio] chat - Stream completed, total length:', fullContent.length);
         console.log('[LMStudio] chat - Tokens:', { totalTokens, inputTokens, outputTokens });
+        console.log('[LMStudio] chat - Tool calls count:', toolCalls.length);
 
         return {
           content: fullContent,
@@ -148,6 +204,8 @@ export class LMStudioProvider implements AIProvider {
             input: inputTokens,
             output: outputTokens
           } : undefined,
+          tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+          finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
           model,
           operator: 'lmstudio'
         };
@@ -155,13 +213,17 @@ export class LMStudioProvider implements AIProvider {
         const data = await response.json();
         console.log('[LMStudio] chat - Response data:', data);
         
+        const message = data.choices[0]?.message;
+        
         return {
-          content: data.choices[0].message.content,
+          content: message?.content || '',
           tokens: data.usage ? {
             total: data.usage.total_tokens,
             input: data.usage.prompt_tokens,
             output: data.usage.completion_tokens
           } : undefined,
+          tool_calls: message?.tool_calls || undefined,
+          finish_reason: data.choices[0]?.finish_reason || 'stop',
           model,
           operator: 'lmstudio'
         };

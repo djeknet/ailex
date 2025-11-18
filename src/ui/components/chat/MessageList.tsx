@@ -44,6 +44,7 @@ export default function MessageList() {
     sendUserMessage, 
     currentChat, 
     selectedOperator,
+    setSelectedOperator,
     contextTruncationInfo,
     clearContextTruncationInfo,
     generatingQuestionsForMessage,
@@ -56,6 +57,24 @@ export default function MessageList() {
   const [compareError, setCompareError] = useState<{ messageId: string; error: string } | null>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [showTruncationDialog, setShowTruncationDialog] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState<string | undefined>(undefined);
+
+  // Get current tab URL
+  useEffect(() => {
+    const getCurrentTabUrl = async () => {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.url) {
+          setCurrentUrl(tab.url);
+          console.log('[MessageList] Current URL:', tab.url);
+        }
+      } catch (error) {
+        console.error('[MessageList] Error getting current URL:', error);
+      }
+    };
+    
+    getCurrentTabUrl();
+  }, []);
 
   // Show truncation dialog when context was truncated
   useEffect(() => {
@@ -102,6 +121,25 @@ export default function MessageList() {
     } catch (err) {
       console.error('Failed to copy:', err);
     }
+  };
+
+  // Handle question click with automatic model switching
+  const handleQuestionClick = async (question: string, operator?: string, model?: string) => {
+    // If operator and model are provided (from branch), switch to that model
+    if (operator && model && operators.length > 0) {
+      const targetOperator = operators.find(op => op.operator === operator);
+      if (targetOperator) {
+        const operatorWithModel = {
+          ...targetOperator,
+          selectedModel: model
+        };
+        console.log('[MessageList] Switching to branch model:', { operator, model });
+        setSelectedOperator(operatorWithModel);
+      }
+    }
+    
+    // Send the question using the (possibly updated) operator
+    await sendUserMessage(question);
   };
 
   const handleRewrite = async (messageId: string, action: string) => {
@@ -551,6 +589,7 @@ export default function MessageList() {
           
           <div className="w-full max-w-4xl">
             <ToolsGrid 
+              currentUrl={currentUrl}
               onToolSelect={async (tool) => {
                 // Если инструмент требует контекст страницы, автоматически включаем его
                 let pageContext: string | undefined;
@@ -615,7 +654,7 @@ export default function MessageList() {
               onCompare={handleCompareResponse}
               onMouseEnter={() => setHoveredMessageId(message.id)}
               onMouseLeave={() => setHoveredMessageId(null)}
-              onQuestionClick={sendUserMessage}
+              onQuestionClick={handleQuestionClick}
               onBranchChange={(branchIndex) => {
                 setActiveBranches(prev => ({ ...prev, [message.id]: branchIndex }));
               }}
@@ -675,7 +714,7 @@ export default function MessageList() {
             )}
             
             {/* Always show loader when loading */}
-            <div className="bg-muted rounded-lg p-4">
+            <div className="p-4">
               <div className="flex gap-1">
                 <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                 <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>

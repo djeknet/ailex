@@ -41,46 +41,74 @@ export function getElements(params: GetElementsParams): ElementInfo[] {
   }
 }
 
-export function clickElement(selector: string, index: number = 0): boolean {
+export interface ClickElementParams {
+  selector: string;
+  index?: number;
+}
+
+export function clickElement(params: ClickElementParams): boolean {
+  const { selector, index = 0 } = params;
+  
+  console.log('[domFunctions] clickElement called:', { selector, index });
+  
   try {
     const elements = document.querySelectorAll(selector);
     const element = elements[index] as HTMLElement;
     
+    console.log('[domFunctions] clickElement - element found:', element);
+    
     if (!element) {
+      console.error('[domFunctions] clickElement - element NOT found at index:', index);
       throw new Error(`Element not found at index ${index}`);
     }
     
     element.click();
+    console.log('[domFunctions] clickElement - SUCCESS');
     return true;
   } catch (error) {
-    console.error('Error in clickElement:', error);
+    console.error('[domFunctions] Error in clickElement:', error);
     return false;
   }
 }
 
-export function setValue(selector: string, value: string): boolean {
+export interface SetValueParams {
+  selector: string;
+  value: string;
+}
+
+export function setValue(params: SetValueParams): boolean {
+  const { selector, value } = params;
+  
+  console.log('[domFunctions] setValue called:', { selector, value });
+  
   try {
     const element = document.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement;
     
+    console.log('[domFunctions] setValue - element found:', element);
+    
     if (!element) {
+      console.error('[domFunctions] setValue - element NOT found for selector:', selector);
       throw new Error('Element not found');
     }
     
     // Handle contenteditable
     if (element.hasAttribute('contenteditable')) {
+      console.log('[domFunctions] setValue - setting contenteditable');
       element.textContent = value;
       element.dispatchEvent(new Event('input', { bubbles: true }));
       return true;
     }
     
     // Handle input/textarea
+    console.log('[domFunctions] setValue - setting input/textarea value');
     element.value = value;
     element.dispatchEvent(new Event('input', { bubbles: true }));
     element.dispatchEvent(new Event('change', { bubbles: true }));
     
+    console.log('[domFunctions] setValue - SUCCESS, new value:', element.value);
     return true;
   } catch (error) {
-    console.error('Error in setValue:', error);
+    console.error('[domFunctions] Error in setValue:', error);
     return false;
   }
 }
@@ -219,6 +247,122 @@ export function scrollToElement(selector: string, smooth: boolean = true): boole
   }
 }
 
+export function getCurrentUrl(): string {
+  return window.location.href;
+}
+
+export function getPageMetadata(): {
+  title: string;
+  description: string;
+  ogTitle: string;
+  ogDescription: string;
+  keywords: string;
+  h1: string;
+} {
+  const getMetaContent = (name: string): string => {
+    const meta = document.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
+    return meta?.getAttribute('content') || '';
+  };
+  
+  return {
+    title: document.title || '',
+    description: getMetaContent('description'),
+    ogTitle: getMetaContent('og:title'),
+    ogDescription: getMetaContent('og:description'),
+    keywords: getMetaContent('keywords'),
+    h1: document.querySelector('h1')?.textContent?.trim() || ''
+  };
+}
+
+export function waitForPageLoad(timeout: number = 5000): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (document.readyState === 'complete') {
+      resolve(true);
+      return;
+    }
+    
+    const timer = setTimeout(() => {
+      resolve(false);
+    }, timeout);
+    
+    window.addEventListener('load', () => {
+      clearTimeout(timer);
+      resolve(true);
+    }, { once: true });
+  });
+}
+
+export function getSimplifiedHTML(): string {
+  try {
+    const body = document.body;
+    if (!body) return '';
+    
+    // Клонируем body для обработки
+    const clone = body.cloneNode(true) as HTMLElement;
+    
+    // Удаляем ненужные элементы
+    const removeSelectors = [
+      'script',
+      'style',
+      'noscript',
+      'iframe',
+      'svg',
+      'canvas',
+      'video',
+      'audio',
+      'object',
+      'embed',
+      '.ad',
+      '.advertisement',
+      '[role="navigation"]',
+      '[role="banner"]',
+      '[role="contentinfo"]',
+      'nav',
+      'header',
+      'footer',
+      'aside'
+    ];
+    
+    removeSelectors.forEach(selector => {
+      const elements = clone.querySelectorAll(selector);
+      elements.forEach(el => el.remove());
+    });
+    
+    // Удаляем атрибуты style, class (оставляем только id и data-атрибуты)
+    const allElements = clone.querySelectorAll('*');
+    allElements.forEach(el => {
+      el.removeAttribute('style');
+      el.removeAttribute('class');
+      // Удаляем event handlers
+      const attrs = Array.from(el.attributes);
+      attrs.forEach(attr => {
+        if (attr.name.startsWith('on')) {
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+    
+    // Получаем HTML и ограничиваем размер
+    let html = clone.innerHTML;
+    
+    // Удаляем HTML комментарии
+    html = html.replace(/<!--[\s\S]*?-->/g, '');
+    
+    // Сжимаем пробелы
+    html = html.replace(/\s+/g, ' ');
+    
+    // Ограничиваем до 5000 символов
+    if (html.length > 5000) {
+      html = html.substring(0, 5000) + '...';
+    }
+    
+    return html.trim();
+  } catch (error) {
+    console.error('Error in getSimplifiedHTML:', error);
+    return '';
+  }
+}
+
 // ============================================================================
 // 2. Чтение данных и анализ страницы
 // ============================================================================
@@ -233,6 +377,7 @@ export function getLinks(params: GetLinksParams = {}): Array<{ href: string; tex
   
   try {
     const links = Array.from(document.querySelectorAll('a[href]'));
+    console.log('[getLinks] Total links found:', links.length);
     
     let filtered = links.filter(link => {
       const href = link.getAttribute('href');
@@ -253,11 +398,29 @@ export function getLinks(params: GetLinksParams = {}): Array<{ href: string; tex
       
       return true;
     });
+    console.log('[getLinks] Filtered links:', filtered.length);
     
-    return filtered.map(link => ({
-      href: link.getAttribute('href') || '',
-      text: link.textContent?.trim() || ''
-    }));
+    // Преобразовать относительные URL в абсолютные
+    const result = filtered.map(link => {
+      const href = link.getAttribute('href') || '';
+      try {
+        const absoluteUrl = new URL(href, window.location.href).href;
+        return {
+          href: absoluteUrl,
+          text: link.textContent?.trim() || ''
+        };
+      } catch {
+        return {
+          href: href,
+          text: link.textContent?.trim() || ''
+        };
+      }
+    });
+    
+    console.log('[getLinks] Returning', result.length, 'links with absolute URLs');
+    console.log('[getLinks] First 5 links:', result.slice(0, 5).map(l => l.href));
+    
+    return result;
   } catch (error) {
     console.error('Error in getLinks:', error);
     return [];

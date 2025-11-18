@@ -17,7 +17,7 @@ export const getFormFieldsTool: Tool = {
   isBuiltIn: true,
   requiresPersonalInfo: true,
   hiddenFromUI: true, // Скрыт из UI, используется только AI
-  systemInstructions: 'After calling get-form-fields, analyze the returned fields and availableUserInfo. Then call fill-form-fields with appropriate mappings.',
+  systemInstructions: 'After calling get-form-fields, analyze the returned fields and availableUserInfo. Then call fill-form-fields with appropriate mappings. IMPORTANT: Map ALL fields that have matching data in availableUserInfo - do not skip any fields that can be filled. For select elements, use the full text value (e.g., "United States" not "USA"). DO NOT submit the form unless user explicitly asks.',
   
   parameters: {
     type: 'object',
@@ -50,14 +50,15 @@ export const getFormFieldsTool: Tool = {
         availableInfo.position = params.personalInfo.position || '';
       }
       
-      const example = `{"email": "${availableInfo.email || 'user@mail.com'}", "name": "${((availableInfo.firstName || '') + ' ' + (availableInfo.lastName || '')).trim()}"}`;
-      const instructions = getTranslation('formFieldsNextStep').replace('{example}', example);
+      const example = `{"firstName": "${availableInfo.firstName || 'John'}", "lastName": "${availableInfo.lastName || 'Doe'}", "email": "${availableInfo.email || 'user@mail.com'}", "phone": "${availableInfo.phone || '+1234567890'}", "address": "${availableInfo.address || '123 Main St'}", "city": "${availableInfo.city || 'New York'}", "zipCode": "${availableInfo.zipCode || '10001'}", "country": "${availableInfo.country || 'United States'}", "company": "${availableInfo.company || 'Acme Inc'}", "position": "${availableInfo.position || 'Developer'}"}`;
       
       return JSON.stringify({
         success: true,
         fields: fields,
+        totalFields: fields.length,
         availableUserInfo: availableInfo,
-        instructions: instructions
+        _instructions: `CRITICAL: You must map ALL ${fields.length} fields to availableUserInfo. Create fieldsToFill object with complete mappings for every field that has data. Do not skip any fields! Full example: ${example}`,
+        message: getTranslation('formFieldsFound').replace('{count}', fields.length.toString())
       }, null, 2);
     } catch (error) {
       console.error('Error in get form fields tool:', error);
@@ -83,14 +84,14 @@ export const fillFormFieldsTool: Tool = {
   urlPattern: undefined,
   isBuiltIn: true,
   hiddenFromUI: true, // Скрыт из UI, используется только AI
-  systemInstructions: 'IMPORTANT: fieldsToFill parameter MUST contain actual field mappings from the data you received from get-form-fields. Never use empty objects {}.',
+  systemInstructions: 'IMPORTANT: fieldsToFill parameter MUST contain actual field mappings from the data you received from get-form-fields. Never use empty objects {}. DO NOT submit the form after filling. CRITICAL: Ensure valid JSON syntax with commas between all properties.',
   
   parameters: {
     type: 'object',
     properties: {
       fieldsToFill: {
         type: 'object',
-        description: 'Mapping object: key = field id/name (from fields), value = user data (from availableUserInfo). Example for fields [{"name":"email"},{"name":"name"}] and data {"email":"user@mail.com","firstName":"John","lastName":"Doe"}: {"email":"user@mail.com", "name":"John Doe"}'
+        description: 'Mapping object: key = field id/name (from fields), value = user data (from availableUserInfo). IMPORTANT: Must be valid JSON with proper commas between all key-value pairs. Example for fields [{"name":"email"},{"name":"name"}] and data {"email":"user@mail.com","firstName":"John","lastName":"Doe"}: {"email":"user@mail.com","name":"John Doe"}'
       }
     },
     required: ['fieldsToFill']
@@ -150,7 +151,7 @@ export const fillFormTool: Tool = {
   urlPattern: undefined,
   isBuiltIn: true,
   requiresPersonalInfo: true,
-  systemInstructions: 'User sent /fillform command. You MUST call get-form-fields tool first to get form fields, then call fill-form-fields with the appropriate data mapping.',
+  systemInstructions: 'User sent /fillform command. You MUST call get-form-fields tool first to get form fields, then call fill-form-fields with the appropriate data mapping. DO NOT call submit-form unless user explicitly asks to submit.',
   
   parameters: {
     type: 'object',

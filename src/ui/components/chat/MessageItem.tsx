@@ -30,7 +30,7 @@ interface MessageItemProps {
   onCompare?: (messageId: string, operator: AIOperatorConfig, modelId: string) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  onQuestionClick?: (question: string) => void;
+  onQuestionClick?: (question: string, operator?: string, model?: string) => void;
   onBranchChange?: (branchIndex: number) => void;
   
   // Config

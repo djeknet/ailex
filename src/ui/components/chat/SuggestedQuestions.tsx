@@ -24,6 +24,11 @@ export default function SuggestedQuestions({
 }: SuggestedQuestionsProps) {
   const { t } = useTranslation();
 
+  // Helper to strip HTML tags (for safety with old saved questions)
+  const stripHtml = (text: string): string => {
+    return text.replace(/<[^>]*>/g, '').trim();
+  };
+
   // Don't render if no questions and not generating
   if (questions.length === 0 && !isGenerating) return null;
 
@@ -45,9 +50,11 @@ export default function SuggestedQuestions({
         // Show actual questions
         <div className="flex flex-wrap gap-2">
           {questions.map((question, index) => {
-            const truncatedQuestion = question.length > 70 
-              ? question.substring(0, 70) + '...' 
-              : question;
+            // Clean question from any HTML tags
+            const cleanQuestion = stripHtml(question);
+            const truncatedQuestion = cleanQuestion.length > 70 
+              ? cleanQuestion.substring(0, 70) + '...' 
+              : cleanQuestion;
 
             return (
               <TooltipProvider key={index}>
@@ -57,7 +64,7 @@ export default function SuggestedQuestions({
                       variant="outline"
                       size="sm"
                       className="h-auto py-2 px-3 text-left whitespace-normal justify-start hover:bg-accent/50 transition-colors"
-                      onClick={() => onQuestionClick(question)}
+                      onClick={() => onQuestionClick(cleanQuestion)}
                       disabled={isLoading}
                     >
                       <Plus className="w-3.5 h-3.5 flex-shrink-0" />
@@ -65,7 +72,7 @@ export default function SuggestedQuestions({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-sm">
-                    <p className="text-xs">{question}</p>
+                    <p className="text-xs">{cleanQuestion}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -72,7 +72,7 @@ interface AIMessageProps {
   onRewrite?: (messageId: string, action: string) => void;
   onCompare?: (messageId: string, operator: AIOperatorConfig, modelId: string) => void;
   onBranchChange?: (branchIndex: number) => void;
-  onQuestionClick?: (question: string) => void;
+  onQuestionClick?: (question: string, operator?: string, model?: string) => void;
   operators?: AIOperatorConfig[];
   isLoading?: boolean;
   generatingQuestionsForMessage?: string | null;
@@ -446,7 +446,7 @@ export default function AIMessage({
           return (
             <SuggestedQuestions
               questions={currentMessage.suggestedQuestions || []}
-              onQuestionClick={(question) => onQuestionClick && onQuestionClick(question)}
+              onQuestionClick={(question) => onQuestionClick && onQuestionClick(question, currentMessage.operator, currentMessage.model)}
               isLoading={isLoading}
               isGenerating={generatingQuestionsForMessage === currentMessage.id}
             />
@@ -478,7 +478,7 @@ export default function AIMessage({
       {/* Suggested questions */}
       <SuggestedQuestions
         questions={message.suggestedQuestions || []}
-        onQuestionClick={(question) => onQuestionClick && onQuestionClick(question)}
+        onQuestionClick={(question) => onQuestionClick && onQuestionClick(question, message.operator, message.model)}
         isLoading={isLoading}
         isGenerating={generatingQuestionsForMessage === message.id}
       />

@@ -3,6 +3,9 @@ import { summarizeTool } from './summarize';
 import { collectContactsTool } from './collectContacts';
 import { fillFormTool, getFormFieldsTool, fillFormFieldsTool } from './fillForm';
 import { setCheckboxTool, submitFormTool } from './formActions';
+import { parsePagesTool } from './parsePages';
+import { findElementsTool } from './findElements';
+import { executeDOMFunctionTool } from './domExecutor';
 import { getTranslation } from '@shared/i18n/useTranslation';
 
 export const toolRegistry: ToolRegistry = {
@@ -12,7 +15,10 @@ export const toolRegistry: ToolRegistry = {
   [getFormFieldsTool.id]: getFormFieldsTool,
   [fillFormFieldsTool.id]: fillFormFieldsTool,
   [setCheckboxTool.id]: setCheckboxTool,
-  [submitFormTool.id]: submitFormTool
+  [submitFormTool.id]: submitFormTool,
+  [parsePagesTool.id]: parsePagesTool,
+  [findElementsTool.id]: findElementsTool,
+  [executeDOMFunctionTool.id]: executeDOMFunctionTool
 };
 
 export function getTool(id: string): Tool | undefined {

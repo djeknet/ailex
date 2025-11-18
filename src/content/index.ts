@@ -1,5 +1,5 @@
 import { extractPageContext, getPageMetadata, extractBySelector } from './pageContext';
-import { startVisualEffect, stopVisualEffect, highlightElements } from './visualEffects';
+import { startVisualEffect, stopVisualEffect, highlightElements, updateParsingProgress } from './visualEffects';
 import { fillForm } from './formFiller';
 import { startElementSelector, stopElementSelector } from './elementSelector';
 import { startScreenshotSelector, stopScreenshotSelector } from './screenshotSelector';
@@ -36,12 +36,24 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           break;
 
         case 'START_VISUAL_EFFECT':
-          startVisualEffect();
+          const effectType = message.data?.type || 'tool';
+          const sessionId = message.data?.sessionId;
+          startVisualEffect(effectType, sessionId);
           sendResponse({ success: true });
           break;
 
         case 'STOP_VISUAL_EFFECT':
           stopVisualEffect();
+          sendResponse({ success: true });
+          break;
+
+        case 'UPDATE_PARSING_PROGRESS':
+          updateParsingProgress(
+            message.data.current,
+            message.data.total,
+            message.data.status,
+            message.data.sessionId
+          );
           sendResponse({ success: true });
           break;
 
@@ -59,27 +71,50 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           try {
             const fieldsToFill = message.data.fieldsToFill as Record<string, string>;
             let filled = 0;
-            let total = 0;
+            let total = Object.keys(fieldsToFill).length;
 
             for (const [fieldIdentifier, value] of Object.entries(fieldsToFill)) {
-              total++;
-              
               // Пытаемся найти элемент по id, name или placeholder
-              let element = document.getElementById(fieldIdentifier) as HTMLInputElement;
+              let element = document.getElementById(fieldIdentifier) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
               
               if (!element) {
-                element = document.querySelector(`[name="${fieldIdentifier}"]`) as HTMLInputElement;
+                element = document.querySelector(`[name="${fieldIdentifier}"]`) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
               }
               
               if (!element) {
-                element = document.querySelector(`input[placeholder="${fieldIdentifier}"], textarea[placeholder="${fieldIdentifier}"]`) as HTMLInputElement;
+                element = document.querySelector(`input[placeholder="${fieldIdentifier}"], textarea[placeholder="${fieldIdentifier}"]`) as HTMLInputElement | HTMLTextAreaElement;
               }
               
               if (element && value) {
-                element.value = value;
-                element.dispatchEvent(new Event('input', { bubbles: true }));
-                element.dispatchEvent(new Event('change', { bubbles: true }));
-                filled++;
+                // Обработка SELECT элементов
+                if (element.tagName === 'SELECT') {
+                  const select = element as HTMLSelectElement;
+                  
+                  // Пытаемся найти option по value
+                  let optionFound = false;
+                  for (let i = 0; i < select.options.length; i++) {
+                    const option = select.options[i];
+                    // Сравниваем по value или по тексту (case-insensitive)
+                    if (option.value.toLowerCase() === value.toLowerCase() || 
+                        option.text.toLowerCase() === value.toLowerCase() ||
+                        option.text.toLowerCase().includes(value.toLowerCase())) {
+                      select.selectedIndex = i;
+                      optionFound = true;
+                      break;
+                    }
+                  }
+                  
+                  if (optionFound) {
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    filled++;
+                  }
+                } else {
+                  // Обработка INPUT и TEXTAREA
+                  element.value = value;
+                  element.dispatchEvent(new Event('input', { bubbles: true }));
+                  element.dispatchEvent(new Event('change', { bubbles: true }));
+                  filled++;
+                }
               }
             }
 
@@ -154,17 +189,23 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         case 'EXECUTE_DOM_FUNCTION':
           const { functionName, params } = message.data;
           
+          console.log('[content] EXECUTE_DOM_FUNCTION received:', { functionName, params });
+          
           // Проверяем, существует ли функция
           if (typeof (domFunctions as any)[functionName] !== 'function') {
+            console.error('[content] Function not found:', functionName);
             sendResponse({ success: false, error: `Function ${functionName} not found` });
             break;
           }
           
           try {
+            console.log('[content] Calling function:', functionName, 'with params:', params);
             // Вызываем функцию
             const result = await (domFunctions as any)[functionName](params);
+            console.log('[content] Function result:', { functionName, result });
             sendResponse({ success: true, result });
           } catch (error) {
+            console.error('[content] Error executing function:', functionName, error);
             sendResponse({ 
               success: false, 
               error: error instanceof Error ? error.message : 'Function execution failed' 

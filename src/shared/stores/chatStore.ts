@@ -431,32 +431,44 @@ export const useChatStore = create<ChatStore>()(
         : undefined;
 
       // Get available tools for current URL (reuse tab from above)
-      const availableTools = await getAllAvailableTools(currentUrl);
+      // При поиске команды НЕ фильтруем по URL - команда должна работать везде
+      const allAvailableTools = await getAllAvailableTools();
       
       // Check if user message is a tool command (starts with /)
       const isToolCommand = content.trim().startsWith('/');
       const commandMatch = isToolCommand ? content.trim().match(/^\/(\S+)/) : null;
       const commandName = commandMatch ? commandMatch[1] : null;
       
-      // Find matching tool by command
+      // Find matching tool by command (search in ALL tools, not filtered by URL)
       const matchingTool = commandName 
-        ? availableTools.find(t => t.command === `/${commandName}`)
+        ? allAvailableTools.find(t => t.command === `/${commandName}`)
         : null;
+      
+      // For AI - filter tools by URL (for suggestions in dropdown)
+      const availableTools = await getAllAvailableTools(currentUrl);
       
       // Check if AI has already used tools in this conversation
       const hasToolHistory = aiMessages.some(msg => msg.tool_calls && msg.tool_calls.length > 0);
       
+      // Check if any previous user message in this chat was a tool command
+      const currentChatMessages = get().messages.filter(m => m.chatId === currentChat.id);
+      const hasToolCommandInHistory = currentChatMessages.some(msg => 
+        msg.isUser && msg.text.trim().startsWith('/')
+      );
+      
       // Decide whether to include tools in the request
-      // Tools are included only when:
+      // Tools are included when:
       // 1. User explicitly called a tool command (starts with /)
       // 2. AI has already used tools in this chat (conversation context)
-      const shouldIncludeTools = isToolCommand || hasToolHistory;
+      // 3. User previously called a tool command in this chat (continuation of tool usage)
+      const shouldIncludeTools = isToolCommand || hasToolHistory || hasToolCommandInHistory;
       
       console.log('[chatStore] Tools decision:', {
         isToolCommand,
         commandName,
         matchingTool: matchingTool?.id,
         hasToolHistory,
+        hasToolCommandInHistory,
         shouldIncludeTools,
         availableToolsCount: availableTools.length
       });
@@ -464,9 +476,16 @@ export const useChatStore = create<ChatStore>()(
       // Фильтруем инструменты: скрываем fill-form (он только для UI команды /fillform)
       // но показываем get-form-fields и fill-form-fields для AI
       // Передаем только если shouldIncludeTools = true
-      const toolsForAI = shouldIncludeTools 
+      let toolsForAI = shouldIncludeTools 
         ? availableTools.filter(tool => tool.id !== 'fill-form')
         : [];
+      
+      // ВАЖНО: если пользователь вызвал команду, добавляем этот инструмент в список,
+      // даже если он не проходит фильтрацию по URL
+      if (matchingTool && !toolsForAI.find(t => t.id === matchingTool.id)) {
+        toolsForAI = [...toolsForAI, matchingTool];
+      }
+      
       const toolDefinitions = toolsToDefinitions(toolsForAI);
       
       console.log('[chatStore] Tools to send to AI:', toolDefinitions.length);
@@ -476,8 +495,8 @@ export const useChatStore = create<ChatStore>()(
         const systemMsg = aiMessages[0];
         let toolInstructions = '';
         
-        // Collect system instructions from all tools
-        const toolsWithInstructions = availableTools.filter(t => t.systemInstructions);
+        // Collect system instructions from all tools that we're sending to AI
+        const toolsWithInstructions = toolsForAI.filter(t => t.systemInstructions);
         if (toolsWithInstructions.length > 0) {
           toolInstructions += '\n\nTool-specific instructions:';
           toolsWithInstructions.forEach(tool => {
@@ -534,7 +553,14 @@ export const useChatStore = create<ChatStore>()(
       
       // If AI called tools, execute them and send results back
       // Keep looping until AI stops calling tools
-      let maxToolIterations = 5; // Prevent infinite loops
+      
+      // Check if this is a parsing session
+      const isParsingSession = response.tool_calls?.some(tc => 
+        tc.function.name === 'parse-pages' || tc.function.name === 'find-elements'
+      );
+      
+      // Increase iteration limit for parsing
+      let maxToolIterations = isParsingSession ? 25 : 5;
       let currentIteration = 0;
       
       while (response.tool_calls && response.tool_calls.length > 0 && currentIteration < maxToolIterations) {
@@ -553,6 +579,45 @@ export const useChatStore = create<ChatStore>()(
           }
         }
         
+        // Check if we should pause for user confirmation after 20 iterations
+        if (currentIteration === 20 && isParsingSession) {
+          // Check if parsing was already finished (action='finish')
+          const hasFinishAction = response.tool_calls.some(tc => {
+            try {
+              const args = JSON.parse(tc.function.arguments);
+              return args.action === 'finish';
+            } catch {
+              return false;
+            }
+          });
+          
+          if (!hasFinishAction) {
+            // Get actual page count from tool results
+            let pagesProcessed = 0;
+            
+            // Find the last extract-data or navigate result which contains currentPage
+            for (let i = toolExecutions.length - 1; i >= 0; i--) {
+              const exec = toolExecutions[i];
+              if (exec?.output && typeof exec.output === 'object' && 'currentPage' in exec.output) {
+                pagesProcessed = (exec.output as any).currentPage || 0;
+                break;
+              }
+            }
+            
+            // Fallback to iteration count if no currentPage found
+            if (pagesProcessed === 0) {
+              pagesProcessed = Math.floor(currentIteration / 3); // Rough estimate: 3 calls per page
+            }
+            
+            console.log('[chatStore] Pausing parsing after 20 iterations, pages processed:', pagesProcessed);
+            assistantContent += `\n\n${getTranslation('parsingContinuePrompt', [pagesProcessed.toString()])}`;
+            set({ streamingContent: assistantContent });
+            break; // Pause loop until user confirms
+          } else {
+            console.log('[chatStore] Parsing finished, skipping pause prompt');
+          }
+        }
+        
         // Add assistant message with tool calls
         aiMessages.push({
           role: 'assistant',
@@ -563,14 +628,24 @@ export const useChatStore = create<ChatStore>()(
         // Add tool results as tool messages
         for (const toolCall of response.tool_calls) {
           const execution = toolExecutions.find(e => e.id === toolCall.id);
-          if (execution?.output) {
-            aiMessages.push({
-              role: 'tool',
-              tool_call_id: toolCall.id,
-              name: toolCall.function.name,
-              content: typeof execution.output === 'string' ? execution.output : JSON.stringify(execution.output)
-            });
+          
+          // ВАЖНО: всегда добавляем tool message, даже если была ошибка
+          // OpenAI API требует ответ на каждый tool_call_id
+          let content: string;
+          if (execution?.error) {
+            content = `Error: ${execution.error}`;
+          } else if (execution?.output) {
+            content = typeof execution.output === 'string' ? execution.output : JSON.stringify(execution.output);
+          } else {
+            content = 'Tool executed with no output';
           }
+          
+          aiMessages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            name: toolCall.function.name,
+            content
+          });
         }
         
         console.log('[chatStore] Sending results back to AI, total messages:', aiMessages.length);
@@ -599,10 +674,15 @@ export const useChatStore = create<ChatStore>()(
       }
 
       // Check if response is empty
-      const finalContent = assistantContent || response.content;
-      if (!finalContent || finalContent.trim() === '') {
-        // Don't remove user message - keep it for retry
+      let finalContent = assistantContent || response.content;
+      if ((!finalContent || finalContent.trim() === '') && toolExecutions.length === 0) {
+        // Empty response without tool executions - this is an error
         throw new AIServiceError(AIErrorCode.EMPTY_RESPONSE, 'Empty response from AI');
+      }
+      
+      // If content is empty but tools were executed, use a default message
+      if (!finalContent || finalContent.trim() === '') {
+        finalContent = '✓'; // Minimal placeholder to indicate tools were executed
       }
 
       console.log('[chatStore] AI response received:', {
@@ -725,6 +805,18 @@ export const useChatStore = create<ChatStore>()(
       
       set({ error: userFriendlyError });
     } finally {
+      // Stop any active visual effects (parsing, tool execution)
+      const tab = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab[0]?.id) {
+        try {
+          await chrome.tabs.sendMessage(tab[0].id, { type: 'STOP_VISUAL_EFFECT' });
+          console.log('[chatStore] Visual effects stopped');
+        } catch (e) {
+          // Ignore errors if tab is closed or content script not ready
+          console.warn('[chatStore] Failed to stop visual effects:', e);
+        }
+      }
+      
       // Remove this chat from loading set
       const { loadingChats } = get();
       const newLoadingChats = new Set(loadingChats);
@@ -918,7 +1010,8 @@ export const useChatStore = create<ChatStore>()(
       // Create system prompt for generating questions
       const systemPrompt = `Generate 3 short, relevant follow-up questions based on this AI response. 
 Questions must be in ${languageName} language.
-Return ONLY the questions, one per line, without numbering.
+Return ONLY plain text questions, one per line, without numbering, bullets, or HTML tags.
+Do not use any formatting like <span>, <li>, <p> or markdown.
 
 AI Response${isTruncated ? ' (excerpt)' : ''}:
 ${responseContext}`;
@@ -961,10 +1054,21 @@ ${responseContext}`;
       );
 
       if (response && response.content) {
+        // Helper function to strip HTML tags
+        const stripHtml = (text: string): string => {
+          return text.replace(/<[^>]*>/g, '').trim();
+        };
+        
         // Parse questions (one per line)
         const questions = response.content
           .split('\n')
-          .map((q: string) => q.trim())
+          .map((q: string) => {
+            // Remove HTML tags and clean up
+            let cleaned = stripHtml(q.trim());
+            // Remove leading dashes, numbers, bullets
+            cleaned = cleaned.replace(/^[-•*\d]+\.?\s*/, '');
+            return cleaned;
+          })
           .filter((q: string) => q.length > 0 && q.length <= 200)
           .slice(0, 3); // Maximum 3 questions
 

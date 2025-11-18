@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Tool, CustomTool, ToolExecution } from '@shared/types/tools';
 import * as toolsService from '@shared/services/toolsService';
+import { i18nService } from '@shared/i18n/i18nService';
 
 interface ToolsStore {
   // Состояние
@@ -12,7 +13,7 @@ interface ToolsStore {
   currentUrl: string | null;
   
   // Actions
-  loadTools: (url?: string) => Promise<void>;
+  loadTools: () => Promise<void>;
   loadCustomTools: () => Promise<void>;
   getFilteredTools: () => Tool[];
   addExecution: (execution: ToolExecution) => void;
@@ -35,16 +36,18 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
   currentUrl: null,
   
   // Load all available tools
-  loadTools: async (url?: string) => {
+  loadTools: async () => {
     set({ isLoading: true, error: null });
     
     try {
-      const tools = await toolsService.getAllAvailableTools(url);
+      // Загружаем ВСЕ инструменты БЕЗ фильтрации по URL
+      // Фильтрация по URL будет в getFilteredTools()
+      const tools = await toolsService.getAllAvailableTools();
       set({ availableTools: tools, isLoading: false });
     } catch (error) {
       console.error('Error loading tools:', error);
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to load tools',
+        error: error instanceof Error ? error.message : i18nService.getMessage('errorLoadingTools'),
         isLoading: false 
       });
     }
@@ -60,7 +63,7 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
     } catch (error) {
       console.error('Error loading custom tools:', error);
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to load custom tools',
+        error: error instanceof Error ? error.message : i18nService.getMessage('errorLoadingCustomTools'),
         isLoading: false 
       });
     }
@@ -73,11 +76,25 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
     // Фильтруем скрытые инструменты для UI
     let filtered = availableTools.filter(tool => !tool.hiddenFromUI);
     
+    console.log('[toolsStore] getFilteredTools:', {
+      totalTools: availableTools.length,
+      afterHiddenFilter: filtered.length,
+      currentUrl
+    });
+    
     if (!currentUrl) {
       return filtered;
     }
     
-    return toolsService.filterToolsByUrl(filtered, currentUrl);
+    // Фильтруем по URL паттерну
+    const result = toolsService.filterToolsByUrl(filtered, currentUrl);
+    
+    console.log('[toolsStore] After URL filter:', {
+      before: filtered.length,
+      after: result.length
+    });
+    
+    return result;
   },
   
   // Add execution
@@ -120,13 +137,13 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
     try {
       // Validate command
       if (!toolsService.validateCommand(tool.command)) {
-        throw new Error('Invalid command format. Command must start with / and contain only lowercase letters, numbers, and hyphens.');
+        throw new Error(i18nService.getMessage('errorInvalidCommandFormat'));
       }
       
       // Check uniqueness
       const isUnique = await toolsService.isCommandUnique(tool.command);
       if (!isUnique) {
-        throw new Error(`Command ${tool.command} already exists`);
+        throw new Error(i18nService.getMessage('errorCommandExists').replace('{command}', tool.command));
       }
       
       const newTool = await toolsService.createCustomTool(tool);
@@ -137,12 +154,12 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
       }));
       
       // Reload all tools
-      await get().loadTools(get().currentUrl || undefined);
+      await get().loadTools();
       
     } catch (error) {
       console.error('Error creating custom tool:', error);
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to create custom tool',
+        error: error instanceof Error ? error.message : i18nService.getMessage('errorCreatingCustomTool'),
         isLoading: false 
       });
       throw error;
@@ -157,12 +174,12 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
       // If updating command, validate it
       if (updates.command) {
         if (!toolsService.validateCommand(updates.command)) {
-          throw new Error('Invalid command format');
+          throw new Error(i18nService.getMessage('errorInvalidCommandFormat'));
         }
         
         const isUnique = await toolsService.isCommandUnique(updates.command, id);
         if (!isUnique) {
-          throw new Error(`Command ${updates.command} already exists`);
+          throw new Error(i18nService.getMessage('errorCommandExists').replace('{command}', updates.command));
         }
       }
       
@@ -176,12 +193,12 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
       }));
       
       // Reload all tools
-      await get().loadTools(get().currentUrl || undefined);
+      await get().loadTools();
       
     } catch (error) {
       console.error('Error updating custom tool:', error);
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to update custom tool',
+        error: error instanceof Error ? error.message : i18nService.getMessage('errorUpdatingCustomTool'),
         isLoading: false 
       });
       throw error;
@@ -201,12 +218,12 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
       }));
       
       // Reload all tools
-      await get().loadTools(get().currentUrl || undefined);
+      await get().loadTools();
       
     } catch (error) {
       console.error('Error deleting custom tool:', error);
       set({ 
-        error: error instanceof Error ? error.message : 'Failed to delete custom tool',
+        error: error instanceof Error ? error.message : i18nService.getMessage('errorDeletingCustomTool'),
         isLoading: false 
       });
       throw error;

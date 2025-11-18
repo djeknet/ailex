@@ -26,7 +26,11 @@ export type MessageType =
   | 'CAPTURE_SCREENSHOT'
   | 'ADD_API_LOG'
   | 'GET_API_LOGS'
-  | 'CLEAR_API_LOGS';
+  | 'CLEAR_API_LOGS'
+  | 'STOP_PARSING'
+  | 'GET_PARSING_STATE'
+  | 'UPDATE_PARSING_STATE'
+  | 'NAVIGATE_TAB';
 
 export interface Message {
   type: MessageType;
@@ -158,6 +162,37 @@ export async function handleMessage(
 
       case 'CLEAR_API_LOGS':
         await dbService.clearApiLogs();
+        return { success: true };
+
+      // Parsing operations
+      case 'STOP_PARSING': {
+        const sessionKey = `parsing_${message.data.sessionId}`;
+        const state = await storageService.getLocalStorage([sessionKey]);
+        
+        if (state[sessionKey]) {
+          await storageService.setLocalStorage({
+            [sessionKey]: {
+              ...state[sessionKey],
+              status: 'paused'
+            }
+          });
+        }
+        
+        return { success: true };
+      }
+
+      case 'GET_PARSING_STATE':
+        const getSessionKey = `parsing_${message.data.sessionId}`;
+        return await storageService.getLocalStorage([getSessionKey]);
+
+      case 'UPDATE_PARSING_STATE':
+        await storageService.setLocalStorage({
+          [`parsing_${message.data.sessionId}`]: message.data.state
+        });
+        return { success: true };
+
+      case 'NAVIGATE_TAB':
+        await chrome.tabs.update(message.data.tabId, { url: message.data.url });
         return { success: true };
 
       default:

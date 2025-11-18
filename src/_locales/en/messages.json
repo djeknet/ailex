@@ -836,9 +836,6 @@
   "duration": {
     "message": "Duration"
   },
-  "error": {
-    "message": "Error"
-  },
   "enabled": {
     "message": "Enabled"
   },
@@ -1606,6 +1603,345 @@
   },
   "requiresPersonalInfo": {
     "message": "requires personal information"
+  },
+  "tool_parsePages": {
+    "message": "Parse Pages"
+  },
+  "tool_parsePages_desc": {
+    "message": "Cyclically collect data from multiple pages"
+  },
+  "tool_findElements": {
+    "message": "Find Elements"
+  },
+  "tool_findElements_desc": {
+    "message": "Automatically find CSS selector by description"
+  },
+  "parsingInProgress": {
+    "message": "Parsing in progress..."
+  },
+  "parsingPageProgress": {
+    "message": "Page $1 of $2"
+  },
+  "parsingCompleted": {
+    "message": "Parsing completed: $1 pages, $2 elements"
+  },
+  "parsingPaused": {
+    "message": "Parsing paused. Continue?"
+  },
+  "parsingContinuePrompt": {
+    "message": "Processed $1 pages. Continue parsing?"
+  },
+  "stopParsing": {
+    "message": "Stop Parsing"
+  },
+  "selectorFound": {
+    "message": "Found selector: $1 ($2 elements)"
+  },
+  "errorLoadingTools": {
+    "message": "Failed to load tools"
+  },
+  "errorLoadingCustomTools": {
+    "message": "Failed to load custom tools"
+  },
+  "errorInvalidCommandFormat": {
+    "message": "Invalid command format. Command must start with / and contain only lowercase letters, numbers, and hyphens."
+  },
+  "errorCommandExists": {
+    "message": "Command {command} already exists"
+  },
+  "errorCreatingCustomTool": {
+    "message": "Failed to create custom tool"
+  },
+  "errorUpdatingCustomTool": {
+    "message": "Failed to update custom tool"
+  },
+  "errorDeletingCustomTool": {
+    "message": "Failed to delete custom tool"
+  },
+  "availableToolsTitle": {
+    "message": "Available AI Tools"
+  },
+  "availableToolsDescription": {
+    "message": "List of AI tools with usage examples in prompts"
+  },
+  "viewAvailableTools": {
+    "message": "Available Tools"
+  },
+  "examples": {
+    "message": "Examples"
+  },
+  "selectElementForPrompt": {
+    "message": "Select element"
+  },
+  "selectElementNote": {
+    "message": "Click on page element to insert its selector"
+  },
+  "searchDomFunctions": {
+    "message": "Search functions..."
+  },
+  "domCategory_navigation": {
+    "message": "Navigation and DOM"
+  },
+  "domCategory_getData": {
+    "message": "Get Data"
+  },
+  "domCategory_manipulation": {
+    "message": "DOM Manipulation"
+  },
+  "domCategory_scrolling": {
+    "message": "Scrolling"
+  },
+  "domCategory_utilities": {
+    "message": "Utilities"
+  },
+  "domFunc_getElements": {
+    "message": "Get elements by selector"
+  },
+  "domFunc_clickElement": {
+    "message": "Click element"
+  },
+  "domFunc_setValue": {
+    "message": "Set input/textarea value"
+  },
+  "domFunc_selectOption": {
+    "message": "Select option in select"
+  },
+  "domFunc_focusElement": {
+    "message": "Focus on element"
+  },
+  "domFunc_setCheckbox": {
+    "message": "Set checkbox"
+  },
+  "domFunc_submitForm": {
+    "message": "Submit form"
+  },
+  "domFunc_hoverElement": {
+    "message": "Hover on element"
+  },
+  "domFunc_scrollToElement": {
+    "message": "Scroll to element"
+  },
+  "domFunc_getCurrentUrl": {
+    "message": "Get current URL"
+  },
+  "domFunc_getPageMetadata": {
+    "message": "Get page metadata"
+  },
+  "domFunc_waitForPageLoad": {
+    "message": "Wait for page load"
+  },
+  "domFunc_getSimplifiedHTML": {
+    "message": "Get simplified HTML"
+  },
+  "domFunc_getLinks": {
+    "message": "Get links"
+  },
+  "domFunc_getText": {
+    "message": "Get page text"
+  },
+  "domFunc_getHTML": {
+    "message": "Get full HTML"
+  },
+  "domFunc_getDOMTree": {
+    "message": "Get DOM tree"
+  },
+  "domFunc_getMeta": {
+    "message": "Get meta tags"
+  },
+  "domFunc_getSelection": {
+    "message": "Get selected text"
+  },
+  "domFunc_getTableData": {
+    "message": "Get table data"
+  },
+  "domFunc_getFormData": {
+    "message": "Get form data"
+  },
+  "domFunc_getFormFields": {
+    "message": "Get form fields"
+  },
+  "domFunc_hideElements": {
+    "message": "Hide elements"
+  },
+  "domFunc_addStyles": {
+    "message": "Add styles"
+  },
+  "domFunc_replaceStyles": {
+    "message": "Replace styles"
+  },
+  "domFunc_injectHTML": {
+    "message": "Inject HTML"
+  },
+  "domFunc_removeElements": {
+    "message": "Remove elements"
+  },
+  "domFunc_highlightElements": {
+    "message": "Highlight elements"
+  },
+  "domFunc_replaceText": {
+    "message": "Replace text"
+  },
+  "domFunc_scrollDown": {
+    "message": "Scroll down"
+  },
+  "domFunc_scrollUp": {
+    "message": "Scroll up"
+  },
+  "domFunc_scrollToTop": {
+    "message": "Scroll to top"
+  },
+  "domFunc_scrollToBottom": {
+    "message": "Scroll to bottom"
+  },
+  "domFunc_isElementVisible": {
+    "message": "Check element visibility"
+  },
+  "domFunc_downloadFile": {
+    "message": "Download file"
+  },
+  "domFunc_getImages": {
+    "message": "Get images"
+  },
+  "domFunc_getElementCode": {
+    "message": "Get element code"
+  },
+  "domFunc_getElementPosition": {
+    "message": "Get element position"
+  },
+  "domFunc_waitForElement": {
+    "message": "Wait for element"
+  },
+  "domFunc_executeJS": {
+    "message": "Execute JS code"
+  },
+  "domFunc_getViewportInfo": {
+    "message": "Get viewport info"
+  },
+  "toolCategory_domManipulation": {
+    "message": "DOM Manipulation"
+  },
+  "toolCategory_formAutomation": {
+    "message": "Form Automation"
+  },
+  "toolCategory_contentAnalysis": {
+    "message": "Content Analysis"
+  },
+  "toolCategory_dataExtraction": {
+    "message": "Data Extraction"
+  },
+  "toolCategory_elementDiscovery": {
+    "message": "Element Discovery"
+  },
+  "tool_executeDOMFunction": {
+    "message": "Execute DOM Function"
+  },
+  "tool_executeDOMFunction_desc": {
+    "message": "Executes any DOM function on the page for direct element manipulation"
+  },
+  "toolExample_setValue_desc": {
+    "message": "Set value in field"
+  },
+  "toolExample_setValue_prompt": {
+    "message": "Call execute-dom-function with functionName: \"setValue\" and params: {\"selector\": \"#email\", \"value\": \"test@mail.com\"}"
+  },
+  "toolExample_clickElement_desc": {
+    "message": "Click on element"
+  },
+  "toolExample_clickElement_prompt": {
+    "message": "Call execute-dom-function with functionName: \"clickElement\" and params: {\"selector\": \".submit-button\", \"index\": 0}"
+  },
+  "toolExample_getText_desc": {
+    "message": "Get element text"
+  },
+  "toolExample_getText_prompt": {
+    "message": "Call execute-dom-function with functionName: \"getText\" and params: {\"selector\": \".result\"}"
+  },
+  "toolExample_selectOption_desc": {
+    "message": "Select option in select"
+  },
+  "toolExample_selectOption_prompt": {
+    "message": "Call execute-dom-function with functionName: \"selectOption\" and params: {\"selector\": \"#country\", \"value\": \"USA\"}"
+  },
+  "tool_fillFormFields": {
+    "message": "Fill Form Fields"
+  },
+  "toolExample_fillMultipleFields_desc": {
+    "message": "Fill multiple fields"
+  },
+  "toolExample_fillMultipleFields_prompt": {
+    "message": "Call fill-form-fields with fieldsToFill: {\"email\": \"user@mail.com\", \"name\": \"John Doe\", \"phone\": \"+1234567890\"}"
+  },
+  "toolExample_fillSingleField_desc": {
+    "message": "Fill single field"
+  },
+  "toolExample_fillSingleField_prompt": {
+    "message": "Call fill-form-fields with fieldsToFill: {\"lastName\": \"Smith\"}"
+  },
+  "toolExample_getFormFields_desc": {
+    "message": "Get form fields"
+  },
+  "toolExample_getFormFields_prompt": {
+    "message": "Call get-form-fields to see all form fields on the page"
+  },
+  "toolExample_checkCheckbox_desc": {
+    "message": "Check checkbox"
+  },
+  "toolExample_checkCheckbox_prompt": {
+    "message": "Call set-checkbox with selector: \"#agree\" and checked: true"
+  },
+  "toolExample_uncheckCheckbox_desc": {
+    "message": "Uncheck checkbox"
+  },
+  "toolExample_uncheckCheckbox_prompt": {
+    "message": "Call set-checkbox with selector: \".newsletter\" and checked: false"
+  },
+  "toolExample_submitSpecificForm_desc": {
+    "message": "Submit specific form"
+  },
+  "toolExample_submitSpecificForm_prompt": {
+    "message": "Call submit-form with selector: \"#contact-form\""
+  },
+  "toolExample_submitFirstForm_desc": {
+    "message": "Submit first form"
+  },
+  "toolExample_submitFirstForm_prompt": {
+    "message": "Call submit-form without parameters to submit the first form"
+  },
+  "toolExample_summarize_desc": {
+    "message": "Create summary"
+  },
+  "toolExample_summarize_prompt": {
+    "message": "Call summarize to create a summary of this page"
+  },
+  "toolExample_collectEmails_desc": {
+    "message": "Collect all emails"
+  },
+  "toolExample_collectEmails_prompt": {
+    "message": "Call collect-contacts with contactType: \"email\" and format: \"json\""
+  },
+  "toolExample_collectAllContacts_desc": {
+    "message": "Collect all contacts"
+  },
+  "toolExample_collectAllContacts_prompt": {
+    "message": "Call collect-contacts with contactType: \"all\" and format: \"text\""
+  },
+  "toolExample_findLoginButton_desc": {
+    "message": "Find login button"
+  },
+  "toolExample_findLoginButton_prompt": {
+    "message": "Call find-elements with description: \"login button\""
+  },
+  "toolExample_findEmailField_desc": {
+    "message": "Find email field"
+  },
+  "toolExample_findEmailField_prompt": {
+    "message": "Call find-elements with description: \"email input field\""
+  },
+  "toolExample_parsePages_desc": {
+    "message": "Parse pages"
+  },
+  "toolExample_parsePages_prompt": {
+    "message": "Use parse-pages to collect data from multiple pages. Follow workflow: init -> get-links -> filter-links -> navigate -> find-elements -> save-selector -> extract-data -> finish"
   }
 }
 

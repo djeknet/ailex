@@ -1,5 +1,6 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, WebSearchSettings, Citation } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
 /**
@@ -57,7 +58,9 @@ export class GeminiProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     _webSearchSettings?: WebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>
   ): Promise<AIResponse> {
     console.log('[Gemini] chat - Starting');
     console.log('[Gemini] chat - Model:', model);
@@ -126,6 +129,18 @@ export class GeminiProvider implements AIProvider {
       }
     };
     
+    // Add function declarations if tools provided
+    if (tools && tools.length > 0) {
+      requestBody.tools = [{
+        functionDeclarations: tools.map(tool => ({
+          name: tool.function.name,
+          description: tool.function.description,
+          parameters: tool.function.parameters
+        }))
+      }];
+      console.log('[Gemini] Added function declarations:', tools.length);
+    }
+    
     // Add Google Search tool if web search is enabled
     if (webSearchEnabled) {
       requestBody.tools = [{
@@ -171,6 +186,7 @@ export class GeminiProvider implements AIProvider {
         let inputTokens = 0;
         let outputTokens = 0;
         let citations: Citation[] = [];
+        const toolCalls: ToolCall[] = [];
         let chunkCount = 0;
       let buffer = '';
 
@@ -225,6 +241,25 @@ export class GeminiProvider implements AIProvider {
                     onChunk(content); // Send immediately to UI
                   }
 
+                  // Handle function calls
+                  const parts = json.candidates?.[0]?.content?.parts;
+                  if (parts) {
+                    for (const part of parts) {
+                      if (part.functionCall) {
+                        const toolCall: ToolCall = {
+                          id: `call_${Date.now()}_${toolCalls.length}`,
+                          type: 'function',
+                          function: {
+                            name: part.functionCall.name,
+                            arguments: JSON.stringify(part.functionCall.args || {})
+                          }
+                        };
+                        toolCalls.push(toolCall);
+                        console.log('[Gemini] Function call detected:', toolCall.function.name);
+                      }
+                    }
+                  }
+
                   // Capture usage metadata if available
                   if (json.usageMetadata) {
                     totalTokens = json.usageMetadata.totalTokenCount || 0;
@@ -267,7 +302,8 @@ export class GeminiProvider implements AIProvider {
         totalTokens,
         inputTokens,
         outputTokens,
-        citationsCount: citations.length
+        citationsCount: citations.length,
+        toolCallsCount: toolCalls.length
       });
 
       return {
@@ -278,6 +314,8 @@ export class GeminiProvider implements AIProvider {
           output: outputTokens
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'gemini'
       };
@@ -292,6 +330,24 @@ export class GeminiProvider implements AIProvider {
       // Extract citations
       const citations = data.candidates?.[0] ? extractCitations(data.candidates[0]) : [];
       
+      // Extract function calls
+      const toolCalls: ToolCall[] = [];
+      const parts = data.candidates?.[0]?.content?.parts;
+      if (parts) {
+        for (const part of parts) {
+          if (part.functionCall) {
+            toolCalls.push({
+              id: `call_${Date.now()}_${toolCalls.length}`,
+              type: 'function',
+              function: {
+                name: part.functionCall.name,
+                arguments: JSON.stringify(part.functionCall.args || {})
+              }
+            });
+          }
+        }
+      }
+      
       console.log('[Gemini] chat - Extracted content:', {
         contentLength: content.length,
         hasCandidates: !!data.candidates,
@@ -299,6 +355,7 @@ export class GeminiProvider implements AIProvider {
         firstCandidate: data.candidates?.[0],
         finishReason: data.candidates?.[0]?.finishReason,
         citationsCount: citations.length,
+        toolCallsCount: toolCalls.length,
         content: content.substring(0, 200)
       });
       
@@ -314,6 +371,8 @@ export class GeminiProvider implements AIProvider {
           output: data.usageMetadata.candidatesTokenCount
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'gemini'
       };

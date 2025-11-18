@@ -17,7 +17,7 @@ export default function ToolExecutionDisplay({ toolExecution, className }: ToolE
     <div className={className}>
       <Tool>
         <ToolHeader 
-          state={toolExecution.state} 
+          state={toolExecution.state as any} 
           type={`tool-${toolExecution.toolName}`} 
           title={toolExecution.toolName}
         />

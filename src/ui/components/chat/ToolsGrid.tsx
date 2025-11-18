@@ -32,10 +32,26 @@ export default function ToolsGrid({ onToolSelect, currentUrl }: ToolsGridProps) 
   
   useEffect(() => {
     setCurrentUrl(currentUrl || null);
-    loadTools(currentUrl);
+    loadTools(); // Загружаем все инструменты, фильтрация по URL в getFilteredTools
   }, [currentUrl, loadTools, setCurrentUrl]);
   
-  const tools = getFilteredTools();
+  // Получаем инструменты и фильтруем их ЗДЕСЬ, не полагаясь на store
+  const allTools = getFilteredTools();
+  
+  // Дополнительная фильтрация по URL прямо здесь
+  const tools = currentUrl 
+    ? allTools.filter(tool => {
+        if (!tool.urlPattern) return true;
+        const matches = currentUrl.startsWith(tool.urlPattern);
+        console.log('[ToolsGrid] Filter check:', {
+          toolName: tool.name,
+          urlPattern: tool.urlPattern,
+          currentUrl,
+          matches
+        });
+        return matches;
+      })
+    : allTools;
   
   if (isLoading) {
     return (

@@ -14,6 +14,10 @@ export interface Tool {
   nameKey?: string; // Ключ локализации для name
   descriptionKey?: string; // Ключ локализации для description
   systemInstructions?: string; // Дополнительные инструкции для AI при вызове этого инструмента
+  // API Integration
+  apiUrl?: string; // API endpoint
+  apiMethod?: 'GET' | 'POST'; // HTTP метод
+  apiHeaders?: Record<string, string>; // Headers для аутентификации
 }
 
 export interface ToolRegistry {

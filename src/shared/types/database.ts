@@ -93,5 +93,9 @@ export interface CustomTool {
   enabled: boolean;
   createdAt: number;
   updatedAt: number;
+  // API Integration
+  apiUrl?: string; // API endpoint
+  apiMethod?: 'GET' | 'POST'; // HTTP метод
+  apiHeaders?: Record<string, string>; // Headers для аутентификации
 }
 

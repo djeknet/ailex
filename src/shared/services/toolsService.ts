@@ -1,4 +1,5 @@
-import { Tool, ToolDefinition, CustomTool } from '@shared/types/tools';
+import { Tool, ToolDefinition } from '@shared/types/tools';
+import { CustomTool } from '@shared/types/database';
 import { toolRegistry } from '@shared/tools';
 import * as dbService from '@/background/services/dbService';
 
@@ -9,6 +10,13 @@ export async function getAllAvailableTools(currentUrl?: string): Promise<Tool[]>
   const builtInTools = Object.values(toolRegistry);
   const customTools = await dbService.getEnabledCustomTools();
   
+  console.log('[toolsService] Loading tools:', {
+    builtInCount: builtInTools.length,
+    customToolsCount: customTools.length,
+    customCommands: customTools.map(t => ({ command: t.command, name: t.name, enabled: t.enabled })),
+    currentUrl
+  });
+  
   // Конвертируем пользовательские инструменты в формат Tool
   const customToolsAsTools: Tool[] = customTools.map(ct => customToolToTool(ct));
   
@@ -16,7 +24,13 @@ export async function getAllAvailableTools(currentUrl?: string): Promise<Tool[]>
   
   // Фильтруем по URL паттерну если указан
   if (currentUrl) {
-    return allTools.filter(tool => matchesUrlPattern(tool, currentUrl));
+    const filtered = allTools.filter(tool => matchesUrlPattern(tool, currentUrl));
+    console.log('[toolsService] Filtered by URL:', {
+      before: allTools.length,
+      after: filtered.length,
+      filtered: allTools.filter(t => !matchesUrlPattern(t, currentUrl)).map(t => ({ command: t.command, urlPattern: t.urlPattern }))
+    });
+    return filtered;
   }
   
   return allTools;
@@ -73,7 +87,17 @@ function matchesUrlPattern(tool: Tool, url: string): boolean {
   }
   
   // Точное совпадение начала URL
-  return url.startsWith(tool.urlPattern);
+  const matches = url.startsWith(tool.urlPattern);
+  
+  console.log('[matchesUrlPattern]', {
+    toolId: tool.id,
+    toolName: tool.name,
+    urlPattern: tool.urlPattern,
+    currentUrl: url,
+    matches
+  });
+  
+  return matches;
 }
 
 /**
@@ -113,6 +137,10 @@ function customToolToTool(customTool: CustomTool): Tool {
     command: customTool.command,
     urlPattern: customTool.urlPattern,
     isBuiltIn: false,
+    apiUrl: customTool.apiUrl,
+    apiMethod: customTool.apiMethod,
+    apiHeaders: customTool.apiHeaders,
+    systemInstructions: `User called custom tool "${customTool.name}". CRITICAL: Read the prompt from this tool result and IMMEDIATELY execute the instructions. If the prompt tells you to call execute-dom-function or any other tool, you MUST call that tool RIGHT NOW in this same response. DO NOT just tell the user what to do - YOU must execute the tool calls yourself. ${customTool.apiUrl ? 'This tool will call an external API and return the result.' : 'You have access to execute-dom-function tool for DOM manipulation.'}`,
     parameters: {
       type: 'object',
       properties: {},
@@ -121,11 +149,20 @@ function customToolToTool(customTool: CustomTool): Tool {
     
     async execute(params: any) {
       // Для пользовательских инструментов возвращаем промпт для AI
-      return {
+      // Если есть результат API, добавляем его в контекст
+      const result: any = {
         success: true,
-        prompt: customTool.prompt,
+        prompt: `EXECUTE THIS INSTRUCTION NOW: ${customTool.prompt}`,
         requiresAI: true
       };
+      
+      // Если был вызов API, добавляем результат
+      if (params.apiResult) {
+        result.apiData = params.apiResult;
+        result.prompt = `EXECUTE THIS INSTRUCTION NOW: ${customTool.prompt}\n\nData from API:\n${JSON.stringify(params.apiResult, null, 2)}`;
+      }
+      
+      return result;
     }
   };
 }

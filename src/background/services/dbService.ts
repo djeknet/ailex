@@ -35,7 +35,7 @@ interface AiLexDB extends DBSchema {
 }
 
 const DB_NAME = 'ailex-db';
-const DB_VERSION = 3; // Увеличиваем версию для добавления customTools
+const DB_VERSION = 4; // Увеличиваем версию для добавления API полей в customTools
 
 let dbInstance: IDBPDatabase<AiLexDB> | null = null;
 
