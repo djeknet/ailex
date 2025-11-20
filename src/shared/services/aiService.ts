@@ -1,4 +1,4 @@
-import { AIMessage, AIResponse, AIOperator, AIOperatorConfig, WebSearchSettings, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, AIOperator, AIOperatorConfig, WebSearchSettings, ToolCall, GeneratedImage } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { OpenAIProvider } from './providers/openai';
 import { AnthropicProvider } from './providers/anthropic';
@@ -86,6 +86,37 @@ export async function testConnection(config: AIOperatorConfig): Promise<boolean>
   }
 
   return await provider.testConnection(config.apiKey, config.endpoint);
+}
+
+export async function generateImage(
+  prompt: string,
+  config: AIOperatorConfig,
+  n?: number,
+  responseFormat?: 'url' | 'b64_json'
+): Promise<GeneratedImage[]> {
+  console.log('[aiService] generateImage - Starting');
+  console.log('[aiService] generateImage - Operator:', config.operator);
+  console.log('[aiService] generateImage - Prompt:', prompt);
+  console.log('[aiService] generateImage - Count:', n);
+  console.log('[aiService] generateImage - Format:', responseFormat);
+  
+  const provider = providers[config.operator];
+  
+  if (!provider) {
+    throw new Error(`Unsupported AI operator: ${config.operator}`);
+  }
+
+  if (!provider.generateImage) {
+    throw new Error(`Image generation not supported by ${config.operator}`);
+  }
+
+  return await provider.generateImage(
+    prompt,
+    config.apiKey,
+    config.endpoint,
+    n,
+    responseFormat
+  );
 }
 
 // Helper to get operator display name

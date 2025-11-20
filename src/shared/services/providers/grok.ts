@@ -1,5 +1,5 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, GrokWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, GrokWebSearchSettings, Citation, ToolCall, GeneratedImage } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
@@ -401,6 +401,69 @@ export class GrokProvider implements AIProvider {
       console.error('Grok connection test failed:', error);
       return false;
     }
+  }
+
+  async generateImage(
+    prompt: string,
+    apiKey: string,
+    endpoint?: string,
+    n: number = 1,
+    responseFormat: 'url' | 'b64_json' = 'b64_json'
+  ): Promise<GeneratedImage[]> {
+    const baseUrl = endpoint || 'https://api.x.ai/v1';
+    const url = `${baseUrl}/images/generations`;
+
+    console.log('[Grok] Generating image', { prompt, n, responseFormat });
+
+    const requestBody = {
+      model: 'grok-2-image',
+      prompt,
+      n,
+      response_format: responseFormat
+    };
+
+    const response = await loggedFetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Grok image generation error');
+    }
+
+    const data = await response.json();
+    console.log('[Grok] Image generation response:', data);
+
+    // Convert response to GeneratedImage format
+    const generatedImages: GeneratedImage[] = [];
+    
+    if (data.data && Array.isArray(data.data)) {
+      data.data.forEach((item: any) => {
+        if (responseFormat === 'b64_json' && item.b64_json) {
+          generatedImages.push({
+            type: 'image_url',
+            image_url: {
+              url: `data:image/png;base64,${item.b64_json}`
+            }
+          });
+        } else if (responseFormat === 'url' && item.url) {
+          generatedImages.push({
+            type: 'image_url',
+            image_url: {
+              url: item.url
+            }
+          });
+        }
+      });
+    }
+
+    console.log('[Grok] Generated images:', generatedImages.length);
+    return generatedImages;
   }
 }
 

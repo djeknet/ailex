@@ -31,6 +31,7 @@ type Format = 'png' | 'jpeg' | 'webp';
 type Background = 'opaque' | 'transparent';
 type InputFidelity = 'low' | 'high';
 type Moderation = 'auto' | 'low';
+type ResponseFormat = 'url' | 'b64_json';
 
 // Token costs for OpenAI image generation
 const TOKEN_COSTS = {
@@ -59,6 +60,10 @@ export default function ImageGenerationSettingsDialog({
   const [background, setBackground] = useState<Background>(currentSettings.background || 'opaque');
   const [inputFidelity, setInputFidelity] = useState<InputFidelity>(currentSettings.inputFidelity || 'low');
   const [moderation, setModeration] = useState<Moderation>(currentSettings.moderation || 'auto');
+  
+  // Grok settings
+  const [imageCount, setImageCount] = useState<number>(currentSettings.n || 1);
+  const [responseFormat, setResponseFormat] = useState<ResponseFormat>(currentSettings.responseFormat || 'b64_json');
 
   // Update local state when settings change
   useEffect(() => {
@@ -73,6 +78,9 @@ export default function ImageGenerationSettingsDialog({
       setBackground(settings.background || 'opaque');
       setInputFidelity(settings.inputFidelity || 'low');
       setModeration(settings.moderation || 'auto');
+    } else if (operator === 'grok') {
+      setImageCount(settings.n || 1);
+      setResponseFormat(settings.responseFormat || 'b64_json');
     }
   }, [operator, getImageSettings]);
 
@@ -161,6 +169,24 @@ export default function ImageGenerationSettingsDialog({
     });
   };
 
+  const handleImageCountChange = (value: string) => {
+    const newCount = parseInt(value, 10);
+    setImageCount(newCount);
+    setImageSettings(operator, {
+      ...currentSettings,
+      n: newCount
+    });
+  };
+
+  const handleResponseFormatChange = (value: string) => {
+    const newFormat = value as ResponseFormat;
+    setResponseFormat(newFormat);
+    setImageSettings(operator, {
+      ...currentSettings,
+      responseFormat: newFormat
+    });
+  };
+
   // Calculate estimated tokens for OpenAI
   const getEstimatedTokens = () => {
     if (quality === 'auto' || size === 'auto') return null;
@@ -182,7 +208,7 @@ export default function ImageGenerationSettingsDialog({
         <DialogHeader>
           <DialogTitle>{t('imageGenerationSettings')}</DialogTitle>
           <DialogDescription>
-            {t('imageGenerationSettingsDescription')} {operator === 'openrouter' ? 'OpenRouter' : 'OpenAI'}
+            {t('imageGenerationSettingsDescription')} {operator === 'openrouter' ? 'OpenRouter' : operator === 'openai' ? 'OpenAI' : operator === 'grok' ? 'Grok' : operator}
           </DialogDescription>
         </DialogHeader>
         
@@ -348,7 +374,48 @@ export default function ImageGenerationSettingsDialog({
             </>
           )}
           
-          {operator !== 'openrouter' && operator !== 'openai' && (
+          {operator === 'grok' && (
+            <>
+              {/* Image Count */}
+              <div className="space-y-2">
+                <Label htmlFor="image-count">{t('imageCount')}</Label>
+                <Select value={imageCount.toString()} onValueChange={handleImageCountChange}>
+                  <SelectTrigger id="image-count">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num} {num === 1 ? t('image') : t('images')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t('imageCountDescription')}
+                </p>
+              </div>
+
+              {/* Response Format */}
+              <div className="space-y-2">
+                <Label htmlFor="response-format">{t('responseFormat')}</Label>
+                <Select value={responseFormat} onValueChange={handleResponseFormatChange}>
+                  <SelectTrigger id="response-format">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="b64_json">{t('responseFormatBase64')}</SelectItem>
+                    <SelectItem value="url">{t('responseFormatUrl')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t('responseFormatDescription')}
+                </p>
+              </div>
+            </>
+          )}
+          
+          {operator !== 'openrouter' && operator !== 'openai' && operator !== 'grok' && (
             <p className="text-sm text-muted-foreground">
               {t('imageGenerationNotAvailable')}
             </p>

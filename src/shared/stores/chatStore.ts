@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { Chat, ChatMessage, ChatFolder } from '@shared/types/database';
 import { AIOperatorConfig, AIOperator, AIMessage, ToolCall } from '@shared/types/ai';
 import { chatAPI, historyAPI, folderAPI } from '@shared/utils/messaging';
-import { sendMessage as sendAIMessage } from '@shared/services/aiService';
+import { sendMessage as sendAIMessage, generateImage as generateAIImage } from '@shared/services/aiService';
 import { PageContextType, HistoryMode } from '@shared/types/extension';
 import { AIServiceError, AIErrorCode, detectErrorType } from '@shared/types/errors';
 import { getTranslation } from '@shared/i18n/useTranslation';
@@ -546,20 +546,66 @@ export const useChatStore = create<ChatStore>()(
       // Use editingImageResponseId or previousResponseId parameter
       const responseIdForEditing = previousResponseId || editingImageResponseId;
       
-      let response = await sendAIMessage(
-        aiMessages,
-        selectedOperator,
-        (chunk) => {
-          assistantContent += chunk;
-          set({ streamingContent: assistantContent });
-        },
-        webSearchEnabled,
-        webSearchSettings,
-        controller.signal,
-        toolDefinitions.length > 0 ? toolDefinitions : undefined,
-        undefined, // Don't execute tools during first call
-        responseIdForEditing || undefined
-      );
+      let response;
+      
+      // Check if this is an image generation request (Grok with image model)
+      const model = selectedOperator.selectedModel || '';
+      const isImageGeneration = selectedOperator.operator === 'grok' && 
+                                 model.toLowerCase().includes('grok') && 
+                                 model.toLowerCase().includes('image');
+      
+      if (isImageGeneration) {
+        console.log('[chatStore] Detected image generation request for Grok');
+        
+        // Get image settings
+        const { useOperatorSettingsStore } = await import('@shared/stores/operatorSettingsStore');
+        const imageSettings = useOperatorSettingsStore.getState().getImageSettings('grok');
+        
+        // Extract prompt from last user message
+        const lastUserMessage = aiMessages[aiMessages.length - 1];
+        const prompt = typeof lastUserMessage.content === 'string' 
+          ? lastUserMessage.content 
+          : lastUserMessage.content.find(c => c.type === 'text')?.text || '';
+        
+        try {
+          const generatedImages = await generateAIImage(
+            prompt,
+            selectedOperator,
+            imageSettings.n || 1,
+            imageSettings.responseFormat || 'b64_json'
+          );
+          
+          console.log('[chatStore] Generated images:', generatedImages.length);
+          
+          // Create response with images
+          response = {
+            content: '', // Empty content for image-only response
+            images: generatedImages,
+            model: model,
+            operator: selectedOperator.operator,
+            tokens: undefined
+          };
+        } catch (error: any) {
+          console.error('[chatStore] Image generation error:', error);
+          throw error;
+        }
+      } else {
+        // Normal chat request
+        response = await sendAIMessage(
+          aiMessages,
+          selectedOperator,
+          (chunk) => {
+            assistantContent += chunk;
+            set({ streamingContent: assistantContent });
+          },
+          webSearchEnabled,
+          webSearchSettings,
+          controller.signal,
+          toolDefinitions.length > 0 ? toolDefinitions : undefined,
+          undefined, // Don't execute tools during first call
+          responseIdForEditing || undefined
+        );
+      }
       
       // Clear editing state after sending
       if (editingImageResponseId) {

@@ -14,6 +14,10 @@ export interface ImageGenerationSettings {
   background?: 'opaque' | 'transparent';
   inputFidelity?: 'low' | 'high';
   moderation?: 'auto' | 'low';
+  
+  // Grok
+  n?: number; // 1-10 images
+  responseFormat?: 'url' | 'b64_json';
 }
 
 interface OperatorSettings {
@@ -37,7 +41,10 @@ const defaultImageSettings: Record<AIOperator, ImageGenerationSettings> = {
     moderation: 'auto'
   },
   anthropic: {},
-  grok: {},
+  grok: {
+    n: 1,
+    responseFormat: 'b64_json'
+  },
   gemini: {},
   lmstudio: {}
 };

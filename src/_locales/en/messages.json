@@ -2086,6 +2086,30 @@
   },
   "imageModerationDescription": {
     "message": "Content filtering level according to OpenAI policy"
+  },
+  "imageCount": {
+    "message": "Image Count"
+  },
+  "image": {
+    "message": "image"
+  },
+  "images": {
+    "message": "images"
+  },
+  "imageCountDescription": {
+    "message": "Number of images to generate (1-10)"
+  },
+  "responseFormat": {
+    "message": "Response Format"
+  },
+  "responseFormatBase64": {
+    "message": "Base64 (embedded)"
+  },
+  "responseFormatUrl": {
+    "message": "URL (hosted)"
+  },
+  "responseFormatDescription": {
+    "message": "How to receive generated images: embedded (base64) or hosted URL"
   }
 }
 

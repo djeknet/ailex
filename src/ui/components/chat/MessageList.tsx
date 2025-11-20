@@ -504,13 +504,15 @@ export default function MessageList() {
       console.log('[MessageList] Response received:', {
         contentLength: response.content?.length || 0,
         accumulatedLength: accumulatedContent.length,
-        hasTokens: !!response.tokens
+        hasTokens: !!response.tokens,
+        hasImages: !!response.images?.length
       });
 
       // Use accumulated content if available, otherwise use response.content
       const finalContent = accumulatedContent || response.content;
 
-      if (!finalContent) {
+      // Allow empty content if images were generated
+      if (!finalContent && (!response.images || response.images.length === 0)) {
         throw new Error(t('errorEmptyResponse'));
       }
 
@@ -523,9 +525,11 @@ export default function MessageList() {
         operator: operator.operator,
         model: modelId,
         branchId: messageId, // Link to original message
-        text: finalContent,
+        text: finalContent || '', // Allow empty text if images are present
         tokens: response.tokens?.total || 0,
-        citations: response.citations // Add citations from response
+        citations: response.citations, // Add citations from response
+        generatedImages: response.images ? JSON.stringify(response.images) : undefined,
+        responseId: response.response_id
       };
 
       console.log('[MessageList] Saving branch message:', {
@@ -542,14 +546,61 @@ export default function MessageList() {
 
       console.log('[MessageList] Branch message saved to database and added to store');
       
+      // Update or create branch with final data including images
+      setMessageBranches(prev => {
+        const updated = { ...prev };
+        
+        // If no branches exist yet (no streaming occurred), create the branch
+        if (!updated[messageId] || updated[messageId].length === 0) {
+          updated[messageId] = [{
+            id: tempBranchId,
+            operator: operator.operator,
+            model: modelId,
+            text: finalContent || '',
+            generatedImages: response.images ? JSON.stringify(response.images) : undefined,
+            responseId: response.response_id
+          }];
+        } else {
+          // Update existing branch
+          const branchIndex = updated[messageId].length - 1;
+          if (branchIndex >= 0) {
+            updated[messageId][branchIndex] = {
+              ...updated[messageId][branchIndex],
+              text: finalContent || '',
+              generatedImages: response.images ? JSON.stringify(response.images) : undefined,
+              responseId: response.response_id
+            };
+          }
+        }
+        
+        return updated;
+      });
+      
+      // Switch to the new branch if not already switched
+      setActiveBranches(prev => {
+        const currentBranchIndex = prev[messageId];
+        const totalBranches = messageBranches[messageId]?.length || 0;
+        
+        // If we're still on the original message (no branch active), switch to the first branch
+        if (currentBranchIndex === undefined || currentBranchIndex === 0) {
+          return {
+            ...prev,
+            [messageId]: totalBranches > 0 ? totalBranches : 1
+          };
+        }
+        
+        return prev;
+      });
+      
       // Generate suggested questions for branch (asynchronously, non-blocking)
       const { useSettingsStore } = await import('@shared/stores/settingsStore');
       const { showAISuggestions } = useSettingsStore.getState();
-      if (showAISuggestions) {
+      const hasGeneratedImages = !!response.images && response.images.length > 0;
+      if (showAISuggestions && !hasGeneratedImages) {
         setTimeout(() => {
           generateSuggestedQuestions(
             branchMessage.id,
-            finalContent,
+            finalContent || '',
             operator.operator,
             modelId
           );

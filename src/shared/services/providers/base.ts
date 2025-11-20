@@ -1,4 +1,4 @@
-import { AIMessage, AIResponse, WebSearchSettings, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, ToolCall, GeneratedImage } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 
 export interface AIProvider {
@@ -17,6 +17,15 @@ export interface AIProvider {
   ): Promise<AIResponse>;
   listModels(apiKey: string, endpoint?: string): Promise<any[]>;
   testConnection(apiKey: string, endpoint?: string): Promise<boolean>;
+  
+  // Image generation method (optional, for providers that support it)
+  generateImage?(
+    prompt: string,
+    apiKey: string,
+    endpoint?: string,
+    n?: number,
+    responseFormat?: 'url' | 'b64_json'
+  ): Promise<GeneratedImage[]>;
 }
 
 

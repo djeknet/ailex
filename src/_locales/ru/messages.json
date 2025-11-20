@@ -2202,5 +2202,29 @@
   },
   "imageModerationDescription": {
     "message": "Уровень фильтрации контента согласно политике OpenAI"
+  },
+  "imageCount": {
+    "message": "Количество изображений"
+  },
+  "image": {
+    "message": "изображение"
+  },
+  "images": {
+    "message": "изображений"
+  },
+  "imageCountDescription": {
+    "message": "Количество изображений для генерации (1-10)"
+  },
+  "responseFormat": {
+    "message": "Формат ответа"
+  },
+  "responseFormatBase64": {
+    "message": "Base64 (встроенный)"
+  },
+  "responseFormatUrl": {
+    "message": "URL (размещённый)"
+  },
+  "responseFormatDescription": {
+    "message": "Как получить сгенерированные изображения: встроенные (base64) или размещённые по URL"
   }
 }
