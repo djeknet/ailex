@@ -61,6 +61,18 @@ export interface AIResponse {
   inlineCitations?: boolean; // Whether to show citations inline in text
   tool_calls?: ToolCall[]; // Вызовы инструментов
   finish_reason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
+  images?: GeneratedImage[]; // Сгенерированные изображения
+  response_id?: string; // ID ответа от OpenAI Responses API для редактирования
+}
+
+// Image Generation Types
+export interface GeneratedImage {
+  type: 'image_url';
+  image_url: {
+    url: string; // base64 data URL
+  };
+  response_id?: string; // ID ответа для редактирования
+  image_generation_call_id?: string; // ID вызова генерации
 }
 
 // Web Search Types

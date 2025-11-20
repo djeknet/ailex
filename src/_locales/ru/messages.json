@@ -2058,5 +2058,149 @@
   },
   "selectElementNote": {
     "message": "Кликните на элемент страницы, чтобы вставить его селектор"
+  },
+  "imageGenerationSettings": {
+    "message": "Настройки генерации изображений"
+  },
+  "imageGenerationSettingsDescription": {
+    "message": "Настройте параметры генерации изображений для"
+  },
+  "aspectRatio": {
+    "message": "Соотношение сторон"
+  },
+  "selectAspectRatio": {
+    "message": "Выберите соотношение сторон"
+  },
+  "aspectRatioDescription": {
+    "message": "Соотношение сторон для генерируемых изображений"
+  },
+  "imageGenerationNotAvailable": {
+    "message": "Настройки генерации изображений для этого оператора пока не доступны."
+  },
+  "aspectRatio_1_1": {
+    "message": "1:1 → 1024×1024 (по умолчанию)"
+  },
+  "aspectRatio_2_3": {
+    "message": "2:3 → 832×1248"
+  },
+  "aspectRatio_3_2": {
+    "message": "3:2 → 1248×832"
+  },
+  "aspectRatio_3_4": {
+    "message": "3:4 → 864×1184"
+  },
+  "aspectRatio_4_3": {
+    "message": "4:3 → 1184×864"
+  },
+  "aspectRatio_4_5": {
+    "message": "4:5 → 896×1152"
+  },
+  "aspectRatio_5_4": {
+    "message": "5:4 → 1152×896"
+  },
+  "aspectRatio_9_16": {
+    "message": "9:16 → 768×1344"
+  },
+  "aspectRatio_16_9": {
+    "message": "16:9 → 1344×768"
+  },
+  "aspectRatio_21_9": {
+    "message": "21:9 → 1536×672"
+  },
+  "imageGenerationSettingsButton": {
+    "message": "Настройки генерации"
+  },
+  "downloadImage": {
+    "message": "Скачать"
+  },
+  "editImage": {
+    "message": "Изменить"
+  },
+  "editImageBadge": {
+    "message": "Изменить изображение"
+  },
+  "imageSize": {
+    "message": "Размер"
+  },
+  "imageQuality": {
+    "message": "Качество"
+  },
+  "imageFormat": {
+    "message": "Формат"
+  },
+  "imageCompression": {
+    "message": "Сжатие"
+  },
+  "imageBackground": {
+    "message": "Фон"
+  },
+  "imageInputFidelity": {
+    "message": "Точность ввода"
+  },
+  "imageModeration": {
+    "message": "Модерация контента"
+  },
+  "tokensEstimate": {
+    "message": "токенов"
+  },
+  "imageSizeAuto": {
+    "message": "Авто"
+  },
+  "imageSize1024x1024": {
+    "message": "1024×1024 (Квадрат)"
+  },
+  "imageSize1536x1024": {
+    "message": "1536×1024 (Горизонталь)"
+  },
+  "imageSize1024x1536": {
+    "message": "1024×1536 (Вертикаль)"
+  },
+  "imageQualityAuto": {
+    "message": "Авто"
+  },
+  "imageQualityLow": {
+    "message": "Низкое (~270-400 токенов)"
+  },
+  "imageQualityMedium": {
+    "message": "Среднее (~1000-1600 токенов)"
+  },
+  "imageQualityHigh": {
+    "message": "Высокое (~4000-6200 токенов)"
+  },
+  "imageQualityDescription": {
+    "message": "Более высокое качество требует больше токенов и времени"
+  },
+  "imageFormatDescription": {
+    "message": "PNG поддерживает прозрачность, JPEG быстрее"
+  },
+  "imageCompressionDescription": {
+    "message": "Уровень сжатия для JPEG и WebP форматов"
+  },
+  "imageBackgroundOpaque": {
+    "message": "Непрозрачный"
+  },
+  "imageBackgroundTransparent": {
+    "message": "Прозрачный"
+  },
+  "imageBackgroundDescription": {
+    "message": "Прозрачный фон работает только для PNG и WebP"
+  },
+  "imageInputFidelityLow": {
+    "message": "Низкая"
+  },
+  "imageInputFidelityHigh": {
+    "message": "Высокая (больше токенов)"
+  },
+  "imageInputFidelityDescription": {
+    "message": "Высокая точность сохраняет больше деталей входных изображений"
+  },
+  "imageModerationAuto": {
+    "message": "Авто (стандартная)"
+  },
+  "imageModerationLow": {
+    "message": "Низкая (менее строгая)"
+  },
+  "imageModerationDescription": {
+    "message": "Уровень фильтрации контента согласно политике OpenAI"
   }
 }

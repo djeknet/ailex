@@ -4,7 +4,10 @@ import { getTranslationLanguages } from '@shared/constants';
 import type { AIOperatorConfig, AIOperator } from '@shared/types/extension';
 import type { MessageBranch } from './MessageItem';
 import { useWebSearchStore } from '@shared/stores/webSearchStore';
+import { useChatStore } from '@shared/stores/chatStore';
 import ToolExecutionDisplay from './ToolExecutionDisplay';
+import GeneratedImage from './GeneratedImage';
+import type { GeneratedImage as GeneratedImageType } from '@shared/types/ai';
 import {
   Copy,
   Check,
@@ -95,6 +98,48 @@ export default function AIMessage({
 }: AIMessageProps) {
   const { t } = useTranslation();
   const { citationMode } = useWebSearchStore();
+  const { setEditingImageResponseId } = useChatStore();
+
+  // Handler for editing an image
+  const handleEditImage = (responseId: string) => {
+    console.log('[AIMessage] Edit image requested, responseId:', responseId);
+    setEditingImageResponseId(responseId);
+    
+    // Focus on the input field
+    // The input field will show the EditImageBadge automatically
+    const textarea = document.querySelector('textarea[placeholder*="message"]') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.focus();
+    }
+  };
+
+  // Helper function to render generated images
+  const renderGeneratedImages = (generatedImagesJson?: string, responseId?: string) => {
+    if (!generatedImagesJson) return null;
+    
+    try {
+      const images: GeneratedImageType[] = JSON.parse(generatedImagesJson);
+      if (!images || images.length === 0) return null;
+      
+      return (
+        <div className="mt-3 flex flex-wrap gap-3">
+          {images.map((img, idx) => (
+            <GeneratedImage
+              key={idx}
+              src={img.image_url.url}
+              alt={`Generated image ${idx + 1}`}
+              responseId={img.response_id || responseId}
+              imageGenerationCallId={img.image_generation_call_id}
+              onEdit={handleEditImage}
+            />
+          ))}
+        </div>
+      );
+    } catch (error) {
+      console.error('[AIMessage] Error parsing generated images:', error);
+      return null;
+    }
+  };
 
   // Helper function to render inline citations as custom badges
   const renderInlineCitations = (text: string, citations: any[]) => {
@@ -399,18 +444,26 @@ export default function AIMessage({
                 </div>
               )}
               
-              <div className="rounded-lg p-4 text-base" style={{ paddingLeft: '6px' }}>
+              <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
                 {renderMessageWithCitations(message.text, message.citations, message.operator)}
               </div>
+              
+              {/* Show generated images if any */}
+              {renderGeneratedImages(message.generatedImages, message.responseId)}
+              
               {renderActionButtons(message.text, message.id, message.operator, message.model)}
             </div>,
             
             /* Pages 1+: Alternative responses */
             ...branches.map((branch, idx) => (
               <div key={`branch-${idx}`}>
-                <div className="rounded-lg p-4 text-base" style={{ paddingLeft: '6px' }}>
+                <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
                   {renderMessageWithCitations(branch.text, branch.citations, branch.operator)}
                 </div>
+                
+                {/* Show generated images if any */}
+                {renderGeneratedImages(branch.generatedImages, branch.responseId)}
+                
                 {renderActionButtons(branch.text, branch.id, branch.operator, branch.model)}
               </div>
             ))
@@ -468,9 +521,12 @@ export default function AIMessage({
         </div>
       )}
       
-      <div className="rounded-lg p-4 text-base" style={{ paddingLeft: '6px' }}>
+      <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
         {renderMessageWithCitations(message.text, message.citations, message.operator)}
       </div>
+      
+      {/* Show generated images if any */}
+      {renderGeneratedImages(message.generatedImages)}
       
       {/* Action buttons for AI messages without branches */}
       {renderActionButtons(message.text, message.id, message.operator, message.model)}

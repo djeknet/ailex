@@ -37,6 +37,12 @@ export interface ChatMessage {
   xpath?: string; // XPath for DOM elements
   file_data?: string; // Base64 data for files and images
   
+  // Generated images metadata
+  generatedImages?: string; // JSON array of GeneratedImage objects
+  
+  // OpenAI response ID for image editing
+  responseId?: string; // OpenAI response ID для редактирования изображений
+  
   // Page context metadata (NOT storing actual content to save space)
   pageContextEnabled?: boolean; // Whether page context was used for this message
   pageContextType?: 'text' | 'dom' | 'html'; // Type of page context used

@@ -51,6 +51,7 @@ import {
 import InstructionSelector from './InstructionSelector';
 import ModelSelect from './ModelSelect';
 import AttachmentBadge from './AttachmentBadge';
+import EditImageBadge from './EditImageBadge';
 import ImagePreview from './ImagePreview';
 import WebSearchSettingsDialog from './WebSearchSettingsDialog';
 import ToolsCommandDropdown from './ToolsCommandDropdown';
@@ -97,7 +98,16 @@ export default function MessageInput() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   
-  const { sendUserMessage, isLoading, selectedOperator, setContextTruncationInfo, stopGeneration, setPageContextType: setGlobalPageContextType } = useChatStore();
+  const { 
+    sendUserMessage, 
+    isLoading, 
+    selectedOperator, 
+    setContextTruncationInfo, 
+    stopGeneration, 
+    setPageContextType: setGlobalPageContextType,
+    editingImageResponseId,
+    setEditingImageResponseId
+  } = useChatStore();
   
   // Get model capabilities (default: enabled if model not found)
   const modelCapabilities = selectedOperator?.selectedModel 
@@ -732,8 +742,17 @@ export default function MessageInput() {
             )}
             
             {/* File/DOM badges above textarea */}
-            {attachedFiles.length > 0 && (
+            {(attachedFiles.length > 0 || editingImageResponseId) && (
               <div className="flex flex-wrap gap-1 items-center mb-2" style={{ width: '100%', padding: '5px', paddingBottom: '0px' }}>
+                {/* Edit image badge */}
+                {editingImageResponseId && (
+                  <EditImageBadge
+                    responseId={editingImageResponseId}
+                    onRemove={() => setEditingImageResponseId(null)}
+                  />
+                )}
+                
+                {/* File/DOM attachment badges */}
                 {attachedFiles.map((file, index) => (
                   <AttachmentBadge
                     key={index}

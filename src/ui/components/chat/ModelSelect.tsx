@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Check, Star } from 'lucide-react';
+import { Check, Star, Settings } from 'lucide-react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useChatStore } from '@shared/stores/chatStore';
 import { useFavoriteModels } from '@shared/hooks/useFavoriteModels';
@@ -7,6 +7,7 @@ import { useTranslation } from '@shared/i18n/useTranslation';
 import { cn } from '@shared/utils/cn';
 import { getModelInfo } from '@shared/constants';
 import { Button } from '@/ui/components/ui/button';
+import ImageGenerationSettingsDialog from './ImageGenerationSettingsDialog';
 import {
   Command,
   CommandEmpty,
@@ -36,6 +37,7 @@ export default function ModelSelect() {
   const { isFavorite, toggleFavorite } = useFavoriteModels();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
 
   const configuredOperators = operators.filter(op => op.selectedModel && op.models && op.models.length > 0);
 
@@ -169,6 +171,22 @@ export default function ModelSelect() {
                       <span className="text-muted-foreground">{t('modelPrice')}:</span>{' '}
                       {formatPrice(modelInfo.pricing.prompt)} / 1M
                     </span>
+                  </div>
+                )}
+                
+                {/* Show image generation settings button if model supports image output */}
+                {modelInfo.architecture?.output_modalities?.includes('image') && selectedOperator && (
+                  <div className="pt-2 mt-2 border-t border-border">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSettingsDialogOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+                    >
+                      <Settings className="w-3 h-3" />
+                      <span>{t('imageGenerationSettingsButton')}</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -312,6 +330,15 @@ export default function ModelSelect() {
           </Command>
         </PopoverContent>
       </Popover>
+      
+      {/* Image Generation Settings Dialog */}
+      {selectedOperator && (
+        <ImageGenerationSettingsDialog
+          open={settingsDialogOpen}
+          onOpenChange={setSettingsDialogOpen}
+          operator={selectedOperator.operator}
+        />
+      )}
     </TooltipProvider>
   );
 }

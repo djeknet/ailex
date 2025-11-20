@@ -1,5 +1,6 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, GrokWebSearchSettings, Citation } from '@shared/types/ai';
+import { AIMessage, AIResponse, GrokWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 
 export class GrokProvider implements AIProvider {
@@ -11,7 +12,10 @@ export class GrokProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     webSearchEnabled?: boolean,
     webSearchSettings?: GrokWebSearchSettings,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>, // Not used: Grok returns all tool_calls at once
+    _previousResponseId?: string
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.x.ai/v1';
     
@@ -24,11 +28,12 @@ export class GrokProvider implements AIProvider {
       model, 
       webSearchEnabled,
       endpoint: url,
-      hasSettings: !!webSearchSettings 
+      hasSettings: !!webSearchSettings,
+      toolsCount: tools?.length || 0
     });
 
     // Build tools array for web search
-    const tools: any[] = [];
+    const webSearchTools: any[] = [];
     
     if (webSearchEnabled && webSearchSettings) {
       // Grok /v1/responses API uses 'web_search' type
@@ -47,7 +52,7 @@ export class GrokProvider implements AIProvider {
         webSearchTool.enable_image_understanding = true;
       }
       
-      tools.push(webSearchTool);
+      webSearchTools.push(webSearchTool);
       console.log('[Grok] Added web_search tool:', webSearchTool);
       
       // Note: X Search parameters are not yet supported in /v1/responses endpoint
@@ -95,8 +100,15 @@ export class GrokProvider implements AIProvider {
     };
   
     // Add tools if web search is enabled
-    if (tools.length > 0) {
+    if (webSearchTools.length > 0) {
+      requestBody.tools = webSearchTools;
+    }
+    
+    // Add function calling tools if provided (only for /chat/completions)
+    if (tools && tools.length > 0 && !webSearchEnabled) {
+      // Note: function calling tools work only with /chat/completions endpoint
       requestBody.tools = tools;
+      console.log('[Grok] Added function calling tools:', tools.length);
     }
     
     console.log('[Grok] Request body:', JSON.stringify(requestBody, null, 2));
@@ -124,6 +136,9 @@ export class GrokProvider implements AIProvider {
       let inputTokens = 0;
       let outputTokens = 0;
       const citations: Citation[] = [];
+      const toolCalls: ToolCall[] = [];
+      let currentToolCallIndex = -1;
+      let currentToolCall: any = {};
       let buffer = ''; // Buffer for incomplete lines
 
       try {
@@ -146,11 +161,6 @@ export class GrokProvider implements AIProvider {
 
             try {
               const json = JSON.parse(data);
-              
-              // Log first few chunks to understand structure
-              if (fullContent.length < 100) {
-                console.log('[Grok] Stream chunk:', JSON.stringify(json));
-              }
               
               // Handle different response formats
               let content = '';
@@ -197,6 +207,39 @@ export class GrokProvider implements AIProvider {
                 fullContent += content;
                 onChunk(content);
               }
+              
+              // Handle tool calls (only for /chat/completions)
+              if (!webSearchEnabled && json.choices?.[0]?.delta?.tool_calls) {
+                const deltaToolCalls = json.choices[0].delta.tool_calls;
+                
+                deltaToolCalls.forEach((tc: any) => {
+                  const index = tc.index;
+                  
+                  if (index > currentToolCallIndex) {
+                    // New tool call - save previous
+                    if (currentToolCallIndex >= 0) {
+                      toolCalls.push(currentToolCall as ToolCall);
+                    }
+                    currentToolCallIndex = index;
+                    currentToolCall = {
+                      id: tc.id || `call_${Date.now()}_${index}`,
+                      type: 'function',
+                      function: {
+                        name: tc.function?.name || '',
+                        arguments: tc.function?.arguments || ''
+                      }
+                    };
+                  } else {
+                    // Continue existing tool call
+                    if (tc.function?.name) {
+                      currentToolCall.function.name += tc.function.name;
+                    }
+                    if (tc.function?.arguments) {
+                      currentToolCall.function.arguments += tc.function.arguments;
+                    }
+                  }
+                });
+              }
 
               // Capture usage info if available
               if (json.usage) {
@@ -217,6 +260,14 @@ export class GrokProvider implements AIProvider {
                   }
                 });
               }
+              
+              // Check finish reason for saving last tool call
+              if (json.choices[0]?.finish_reason === 'tool_calls') {
+                if (currentToolCallIndex >= 0) {
+                  toolCalls.push(currentToolCall as ToolCall);
+                  console.log('[Grok] Saved final tool call, total:', toolCalls.length);
+                }
+              }
             } catch (e) {
               console.error('[Grok] Error parsing streaming response:', e);
               console.error('[Grok] Problematic line:', line);
@@ -230,7 +281,8 @@ export class GrokProvider implements AIProvider {
       console.log('[Grok] Streaming completed', {
         contentLength: fullContent.length,
         totalTokens,
-        citationsCount: citations.length
+        citationsCount: citations.length,
+        toolCallsCount: toolCalls.length
       });
 
       return {
@@ -241,6 +293,8 @@ export class GrokProvider implements AIProvider {
           output: outputTokens
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        finish_reason: toolCalls.length > 0 ? 'tool_calls' : undefined,
         model,
         operator: 'grok'
       };
@@ -262,6 +316,14 @@ export class GrokProvider implements AIProvider {
       }
       
       console.log('[Grok] Extracted citations:', citations);
+      
+      // Extract tool calls from non-streaming response
+      const message = data.choices?.[0]?.message;
+      const extractedToolCalls = message?.tool_calls || undefined;
+      
+      if (extractedToolCalls) {
+        console.log('[Grok] Extracted tool calls from non-streaming response:', extractedToolCalls.length);
+      }
       
       // /v1/responses returns different structure: output array with message objects
       // /v1/chat/completions returns: choices[].message.content
@@ -301,6 +363,8 @@ export class GrokProvider implements AIProvider {
         content,
         tokens,
         citations: citations.length > 0 ? citations : undefined,
+        tool_calls: extractedToolCalls,
+        finish_reason: data.choices?.[0]?.finish_reason || 'stop',
         model,
         operator: 'grok'
       };

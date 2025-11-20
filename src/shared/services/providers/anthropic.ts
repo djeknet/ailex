@@ -14,7 +14,8 @@ export class AnthropicProvider implements AIProvider {
     webSearchSettings?: ClaudeWebSearchSettings,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    onToolCall?: (toolCall: ToolCall) => Promise<any>
+    onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    _previousResponseId?: string
   ): Promise<AIResponse> {
     console.log('[Anthropic] Starting chat request');
     console.log('[Anthropic] Model:', model);
@@ -36,7 +37,17 @@ export class AnthropicProvider implements AIProvider {
     console.log('[Anthropic] Chat messages count:', chatMessages.length);
 
     // Convert messages to Anthropic format
-    const anthropicMessages = chatMessages.map(msg => {
+    // Anthropic требует специальный формат: assistant messages с tool_use, затем user messages с tool_result
+    const anthropicMessages = [];
+    
+    for (let i = 0; i < chatMessages.length; i++) {
+      const msg = chatMessages[i];
+      
+      // Skip tool messages - они будут обработаны отдельно
+      if (msg.role === 'tool') {
+        continue;
+      }
+      
       const role = msg.role === 'user' ? 'user' : 'assistant';
       
       // Handle both string content and array content (multimodal)
@@ -102,8 +113,63 @@ export class AnthropicProvider implements AIProvider {
         content = String(msg.content);
       }
       
-      return { role, content };
-    });
+      // Convert tool_calls to Anthropic format
+      if (msg.tool_calls && msg.tool_calls.length > 0) {
+        // Assistant message с tool_use blocks
+        const contentArray = [];
+        
+        // Add text content if present
+        if (content && typeof content === 'string' && content.trim()) {
+          contentArray.push({
+            type: 'text',
+            text: content
+          });
+        }
+        
+        // Add tool_use blocks
+        for (const toolCall of msg.tool_calls) {
+          contentArray.push({
+            type: 'tool_use',
+            id: toolCall.id,
+            name: toolCall.function.name,
+            input: JSON.parse(toolCall.function.arguments)
+          });
+        }
+        
+        anthropicMessages.push({ role: 'assistant', content: contentArray });
+        
+        // Теперь собираем все tool results следующие за этим assistant message
+        const toolResults = [];
+        let j = i + 1;
+        while (j < chatMessages.length && chatMessages[j].role === 'tool') {
+          const toolMsg = chatMessages[j];
+          toolResults.push({
+            type: 'tool_result',
+            tool_use_id: toolMsg.tool_call_id,
+            content: toolMsg.content
+          });
+          j++;
+        }
+        
+        // Добавляем user message с tool_result blocks
+        if (toolResults.length > 0) {
+          anthropicMessages.push({ role: 'user', content: toolResults });
+          // Skip processed tool messages
+          i = j - 1;
+        }
+      } else {
+        // Обычное сообщение без tool_calls
+        anthropicMessages.push({ role, content });
+      }
+    }
+
+    // Convert tools from OpenAI format to Anthropic format
+    const anthropicTools = tools?.map(tool => ({
+      type: 'custom',
+      name: tool.function.name,
+      description: tool.function.description,
+      input_schema: tool.function.parameters
+    }));
 
     const requestBody = {
       model,
@@ -111,7 +177,7 @@ export class AnthropicProvider implements AIProvider {
       system: typeof systemMessage?.content === 'string' ? systemMessage.content : undefined,
       messages: anthropicMessages,
       stream: !!onChunk,
-      ...(webSearchEnabled && webSearchSettings || tools && tools.length > 0 ? {
+      ...(webSearchEnabled && webSearchSettings || anthropicTools && anthropicTools.length > 0 ? {
         tools: [
           // Add web search tool if enabled
           ...(webSearchEnabled && webSearchSettings ? [{
@@ -139,15 +205,15 @@ export class AnthropicProvider implements AIProvider {
               }
             } : {})
           }] : []),
-          // Add custom tools
-          ...(tools || [])
+          // Add custom tools (converted to Anthropic format)
+          ...(anthropicTools || [])
         ]
       } : {})
     };
 
     console.log('[Anthropic] Request body:', JSON.stringify(requestBody, null, 2));
-    if (tools && tools.length > 0) {
-      console.log('[Anthropic] Added tools:', tools.length);
+    if (anthropicTools && anthropicTools.length > 0) {
+      console.log('[Anthropic] Added tools:', anthropicTools.length);
     }
 
     try {
@@ -274,7 +340,9 @@ export class AnthropicProvider implements AIProvider {
                         type: 'tool_use',
                         id: json.content_block.id,
                         name: json.content_block.name,
-                        inputJson: ''
+                        // Use existing input if provided, otherwise prepare for streaming
+                        input: json.content_block.input,
+                        inputJson: json.content_block.input ? JSON.stringify(json.content_block.input) : ''
                       };
                       console.log('[Anthropic] Tool use block started:', json.content_block.name);
                     }
@@ -319,10 +387,10 @@ export class AnthropicProvider implements AIProvider {
                     console.log('[Anthropic] content_block_stop, block:', block.type);
                     
                     // Finalize tool_use block
-                    if (block.type === 'tool_use' && block.inputJson) {
+                    if (block.type === 'tool_use') {
                       try {
-                        const input = JSON.parse(block.inputJson);
-                        delete block.inputJson;
+                        // Use existing parsed input or parse accumulated inputJson
+                        const input = block.input || (block.inputJson ? JSON.parse(block.inputJson) : {});
                         
                         // Convert to standard ToolCall format
                         const toolCall: ToolCall = {
@@ -334,7 +402,7 @@ export class AnthropicProvider implements AIProvider {
                           }
                         };
                         toolCalls.push(toolCall);
-                        console.log('[Anthropic] Tool call finalized:', toolCall.function.name);
+                        console.log('[Anthropic] Tool call finalized:', toolCall.function.name, 'with args:', toolCall.function.arguments);
                         
                         // Execute tool if callback provided
                         if (onToolCall) {

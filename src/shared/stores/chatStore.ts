@@ -21,6 +21,8 @@ interface ChatStore {
   pageContextEnabled: boolean;
   pageContextType: PageContextType;
   streamingContent: string;
+  streamingImages: number; // Количество генерируемых изображений
+  editingImageResponseId: string | null; // Response ID для редактирования изображения
   error: string | null;
   folders: ChatFolder[];
   chats: Chat[];
@@ -49,11 +51,13 @@ interface ChatStore {
     attachments?: Array<{type: 'file' | 'image' | 'dom'; name: string; data: string; xpath?: string}>,
     webSearchEnabled?: boolean,
     instructionData?: { id: string; content: string },
-    quotedText?: string
+    quotedText?: string,
+    previousResponseId?: string
   ) => Promise<void>;
   setSelectedOperator: (operator: AIOperatorConfig | null) => void;
   setPageContextEnabled: (enabled: boolean) => void;
   setPageContextType: (type: PageContextType) => void;
+  setEditingImageResponseId: (responseId: string | null) => void;
   createNewChat: (site: string) => Promise<Chat>;
   loadOrCreateChat: (site: string, historyMode: HistoryMode) => Promise<void>;
   clearChat: () => void;
@@ -87,6 +91,8 @@ export const useChatStore = create<ChatStore>()(
       pageContextEnabled: true,
       pageContextType: 'text',
       streamingContent: '',
+      streamingImages: 0,
+      editingImageResponseId: null,
       error: null,
       folders: [],
       chats: [],
@@ -116,8 +122,8 @@ export const useChatStore = create<ChatStore>()(
     }
   },
 
-  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText) => {
-    const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController } = get();
+  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId) => {
+    const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController, editingImageResponseId } = get();
     
     if (!currentChat || !selectedOperator) {
       console.error('No chat or operator selected');
@@ -537,6 +543,9 @@ export const useChatStore = create<ChatStore>()(
       };
 
       // Send to AI with streaming and tools
+      // Use editingImageResponseId or previousResponseId parameter
+      const responseIdForEditing = previousResponseId || editingImageResponseId;
+      
       let response = await sendAIMessage(
         aiMessages,
         selectedOperator,
@@ -548,8 +557,14 @@ export const useChatStore = create<ChatStore>()(
         webSearchSettings,
         controller.signal,
         toolDefinitions.length > 0 ? toolDefinitions : undefined,
-        undefined // Don't execute tools during first call
+        undefined, // Don't execute tools during first call
+        responseIdForEditing || undefined
       );
+      
+      // Clear editing state after sending
+      if (editingImageResponseId) {
+        set({ editingImageResponseId: null });
+      }
       
       // If AI called tools, execute them and send results back
       // Keep looping until AI stops calling tools
@@ -675,14 +690,20 @@ export const useChatStore = create<ChatStore>()(
 
       // Check if response is empty
       let finalContent = assistantContent || response.content;
-      if ((!finalContent || finalContent.trim() === '') && toolExecutions.length === 0) {
-        // Empty response without tool executions - this is an error
+      const hasImages = response.images && response.images.length > 0;
+      
+      if ((!finalContent || finalContent.trim() === '') && toolExecutions.length === 0 && !hasImages) {
+        // Empty response without tool executions or images - this is an error
         throw new AIServiceError(AIErrorCode.EMPTY_RESPONSE, 'Empty response from AI');
       }
       
-      // If content is empty but tools were executed, use a default message
+      // If content is empty but tools were executed or images were generated, use a default message
       if (!finalContent || finalContent.trim() === '') {
-        finalContent = '✓'; // Minimal placeholder to indicate tools were executed
+        if (hasImages) {
+          finalContent = ''; // Empty content is OK when images are present
+        } else {
+          finalContent = '✓'; // Minimal placeholder to indicate tools were executed
+        }
       }
 
       console.log('[chatStore] AI response received:', {
@@ -690,10 +711,12 @@ export const useChatStore = create<ChatStore>()(
         tokens: response.tokens,
         model: selectedOperator.selectedModel,
         hasCitations: !!response.citations,
-        citationsCount: response.citations?.length || 0
+        citationsCount: response.citations?.length || 0,
+        hasImages: !!response.images,
+        imagesCount: response.images?.length || 0
       });
 
-      // Save assistant message with citations and tool executions
+      // Save assistant message with citations, tool executions and generated images
       const assistantMessage: ChatMessage = {
         id: assistantMessageId,
         createdAt: Date.now(),
@@ -704,7 +727,9 @@ export const useChatStore = create<ChatStore>()(
         text: finalContent,
         tokens: response.tokens?.total || 0,
         citations: response.citations,
-        toolCalls: toolExecutions.length > 0 ? toolExecutions : undefined
+        toolCalls: toolExecutions.length > 0 ? toolExecutions : undefined,
+        generatedImages: response.images ? JSON.stringify(response.images) : undefined,
+        responseId: response.response_id
       };
 
       await addMessage(assistantMessage);
@@ -748,10 +773,12 @@ export const useChatStore = create<ChatStore>()(
       // Skip if:
       // 1. Tools were used - suggestions are not relevant when working with tools
       // 2. User sent a tool command - even if AI didn't call tool yet (like asking clarifying questions)
+      // 3. Response contains generated images - suggestions are not relevant for image generation
       const { useSettingsStore } = await import('./settingsStore');
       const { showAISuggestions } = useSettingsStore.getState();
       const hasToolCalls = toolExecutions.length > 0;
-      const shouldSkipSuggestions = hasToolCalls || isToolCommand;
+      const hasGeneratedImages = !!response.images && response.images.length > 0;
+      const shouldSkipSuggestions = hasToolCalls || isToolCommand || hasGeneratedImages;
       
       if (showAISuggestions && !shouldSkipSuggestions && selectedOperator) {
         setTimeout(() => {
@@ -837,6 +864,8 @@ export const useChatStore = create<ChatStore>()(
   setPageContextEnabled: (enabled) => set({ pageContextEnabled: enabled }),
 
   setPageContextType: (type) => set({ pageContextType: type }),
+
+  setEditingImageResponseId: (responseId) => set({ editingImageResponseId: responseId }),
 
   createNewChat: async (site) => {
     const chat: Chat = {

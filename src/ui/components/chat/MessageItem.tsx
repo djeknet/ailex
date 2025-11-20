@@ -11,6 +11,8 @@ export interface MessageBranch {
   text: string;
   suggestedQuestions?: string[];
   citations?: Citation[];
+  generatedImages?: string;
+  responseId?: string;
 }
 
 interface MessageItemProps {

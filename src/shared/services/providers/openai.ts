@@ -1,7 +1,8 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, OpenAIWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, OpenAIWebSearchSettings, Citation, ToolCall, GeneratedImage } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
 
 export class OpenAIProvider implements AIProvider {
   async chat(
@@ -14,7 +15,8 @@ export class OpenAIProvider implements AIProvider {
     webSearchSettings?: OpenAIWebSearchSettings,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    onToolCall?: (toolCall: ToolCall) => Promise<any>
+    onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    previousResponseId?: string
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.openai.com/v1';
     
@@ -24,9 +26,17 @@ export class OpenAIProvider implements AIProvider {
       msg.content.some(item => item.type === 'document')
     );
     
-    // Use new /responses API for documents and web search
-    if (hasDocuments || webSearchEnabled) {
-      return this.chatWithResponses(messages, model, apiKey, baseUrl, onChunk, webSearchEnabled, webSearchSettings, signal, tools, onToolCall);
+    // Models that only support Responses API
+    const responsesOnlyModels = ['gpt-image-1', 'gpt-5'];
+    const isResponsesOnlyModel = responsesOnlyModels.some(m => model.includes(m));
+    
+    // Use new /responses API for:
+    // - Documents/PDFs
+    // - Web search
+    // - Image generation (previousResponseId)
+    // - Models that only support Responses API (like gpt-image-1)
+    if (hasDocuments || webSearchEnabled || previousResponseId || isResponsesOnlyModel) {
+      return this.chatWithResponses(messages, model, apiKey, baseUrl, onChunk, webSearchEnabled, webSearchSettings, signal, tools, onToolCall, previousResponseId);
     } else {
       return this.chatStandard(messages, model, apiKey, baseUrl, onChunk, signal, tools, onToolCall);
     }
@@ -236,7 +246,7 @@ export class OpenAIProvider implements AIProvider {
     }
   }
 
-  // New responses API (for documents/PDF and web search)
+  // New responses API (for documents/PDF, web search, and image generation)
   private async chatWithResponses(
     messages: AIMessage[],
     model: string,
@@ -247,7 +257,8 @@ export class OpenAIProvider implements AIProvider {
     webSearchSettings?: OpenAIWebSearchSettings,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    _onToolCall?: (toolCall: ToolCall) => Promise<any>
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    previousResponseId?: string
   ): Promise<AIResponse> {
     const url = `${baseUrl}/responses`;
     
@@ -350,10 +361,55 @@ export class OpenAIProvider implements AIProvider {
       console.log('[OpenAI] Added custom tools:', tools.length);
     }
 
+    // Add image generation tool if supported by model
+    // Check if model supports image generation (e.g., gpt-image-1 or models with image output)
+    const modelSupportsImageGeneration = model.includes('image') || model.includes('gpt-4') || model.includes('gpt-5');
+    
+    if (modelSupportsImageGeneration) {
+      const imageSettings = useOperatorSettingsStore.getState().getImageSettings('openai');
+      
+      const imageGenTool: any = {
+        type: 'image_generation'
+      };
+      
+      // Add only supported settings according to OpenAI API
+      if (imageSettings.size && imageSettings.size !== 'auto') {
+        imageGenTool.size = imageSettings.size;
+      }
+      
+      if (imageSettings.quality && imageSettings.quality !== 'auto') {
+        imageGenTool.quality = imageSettings.quality;
+      }
+      
+      // Background (transparent/opaque) - only for PNG/WebP
+      if (imageSettings.background && imageSettings.background === 'transparent') {
+        imageGenTool.background = 'transparent';
+      }
+      
+      // Input fidelity for preserving input image details
+      if (imageSettings.inputFidelity && imageSettings.inputFidelity === 'high') {
+        imageGenTool.input_fidelity = 'high';
+      }
+      
+      // Moderation level
+      if (imageSettings.moderation && imageSettings.moderation === 'low') {
+        imageGenTool.moderation = 'low';
+      }
+      
+      responsesTools.push(imageGenTool);
+      console.log('[OpenAI] Image generation tool configured:', imageGenTool);
+    }
+
     const requestBody: any = {
       model,
       input
     };
+
+    // Add previous_response_id if editing an image
+    if (previousResponseId) {
+      requestBody.previous_response_id = previousResponseId;
+      console.log('[OpenAI] Using previous_response_id for image editing:', previousResponseId);
+    }
 
     if (responsesTools.length > 0) {
       requestBody.tools = responsesTools;
@@ -384,12 +440,21 @@ export class OpenAIProvider implements AIProvider {
     const data = await response.json();
     console.log('[OpenAI] Response data:', JSON.stringify(data, null, 2));
     
-    // Extract content and citations from response
+    // Extract content, citations, and images from response
     let content = '';
     const citations: Citation[] = [];
+    const generatedImages: GeneratedImage[] = [];
+    let responseId: string | undefined;
+    
+    // Store response ID for image editing
+    if (data.id) {
+      responseId = data.id;
+      console.log('[OpenAI] Response ID:', responseId);
+    }
     
     if (data.output && Array.isArray(data.output)) {
       for (const item of data.output) {
+        // Extract text messages
         if (item.type === 'message' && item.content) {
           for (const contentItem of item.content) {
             if (contentItem.type === 'output_text') {
@@ -416,6 +481,24 @@ export class OpenAIProvider implements AIProvider {
             }
           }
         }
+        
+        // Extract generated images
+        if (item.type === 'image_generation_call' && item.result) {
+          const format = item.format || 'png';
+          generatedImages.push({
+            type: 'image_url',
+            image_url: {
+              url: `data:image/${format};base64,${item.result}`
+            },
+            response_id: responseId,
+            image_generation_call_id: item.id
+          });
+          console.log('[OpenAI] Generated image extracted:', {
+            id: item.id,
+            format,
+            hasResponseId: !!responseId
+          });
+        }
       }
     }
 
@@ -425,7 +508,8 @@ export class OpenAIProvider implements AIProvider {
     }
 
     console.log('[OpenAI] Extracted content:', { length: content.length, hasContent: !!content });
-    console.log('[OpenAI] Extracted citations:', citations);
+    console.log('[OpenAI] Extracted citations:', citations.length);
+    console.log('[OpenAI] Extracted images:', generatedImages.length);
     
     return {
       content: content || '',
@@ -436,7 +520,9 @@ export class OpenAIProvider implements AIProvider {
       } : undefined,
       model,
       operator: 'openai',
-      citations: citations.length > 0 ? citations : undefined
+      citations: citations.length > 0 ? citations : undefined,
+      images: generatedImages.length > 0 ? generatedImages : undefined,
+      response_id: responseId
     };
   }
 

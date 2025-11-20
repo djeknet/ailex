@@ -137,7 +137,7 @@ export default function UserMessage({
           
           {/* Show only action label for rewrite actions, or full text for regular messages */}
           {!message.replyTo && !message.quotedText && (
-            <div className="bg-muted rounded-lg p-4 text-base">
+            <div className="bg-muted rounded-lg p-4 text-base max-w-full overflow-hidden">
               {/* Display image attachments above text */}
               {message.attach_type === 'image' && message.file_data && (
                 <div className="mb-3">
@@ -155,7 +155,7 @@ export default function UserMessage({
               )}
               
               {/* Display text with inline file/dom badges */}
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1 max-w-full">
                 {/* Display file/dom badges inline */}
                 {(message.attach_type === 'file' || message.attach_type === 'dom') && message.attach_name && (
                   <AttachmentBadge

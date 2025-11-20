@@ -14,7 +14,8 @@ export class LMStudioProvider implements AIProvider {
     _webSearchSettings?: WebSearchSettings,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    _onToolCall?: (toolCall: ToolCall) => Promise<any>
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    _previousResponseId?: string
   ): Promise<AIResponse> {
     console.log('[LMStudio] chat - Starting');
     console.log('[LMStudio] chat - Model:', model);

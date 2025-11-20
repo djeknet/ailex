@@ -16,7 +16,7 @@ export const getFormFieldsTool: Tool = {
   urlPattern: undefined,
   isBuiltIn: true,
   requiresPersonalInfo: true,
-  hiddenFromUI: true, // Скрыт из UI, используется только AI
+  hiddenFromUI: true, // Hidden from UI, used only by AI
   systemInstructions: 'After calling get-form-fields, analyze the returned fields and availableUserInfo. Then call fill-form-fields with appropriate mappings. IMPORTANT: Map ALL fields that have matching data in availableUserInfo - do not skip any fields that can be filled. For select elements, use the full text value (e.g., "United States" not "USA"). DO NOT submit the form unless user explicitly asks.',
   
   parameters: {
@@ -34,7 +34,7 @@ export const getFormFieldsTool: Tool = {
         return getTranslation('formFieldsNotFound');
       }
       
-      // Возвращаем информацию о полях и доступных данных пользователя
+      // Return information about fields and available user data
       const availableInfo: any = {};
       
       if (params.personalInfo) {
@@ -83,7 +83,7 @@ export const fillFormFieldsTool: Tool = {
   command: '/fillfields',
   urlPattern: undefined,
   isBuiltIn: true,
-  hiddenFromUI: true, // Скрыт из UI, используется только AI
+  hiddenFromUI: true, // Hidden from UI, used only by AI
   systemInstructions: 'IMPORTANT: fieldsToFill parameter MUST contain actual field mappings from the data you received from get-form-fields. Never use empty objects {}. DO NOT submit the form after filling. CRITICAL: Ensure valid JSON syntax with commas between all properties.',
   
   parameters: {
@@ -106,7 +106,7 @@ export const fillFormFieldsTool: Tool = {
         });
       }
 
-      // Заполняем указанные поля
+      // Fill the specified fields
       const response = await chrome.tabs.sendMessage(params.tabId, {
         type: 'FILL_FORM_FIELDS',
         data: { fieldsToFill: params.fieldsToFill }
@@ -137,8 +137,8 @@ export const fillFormFieldsTool: Tool = {
 };
 
 /**
- * Основной инструмент для команды /fillform
- * Возвращает инструкцию AI вызвать get-form-fields
+ * Main tool for /fillform command
+ * Returns instruction for AI to call get-form-fields
  */
 export const fillFormTool: Tool = {
   id: 'fill-form',
@@ -160,7 +160,7 @@ export const fillFormTool: Tool = {
   },
 
   async execute(params: { tabId: number; personalInfo?: PersonalInfo }) {
-    // Вызываем get-form-fields напрямую чтобы начать процесс
+    // Call get-form-fields directly to start the process
     return await getFormFieldsTool.execute(params);
   }
 };

@@ -68,6 +68,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Предотвращение горизонтального скролла */
+  .flex-1, .flex, .flex-col {
+    min-width: 0;
+  }
 }
 
 /* Global Scrollbar Styles */
@@ -139,4 +144,57 @@
   }
 }
 
+/* Shimmer animation for image loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* AI Message List Styles */
+@layer base {
+  /* Стили для списков в ответах AI */
+  .rounded-lg li {
+    margin-left: 17px;
+  }
+  
+  /* Предотвращение горизонтального скролла в чате */
+  .rounded-lg {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  
+  /* Переносы для длинных слов и ссылок */
+  .rounded-lg p,
+  .rounded-lg div,
+  .rounded-lg span,
+  .rounded-lg pre,
+  .rounded-lg code {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  
+  /* Для блоков кода */
+  .rounded-lg pre {
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  
+  /* Для inline кода */
+  .rounded-lg code {
+    white-space: pre-wrap;
+  }
+}
 

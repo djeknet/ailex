@@ -1,7 +1,8 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, WebSearchSettings, OpenRouterWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, OpenRouterWebSearchSettings, Citation, ToolCall, GeneratedImage } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
 
 export class OpenRouterProvider implements AIProvider {
   /**
@@ -34,7 +35,8 @@ export class OpenRouterProvider implements AIProvider {
     webSearchSettings?: WebSearchSettings,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    onToolCall?: (toolCall: ToolCall) => Promise<any>
+    onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    _previousResponseId?: string
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://openrouter.ai/api/v1';
     const url = `${baseUrl}/chat/completions`;
@@ -130,8 +132,18 @@ export class OpenRouterProvider implements AIProvider {
             ...(msg.name ? { name: msg.name } : {})
           };
         }),
-        stream: !!onChunk
+        stream: !!onChunk,
+        modalities: ['image', 'text'] // Always enable image generation support
       };
+    
+    // Add image generation config
+    const imageSettings = useOperatorSettingsStore.getState().getImageSettings('openrouter');
+    if (imageSettings.imageAspectRatio) {
+      requestBody.image_config = {
+        aspect_ratio: imageSettings.imageAspectRatio
+      };
+      console.log('[OpenRouter] Image generation enabled with aspect ratio:', imageSettings.imageAspectRatio);
+    }
     
     // Add tools if provided
     if (tools && tools.length > 0) {
@@ -182,18 +194,26 @@ export class OpenRouterProvider implements AIProvider {
       let outputTokens = 0;
       const citations: Citation[] = [];
       const toolCalls: ToolCall[] = [];
+      const generatedImages: GeneratedImage[] = [];
       let currentToolCallIndex = -1;
       let currentToolCall: any = {};
+      let buffer = ''; // Buffer for incomplete JSON chunks
 
       try {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          
+          // Split by lines and keep incomplete line in buffer
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep last incomplete line in buffer
 
           for (const line of lines) {
+            if (line.trim() === '') continue;
+            
             if (line.startsWith('data: ')) {
               const data = line.slice(6);
               if (data === '[DONE]') continue;
@@ -201,6 +221,7 @@ export class OpenRouterProvider implements AIProvider {
               try {
                 const json = JSON.parse(data);
                 const delta = json.choices[0]?.delta;
+                const message = json.choices[0]?.message;
                 
                 // Handle regular content
                 if (delta?.content) {
@@ -239,6 +260,36 @@ export class OpenRouterProvider implements AIProvider {
                   });
                 }
 
+                // Handle generated images from delta
+                if (delta?.images) {
+                  delta.images.forEach((img: any) => {
+                    if (img.image_url?.url && !generatedImages.find(gi => gi.image_url.url === img.image_url.url)) {
+                      generatedImages.push({
+                        type: 'image_url',
+                        image_url: {
+                          url: img.image_url.url
+                        }
+                      });
+                      console.log('[OpenRouter] Received generated image in delta');
+                    }
+                  });
+                }
+                
+                // Handle generated images from message (for models that send complete images at the end)
+                if (message?.images && Array.isArray(message.images)) {
+                  message.images.forEach((img: any) => {
+                    if (img.image_url?.url && !generatedImages.find(gi => gi.image_url.url === img.image_url.url)) {
+                      generatedImages.push({
+                        type: 'image_url',
+                        image_url: {
+                          url: img.image_url.url
+                        }
+                      });
+                      console.log('[OpenRouter] Received generated image in message');
+                    }
+                  });
+                }
+
                 // Capture usage info if available
                 if (json.usage) {
                   totalTokens = json.usage.total_tokens || 0;
@@ -247,7 +298,6 @@ export class OpenRouterProvider implements AIProvider {
                 }
                 
                 // Extract citations from annotations
-                const message = json.choices[0]?.message;
                 if (message?.annotations) {
                   this.extractCitationsFromAnnotations(message.annotations, citations);
                 }
@@ -260,7 +310,10 @@ export class OpenRouterProvider implements AIProvider {
                   }
                 }
               } catch (e) {
-                console.error('[OpenRouter] Error parsing streaming response:', e);
+                // Log but continue - some chunks might be incomplete
+                if (data.length < 100) {
+                  console.error('[OpenRouter] Error parsing streaming response chunk:', data.substring(0, 100), e);
+                }
               }
             }
           }
@@ -273,7 +326,8 @@ export class OpenRouterProvider implements AIProvider {
         contentLength: fullContent.length,
         totalTokens,
         citationsCount: citations.length,
-        toolCallsCount: toolCalls.length
+        toolCallsCount: toolCalls.length,
+        imagesCount: generatedImages.length
       });
 
       return {
@@ -285,6 +339,7 @@ export class OpenRouterProvider implements AIProvider {
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
         tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        images: generatedImages.length > 0 ? generatedImages : undefined,
         finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'openrouter'
@@ -301,7 +356,23 @@ export class OpenRouterProvider implements AIProvider {
         this.extractCitationsFromAnnotations(message.annotations, citations);
       }
       
+      // Extract generated images
+      const generatedImages: GeneratedImage[] = [];
+      if (message?.images && Array.isArray(message.images)) {
+        message.images.forEach((img: any) => {
+          if (img.image_url?.url) {
+            generatedImages.push({
+              type: 'image_url',
+              image_url: {
+                url: img.image_url.url
+              }
+            });
+          }
+        });
+      }
+      
       console.log('[OpenRouter] Extracted citations:', citations.length);
+      console.log('[OpenRouter] Generated images:', generatedImages.length);
       
       return {
         content: data.choices[0].message.content || '',
@@ -312,6 +383,7 @@ export class OpenRouterProvider implements AIProvider {
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
         tool_calls: message?.tool_calls || undefined,
+        images: generatedImages.length > 0 ? generatedImages : undefined,
         finish_reason: data.choices[0]?.finish_reason || 'stop',
         model,
         operator: 'openrouter'

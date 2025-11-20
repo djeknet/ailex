@@ -99,7 +99,9 @@ export default function MessageList() {
           model: msg.model!,
           text: msg.text,
           suggestedQuestions: msg.suggestedQuestions,
-          citations: msg.citations // Add citations
+          citations: msg.citations,
+          generatedImages: msg.generatedImages,
+          responseId: msg.responseId
         });
       }
     });
@@ -635,8 +637,8 @@ export default function MessageList() {
 
   return (
     <>
-    <Conversation>
-      <ConversationContent className="p-4 space-y-4 text-base">
+    <Conversation className="overflow-x-hidden">
+      <ConversationContent className="p-4 space-y-4 text-base max-w-full">
         {messages
           .filter(msg => !msg.branchId) // Filter out branch messages from main list
           .map((message) => (

@@ -60,7 +60,8 @@ export class GeminiProvider implements AIProvider {
     _webSearchSettings?: WebSearchSettings,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    _onToolCall?: (toolCall: ToolCall) => Promise<any>
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    _previousResponseId?: string
   ): Promise<AIResponse> {
     console.log('[Gemini] chat - Starting');
     console.log('[Gemini] chat - Model:', model);
@@ -75,12 +76,59 @@ export class GeminiProvider implements AIProvider {
     console.log('[Gemini] chat - Request URL:', url);
 
     // Convert messages to Gemini format
-    const contents = messages.map(msg => {
-      const role = msg.role === 'assistant' ? 'model' : 'user';
+    const contents = [];
+    
+    for (const msg of messages) {
+      // Skip system messages - Gemini doesn't support them, will use first user message
+      if (msg.role === 'system') {
+        continue;
+      }
+      
+      // Gemini uses 'model' instead of 'assistant', 'function' for tool results
+      let role: 'user' | 'model' | 'function';
+      if (msg.role === 'assistant') {
+        role = 'model';
+      } else if (msg.role === 'tool') {
+        role = 'function';
+      } else {
+        role = 'user';
+      }
       
       // Handle both string content and array content (multimodal)
       let parts;
-      if (typeof msg.content === 'string') {
+      
+      // Handle tool messages (function responses)
+      if (msg.role === 'tool') {
+        parts = [{
+          functionResponse: {
+            name: msg.name,
+            response: {
+              result: msg.content
+            }
+          }
+        }];
+      }
+      // Handle messages with tool_calls (function calls)
+      else if (msg.tool_calls && msg.tool_calls.length > 0) {
+        parts = [];
+        
+        // Add text content if present
+        if (msg.content && typeof msg.content === 'string' && msg.content.trim()) {
+          parts.push({ text: msg.content });
+        }
+        
+        // Add function calls
+        for (const toolCall of msg.tool_calls) {
+          parts.push({
+            functionCall: {
+              name: toolCall.function.name,
+              args: JSON.parse(toolCall.function.arguments)
+            }
+          });
+        }
+      }
+      // Handle regular content
+      else if (typeof msg.content === 'string') {
         parts = [{ text: msg.content }];
       } else if (Array.isArray(msg.content)) {
         // Multimodal content
@@ -114,8 +162,8 @@ export class GeminiProvider implements AIProvider {
         parts = [{ text: String(msg.content) }];
       }
       
-      return { role, parts };
-    });
+      contents.push({ role, parts });
+    }
 
     console.log('[Gemini] chat - Converted messages:', JSON.stringify(contents, null, 2));
 
@@ -129,24 +177,32 @@ export class GeminiProvider implements AIProvider {
       }
     };
     
+    // Build tools array
+    const geminiTools: any[] = [];
+    
     // Add function declarations if tools provided
     if (tools && tools.length > 0) {
-      requestBody.tools = [{
+      geminiTools.push({
         functionDeclarations: tools.map(tool => ({
           name: tool.function.name,
           description: tool.function.description,
           parameters: tool.function.parameters
         }))
-      }];
+      });
       console.log('[Gemini] Added function declarations:', tools.length);
     }
     
     // Add Google Search tool if web search is enabled
     if (webSearchEnabled) {
-      requestBody.tools = [{
+      geminiTools.push({
         googleSearch: {} // Empty object means use default search
-      }];
+      });
       console.log('[Gemini] Web search enabled with Google Search tool');
+    }
+    
+    // Add tools to request body if any
+    if (geminiTools.length > 0) {
+      requestBody.tools = geminiTools;
     }
 
     console.log('[Gemini] chat - Request body:', JSON.stringify(requestBody, null, 2));
@@ -167,9 +223,14 @@ export class GeminiProvider implements AIProvider {
       const errorText = await response.text();
       console.error('[Gemini] chat - Error response:', errorText);
       try {
-        const error = JSON.parse(errorText);
-        console.error('[Gemini] chat - Parsed error:', error);
-        throw new Error(error.error?.message || 'Gemini API error');
+        const errorData = JSON.parse(errorText);
+        console.error('[Gemini] chat - Parsed error:', errorData);
+        
+        // Gemini может вернуть как объект, так и массив с объектом ошибки
+        const error = Array.isArray(errorData) ? errorData[0] : errorData;
+        const errorMessage = error.error?.message || 'Gemini API error';
+        
+        throw new Error(errorMessage);
       } catch (parseError) {
         console.error('[Gemini] chat - Failed to parse error response');
         throw new Error(`Gemini API error: ${errorText}`);

@@ -27,7 +27,10 @@ export const ConversationContent = ({
   className,
   ...props
 }: ConversationContentProps) => (
-  <StickToBottom.Content className={cn("p-4", className)} {...props} />
+  <StickToBottom.Content 
+    className={cn("p-4 max-w-full overflow-x-hidden", className)} 
+    {...props} 
+  />
 );
 
 export type ConversationEmptyStateProps = ComponentProps<"div"> & {

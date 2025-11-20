@@ -1942,6 +1942,150 @@
   },
   "toolExample_parsePages_prompt": {
     "message": "Use parse-pages to collect data from multiple pages. Follow workflow: init -> get-links -> filter-links -> navigate -> find-elements -> save-selector -> extract-data -> finish"
+  },
+  "imageGenerationSettings": {
+    "message": "Image Generation Settings"
+  },
+  "imageGenerationSettingsDescription": {
+    "message": "Configure image generation parameters for"
+  },
+  "aspectRatio": {
+    "message": "Aspect Ratio"
+  },
+  "selectAspectRatio": {
+    "message": "Select aspect ratio"
+  },
+  "aspectRatioDescription": {
+    "message": "Aspect ratio for generated images"
+  },
+  "imageGenerationNotAvailable": {
+    "message": "Image generation settings are not yet available for this operator."
+  },
+  "aspectRatio_1_1": {
+    "message": "1:1 → 1024×1024 (default)"
+  },
+  "aspectRatio_2_3": {
+    "message": "2:3 → 832×1248"
+  },
+  "aspectRatio_3_2": {
+    "message": "3:2 → 1248×832"
+  },
+  "aspectRatio_3_4": {
+    "message": "3:4 → 864×1184"
+  },
+  "aspectRatio_4_3": {
+    "message": "4:3 → 1184×864"
+  },
+  "aspectRatio_4_5": {
+    "message": "4:5 → 896×1152"
+  },
+  "aspectRatio_5_4": {
+    "message": "5:4 → 1152×896"
+  },
+  "aspectRatio_9_16": {
+    "message": "9:16 → 768×1344"
+  },
+  "aspectRatio_16_9": {
+    "message": "16:9 → 1344×768"
+  },
+  "aspectRatio_21_9": {
+    "message": "21:9 → 1536×672"
+  },
+  "imageGenerationSettingsButton": {
+    "message": "Generation Settings"
+  },
+  "downloadImage": {
+    "message": "Download"
+  },
+  "editImage": {
+    "message": "Edit"
+  },
+  "editImageBadge": {
+    "message": "Edit image"
+  },
+  "imageSize": {
+    "message": "Size"
+  },
+  "imageQuality": {
+    "message": "Quality"
+  },
+  "imageFormat": {
+    "message": "Format"
+  },
+  "imageCompression": {
+    "message": "Compression"
+  },
+  "imageBackground": {
+    "message": "Background"
+  },
+  "imageInputFidelity": {
+    "message": "Input Fidelity"
+  },
+  "imageModeration": {
+    "message": "Content Moderation"
+  },
+  "tokensEstimate": {
+    "message": "tokens"
+  },
+  "imageSizeAuto": {
+    "message": "Auto"
+  },
+  "imageSize1024x1024": {
+    "message": "1024×1024 (Square)"
+  },
+  "imageSize1536x1024": {
+    "message": "1536×1024 (Landscape)"
+  },
+  "imageSize1024x1536": {
+    "message": "1024×1536 (Portrait)"
+  },
+  "imageQualityAuto": {
+    "message": "Auto"
+  },
+  "imageQualityLow": {
+    "message": "Low (~270-400 tokens)"
+  },
+  "imageQualityMedium": {
+    "message": "Medium (~1000-1600 tokens)"
+  },
+  "imageQualityHigh": {
+    "message": "High (~4000-6200 tokens)"
+  },
+  "imageQualityDescription": {
+    "message": "Higher quality requires more tokens and time"
+  },
+  "imageFormatDescription": {
+    "message": "PNG supports transparency, JPEG is faster"
+  },
+  "imageCompressionDescription": {
+    "message": "Compression level for JPEG and WebP formats"
+  },
+  "imageBackgroundOpaque": {
+    "message": "Opaque"
+  },
+  "imageBackgroundTransparent": {
+    "message": "Transparent"
+  },
+  "imageBackgroundDescription": {
+    "message": "Transparent background only works for PNG and WebP"
+  },
+  "imageInputFidelityLow": {
+    "message": "Low"
+  },
+  "imageInputFidelityHigh": {
+    "message": "High (more tokens)"
+  },
+  "imageInputFidelityDescription": {
+    "message": "High fidelity preserves more details from input images"
+  },
+  "imageModerationAuto": {
+    "message": "Auto (standard)"
+  },
+  "imageModerationLow": {
+    "message": "Low (less strict)"
+  },
+  "imageModerationDescription": {
+    "message": "Content filtering level according to OpenAI policy"
   }
 }
 

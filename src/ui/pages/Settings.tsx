@@ -20,21 +20,21 @@ export default function Settings() {
       <div className="flex-1 overflow-auto p-4">
         <Tabs value={activeSettingsTab} onValueChange={(value) => setActiveSettingsTab(value as any)} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="operators" className="flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              {t('operators')}
+            <TabsTrigger value="operators" className="flex items-center gap-2" title={t('operators')}>
+              <Bot className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{t('operators')}</span>
             </TabsTrigger>
-            <TabsTrigger value="general" className="flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              {t('general')}
+            <TabsTrigger value="general" className="flex items-center gap-2" title={t('general')}>
+              <SlidersHorizontal className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{t('general')}</span>
             </TabsTrigger>
-            <TabsTrigger value="personalInfo" className="flex items-center gap-2">
-              <UserCircle className="h-4 w-4" />
-              {t('personalInfo')}
+            <TabsTrigger value="personalInfo" className="flex items-center gap-2" title={t('personalInfo')}>
+              <UserCircle className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{t('personalInfo')}</span>
             </TabsTrigger>
-            <TabsTrigger value="instructions" className="flex items-center gap-2">
-              <ScrollText className="h-4 w-4" />
-              {t('instructions')}
+            <TabsTrigger value="instructions" className="flex items-center gap-2" title={t('instructions')}>
+              <ScrollText className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{t('instructions')}</span>
             </TabsTrigger>
           </TabsList>
           

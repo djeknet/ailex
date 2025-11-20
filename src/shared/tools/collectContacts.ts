@@ -9,7 +9,7 @@ export const collectContactsTool: Tool = {
   descriptionKey: 'tool_collectContacts_desc',
   icon: '📧',
   command: '/contacts',
-  urlPattern: undefined, // Работает на всех сайтах
+  urlPattern: undefined, // Works on all websites
   isBuiltIn: true,
   systemInstructions: 'IMPORTANT: First, you MUST ask the user: 1) What type of contacts to collect (all/email/phone/telegram)? 2) In what format to return (text/json/csv)? Only after receiving the answers, call this tool with the specified parameters. When you receive the result from the tool, return it AS IS without any modifications or reformatting - the result is already properly formatted with markdown code blocks.',
   
