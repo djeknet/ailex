@@ -17025,6 +17025,100 @@
         "top_p"
       ],
       "default_parameters": {}
+    },
+    {
+      "id": "gemini-2.5-flash-image",
+      "canonical_slug": "gemini-2.5-flash-image",
+      "hugging_face_id": "",
+      "name": "Gemini 2.5 Flash Image (Nano Banana)",
+      "created": 1759870431,
+      "description": "Gemini 2.5 Flash Image, a.k.a. \"Nano Banana,\" is a state of the art image generation model with contextual understanding. It is capable of image generation, edits, and multi-turn conversations. Optimized for speed and efficiency with 1024px resolution.",
+      "context_length": 32768,
+      "architecture": {
+        "modality": "text+image->text+image",
+        "input_modalities": [
+          "image",
+          "text"
+        ],
+        "output_modalities": [
+          "image",
+          "text"
+        ],
+        "tokenizer": "Gemini",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.0000003",
+        "completion": "0.0000025",
+        "request": "0",
+        "image": "0.001238",
+        "web_search": "0",
+        "internal_reasoning": "0"
+      },
+      "top_provider": {
+        "context_length": 32768,
+        "max_completion_tokens": 32768,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "top_k"
+      ],
+      "default_parameters": {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40
+      }
+    },
+    {
+      "id": "gemini-3-pro-image-preview",
+      "canonical_slug": "gemini-3-pro-image-preview",
+      "hugging_face_id": "",
+      "name": "Gemini 3 Pro Image Preview (Nano Banana Pro Preview)",
+      "created": 1759870431,
+      "description": "Gemini 3 Pro Image Preview is designed for professional image creation. It supports complex instructions, grounding with Google Search, and can generate images up to 4K resolution. Supports up to 14 reference images.",
+      "context_length": 32768,
+      "architecture": {
+        "modality": "text+image->text+image",
+        "input_modalities": [
+          "image",
+          "text"
+        ],
+        "output_modalities": [
+          "image",
+          "text"
+        ],
+        "tokenizer": "Gemini",
+        "instruct_type": null
+      },
+      "pricing": {
+        "prompt": "0.000001",
+        "completion": "0.000005",
+        "request": "0",
+        "image": "0.003",
+        "web_search": "0",
+        "internal_reasoning": "0"
+      },
+      "top_provider": {
+        "context_length": 32768,
+        "max_completion_tokens": 32768,
+        "is_moderated": false
+      },
+      "per_request_limits": null,
+      "supported_parameters": [
+        "max_tokens",
+        "temperature",
+        "top_p",
+        "top_k"
+      ],
+      "default_parameters": {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 40
+      }
     }
   ]
 }

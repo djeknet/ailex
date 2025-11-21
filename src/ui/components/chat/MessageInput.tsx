@@ -94,6 +94,7 @@ export default function MessageInput() {
   const [isSelectingElement, setIsSelectingElement] = useState(false);
   const [isSelectingScreenshot, setIsSelectingScreenshot] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -510,6 +511,74 @@ export default function MessageInput() {
     setShowToolsDropdown(false);
   };
 
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (!modelCapabilities.supportsImages) return;
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+    for (const file of imageFiles) {
+      // Validate image size
+      if (!validateFileSize(file, maxImageSize)) {
+        alert(t('fileTooLarge').replace('{size}', `${maxImageSize}MB`));
+        continue;
+      }
+
+      try {
+        let data = await readFileAsBase64(file);
+        
+        // Compress if needed
+        const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
+        if (sizeInMB > maxImageSize) {
+          data = await compressImage(data, maxImageSize);
+        }
+
+        setAttachedImages(prev => [...prev, {
+          data,
+          name: file.name
+        }]);
+      } catch (error) {
+        console.error('Error reading dropped image:', error);
+        alert(t('errorReadingFile'));
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!modelCapabilities.supportsImages) return;
+    
+    // Check if dragged items contain images
+    const hasImages = Array.from(e.dataTransfer.items).some(
+      item => item.type.startsWith('image/')
+    );
+    
+    if (hasImages) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only set dragging to false if leaving the main container
+    if (e.currentTarget === e.target) {
+      setIsDragging(false);
+    }
+  };
+
   const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     if (!hasText || isLoading) return;
@@ -705,7 +774,25 @@ export default function MessageInput() {
 
   return (
     <TooltipProvider>
-      <div className="border-t p-4 bg-card relative">
+      <div 
+        className={`border-t p-4 bg-card relative transition-colors ${
+          isDragging ? 'bg-accent/50 border-primary' : ''
+        }`}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+      >
+        {/* Drag overlay indicator */}
+        {isDragging && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-accent/80 border-2 border-dashed border-primary rounded-lg pointer-events-none">
+            <div className="text-center">
+              <ImageIcon className="h-12 w-12 mx-auto mb-2 text-primary" />
+              <p className="text-lg font-medium">{t('dropImagesHere')}</p>
+            </div>
+          </div>
+        )}
+        
         {/* Tools Command Dropdown */}
         <ToolsCommandDropdown
           text={text}

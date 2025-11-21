@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Chat, ChatMessage, ChatFolder } from '@shared/types/database';
+import { Chat, ChatMessage, ChatFolder, MessageAttachment } from '@shared/types/database';
 import { AIOperatorConfig, AIOperator, AIMessage, ToolCall } from '@shared/types/ai';
 import { chatAPI, historyAPI, folderAPI } from '@shared/utils/messaging';
 import { sendMessage as sendAIMessage, generateImage as generateAIImage } from '@shared/services/aiService';
@@ -213,7 +213,21 @@ export const useChatStore = create<ChatStore>()(
         attachmentTypes: attachments.map(a => a.type)
       });
 
-      // Handle attachments - save first one to message (for now, later can support multiple)
+      // Handle attachments - save all attachments to new field
+      const binaryFileAttachments = attachments.filter(a => {
+        if (a.type !== 'file') return false;
+        return a.data.match(/^[A-Za-z0-9+/=]+$/);
+      });
+      
+      // Save all attachments in new format
+      const allAttachments = attachments.map(att => ({
+        type: att.type,
+        name: att.name,
+        data: att.data,
+        xpath: att.xpath
+      }));
+      
+      // First attachment for backward compatibility
       const firstAttachment = attachments[0];
       
       // Prepare content for saving to database (only user text + text attachments, NO page context)
@@ -234,12 +248,6 @@ export const useChatStore = create<ChatStore>()(
         }
       }
       
-      // Save binary file data for later use (similar to images)
-      const binaryFileAttachments = attachments.filter(a => {
-        if (a.type !== 'file') return false;
-        return a.data.match(/^[A-Za-z0-9+/=]+$/);
-      });
-      
       // Create user message with metadata (page context NOT included in text)
       const userMessage: ChatMessage = {
         id: `msg_${Date.now()}_user`,
@@ -252,7 +260,11 @@ export const useChatStore = create<ChatStore>()(
         actionLabel,
         quotedText, // Save quoted text from context menu actions
         webSearch: webSearchEnabled, // Save web search flag
-        // Save attachment data (file_data for images and binary files)
+        
+        // NEW: Save all attachments as JSON
+        attachments: allAttachments.length > 0 ? JSON.stringify(allAttachments) : undefined,
+        
+        // OLD: Save first attachment for backward compatibility
         attach_type: firstAttachment?.type,
         attach_name: firstAttachment?.name,
         xpath: firstAttachment?.xpath,
@@ -311,6 +323,73 @@ export const useChatStore = create<ChatStore>()(
             
             messageContent += `\n\nPage context:\n${cleanedContext}`;
           }
+        }
+        
+        // NEW: Handle multimodal messages with multiple attachments
+        if (m.isUser && m.attachments) {
+          try {
+            const atts: MessageAttachment[] = JSON.parse(m.attachments);
+            const images = atts.filter(a => a.type === 'image');
+            const files = atts.filter(a => a.type === 'file');
+            
+            // Build content parts array for multimodal
+            if (images.length > 0 || files.some(f => f.data.match(/^[A-Za-z0-9+/=]+$/))) {
+              const contentParts: any[] = [{ type: 'text', text: messageContent }];
+              
+              // Add all images
+              for (const img of images) {
+                contentParts.push({
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/png;base64,${img.data}`
+                  }
+                });
+              }
+              
+              // Add all binary files (PDFs, etc.)
+              for (const file of files) {
+                const isBinary = file.data.match(/^[A-Za-z0-9+/=]+$/);
+                if (isBinary) {
+                  const ext = file.name.split('.').pop()?.toLowerCase();
+                  let mimeType = 'application/octet-stream';
+                  if (ext === 'pdf') mimeType = 'application/pdf';
+                  else if (ext === 'doc') mimeType = 'application/msword';
+                  else if (ext === 'docx') mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                  
+                  contentParts.push({
+                    type: 'document',
+                    document: {
+                      url: `data:${mimeType};base64,${file.data}`,
+                      filename: file.name
+                    }
+                  });
+                }
+              }
+              
+              return {
+                role: 'user' as const,
+                content: contentParts
+              };
+            }
+          } catch (error) {
+            console.error('[chatStore] Failed to parse attachments:', error);
+          }
+        }
+        
+        // Fallback: Handle old format (single image attachment)
+        if (m.isUser && m.attach_type === 'image' && m.file_data) {
+          return {
+            role: 'user' as const,
+            content: [
+              { type: 'text', text: messageContent },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/png;base64,${m.file_data}`
+                }
+              }
+            ]
+          };
         }
         
         return {
@@ -546,6 +625,37 @@ export const useChatStore = create<ChatStore>()(
       // Use editingImageResponseId or previousResponseId parameter
       const responseIdForEditing = previousResponseId || editingImageResponseId;
       
+      // For Gemini, extract base64 image instead of using responseId
+      let editingImageBase64: string | undefined;
+      if (editingImageResponseId && selectedOperator.operator === 'gemini') {
+        console.log('[chatStore] Extracting base64 image for Gemini editing, messageId:', editingImageResponseId);
+        
+        // Find the message with this ID (for Gemini we use messageId, not responseId)
+        const messageWithImage = messages.find(msg => msg.id === editingImageResponseId);
+        console.log('[chatStore] Found message:', !!messageWithImage, messageWithImage?.generatedImages ? 'has images' : 'no images');
+        
+        if (messageWithImage && messageWithImage.generatedImages) {
+          try {
+            const images = JSON.parse(messageWithImage.generatedImages);
+            console.log('[chatStore] Parsed images:', images);
+            
+            if (images && images.length > 0) {
+              // Use base64Image if available, otherwise extract from data URL
+              if (images[0].base64Image) {
+                editingImageBase64 = `data:image/png;base64,${images[0].base64Image}`;
+              } else if (images[0].image_url?.url) {
+                editingImageBase64 = images[0].image_url.url;
+              }
+              console.log('[chatStore] Extracted base64 image for editing:', editingImageBase64 ? editingImageBase64.substring(0, 50) + '...' : 'none');
+            }
+          } catch (error) {
+            console.error('[chatStore] Failed to parse generated images:', error);
+          }
+        } else {
+          console.log('[chatStore] Message not found or has no images');
+        }
+      }
+      
       let response;
       
       // Check if this is an image generation request (Grok with image model)
@@ -603,7 +713,8 @@ export const useChatStore = create<ChatStore>()(
           controller.signal,
           toolDefinitions.length > 0 ? toolDefinitions : undefined,
           undefined, // Don't execute tools during first call
-          responseIdForEditing || undefined
+          selectedOperator.operator === 'gemini' ? undefined : (responseIdForEditing || undefined), // previousResponseId only for non-Gemini
+          editingImageBase64 // editingImageBase64 for Gemini
         );
       }
       
@@ -850,6 +961,9 @@ export const useChatStore = create<ChatStore>()(
       // Detect error type
       const errorCode = detectErrorType(error);
       
+      // Get error message from error object
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
       // Get localized error message
       let userFriendlyError: string;
       
@@ -864,16 +978,18 @@ export const useChatStore = create<ChatStore>()(
           userFriendlyError = getTranslation('errorTimeout');
           break;
         case AIErrorCode.AUTH_ERROR:
-          userFriendlyError = getTranslation('errorAuth');
+          userFriendlyError = `${getTranslation('errorAuth')}: ${errorMessage}`;
           break;
         case AIErrorCode.RATE_LIMIT:
-          userFriendlyError = getTranslation('errorRateLimit');
+          userFriendlyError = `${getTranslation('errorRateLimit')}: ${errorMessage}`;
           break;
         case AIErrorCode.SERVER_ERROR:
-          userFriendlyError = getTranslation('errorServer');
+          // For server errors, show the actual error message from API
+          userFriendlyError = errorMessage;
           break;
         default:
-          userFriendlyError = getTranslation('errorUnknown');
+          // For unknown errors, also show the actual message
+          userFriendlyError = errorMessage || getTranslation('errorUnknown');
       }
       
       set({ error: userFriendlyError });

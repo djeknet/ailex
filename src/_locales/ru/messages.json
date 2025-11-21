@@ -1027,6 +1027,27 @@
   "errorReadingFile": {
     "message": "Ошибка чтения файла"
   },
+  "dropImagesHere": {
+    "message": "Перетащите изображения сюда"
+  },
+  "modelFilters": {
+    "message": "Фильтры моделей"
+  },
+  "minContext": {
+    "message": "Мин. контекст"
+  },
+  "inputModalities": {
+    "message": "Входящие"
+  },
+  "outputModalities": {
+    "message": "Выходящие"
+  },
+  "resetFilters": {
+    "message": "Сбросить"
+  },
+  "filteredModels": {
+    "message": "Найдено моделей"
+  },
   "errorCapturingScreenshot": {
     "message": "Ошибка создания скриншота"
   },

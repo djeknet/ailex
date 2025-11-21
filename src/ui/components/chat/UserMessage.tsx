@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChatMessage } from '@shared/types/database';
+import { ChatMessage, MessageAttachment } from '@shared/types/database';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
@@ -46,6 +46,32 @@ export default function UserMessage({
       onCopy(message.text, message.id, true);
     }
   };
+  
+  // Parse attachments from new format
+  const getAttachments = (): MessageAttachment[] => {
+    if (message.attachments) {
+      try {
+        return JSON.parse(message.attachments);
+      } catch (error) {
+        console.error('[UserMessage] Failed to parse attachments:', error);
+      }
+    }
+    // Fallback to old format
+    if (message.attach_type && message.attach_name) {
+      return [{
+        type: message.attach_type,
+        name: message.attach_name,
+        data: message.file_data || '',
+        xpath: message.xpath
+      }];
+    }
+    return [];
+  };
+  
+  const attachments = getAttachments();
+  const imageAttachments = attachments.filter(a => a.type === 'image');
+  const fileAttachments = attachments.filter(a => a.type === 'file');
+  const domAttachments = attachments.filter(a => a.type === 'dom');
 
   // Helper to find quoted message
   const getQuotedMessage = () => {
@@ -138,32 +164,54 @@ export default function UserMessage({
           {/* Show only action label for rewrite actions, or full text for regular messages */}
           {!message.replyTo && !message.quotedText && (
             <div className="bg-muted rounded-lg p-4 text-base max-w-full overflow-hidden">
-              {/* Display image attachments above text */}
-              {message.attach_type === 'image' && message.file_data && (
-                <div className="mb-3">
-                  <img
-                    src={`data:image/png;base64,${message.file_data}`}
-                    alt={message.attach_name || 'Attached image'}
-                    className="max-w-full rounded cursor-pointer hover:opacity-80 transition-opacity border border-border"
-                    style={{ maxHeight: '400px' }}
-                    onClick={() => setViewerImage({ 
-                      base64: message.file_data!, 
-                      name: message.attach_name || 'image.png' 
-                    })}
-                  />
+              {/* Display image attachments in adaptive grid */}
+              {imageAttachments.length > 0 && (
+                <div 
+                  className={`mb-3 grid gap-2 ${
+                    imageAttachments.length === 1 ? 'grid-cols-1' :
+                    imageAttachments.length === 2 ? 'grid-cols-2' :
+                    imageAttachments.length === 3 ? 'grid-cols-3' :
+                    'grid-cols-2'
+                  }`}
+                >
+                  {imageAttachments.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={`data:image/png;base64,${img.data}`}
+                      alt={img.name || `Image ${idx + 1}`}
+                      className="w-full rounded cursor-pointer hover:opacity-80 transition-opacity border border-border object-cover"
+                      style={{ 
+                        maxHeight: imageAttachments.length === 1 ? '400px' : '200px',
+                        aspectRatio: imageAttachments.length === 1 ? 'auto' : '1'
+                      }}
+                      onClick={() => setViewerImage({ 
+                        base64: img.data, 
+                        name: img.name || `image-${idx + 1}.png` 
+                      })}
+                    />
+                  ))}
                 </div>
               )}
               
               {/* Display text with inline file/dom badges */}
               <div className="flex flex-wrap items-center gap-1 max-w-full">
                 {/* Display file/dom badges inline */}
-                {(message.attach_type === 'file' || message.attach_type === 'dom') && message.attach_name && (
+                {fileAttachments.map((file, idx) => (
                   <AttachmentBadge
-                    type={message.attach_type}
-                    name={message.attach_name}
+                    key={`file-${idx}`}
+                    type="file"
+                    name={file.name}
                     readonly={true}
                   />
-                )}
+                ))}
+                {domAttachments.map((dom, idx) => (
+                  <AttachmentBadge
+                    key={`dom-${idx}`}
+                    type="dom"
+                    name={dom.name}
+                    readonly={true}
+                  />
+                ))}
                 <Response>{message.text}</Response>
               </div>
             </div>

@@ -26,7 +26,8 @@ export async function sendMessage(
   signal?: AbortSignal,
   tools?: ToolDefinition[],
   onToolCall?: (toolCall: ToolCall) => Promise<any>,
-  previousResponseId?: string
+  previousResponseId?: string,
+  editingImageBase64?: string
 ): Promise<AIResponse> {
   console.log('[aiService] sendMessage - Starting');
   console.log('[aiService] sendMessage - Operator:', config.operator);
@@ -35,6 +36,7 @@ export async function sendMessage(
   console.log('[aiService] sendMessage - Streaming enabled:', !!onChunk);
   console.log('[aiService] sendMessage - Tools count:', tools?.length || 0);
   console.log('[aiService] sendMessage - Previous Response ID:', previousResponseId);
+  console.log('[aiService] sendMessage - Editing Image Base64:', editingImageBase64 ? `${editingImageBase64.substring(0, 50)}...` : 'none');
   console.log('[aiService] sendMessage - Config:', {
     operator: config.operator,
     hasApiKey: !!config.apiKey,
@@ -64,7 +66,8 @@ export async function sendMessage(
     signal,
     tools,
     onToolCall,
-    previousResponseId
+    previousResponseId,
+    editingImageBase64
   );
 }
 

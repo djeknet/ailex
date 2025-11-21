@@ -64,6 +64,10 @@ export default function ImageGenerationSettingsDialog({
   // Grok settings
   const [imageCount, setImageCount] = useState<number>(currentSettings.n || 1);
   const [responseFormat, setResponseFormat] = useState<ResponseFormat>(currentSettings.responseFormat || 'b64_json');
+  
+  // Gemini settings
+  const [geminiAspectRatio, setGeminiAspectRatio] = useState<AspectRatio>(currentSettings.aspectRatio || '16:9');
+  const [geminiImageSize, setGeminiImageSize] = useState<'1K' | '2K' | '4K'>(currentSettings.imageSize || '2K');
 
   // Update local state when settings change
   useEffect(() => {
@@ -81,6 +85,9 @@ export default function ImageGenerationSettingsDialog({
     } else if (operator === 'grok') {
       setImageCount(settings.n || 1);
       setResponseFormat(settings.responseFormat || 'b64_json');
+    } else if (operator === 'gemini') {
+      setGeminiAspectRatio(settings.aspectRatio || '16:9');
+      setGeminiImageSize(settings.imageSize || '2K');
     }
   }, [operator, getImageSettings]);
 
@@ -186,6 +193,24 @@ export default function ImageGenerationSettingsDialog({
       responseFormat: newFormat
     });
   };
+  
+  const handleGeminiAspectRatioChange = (value: string) => {
+    const ratio = value as AspectRatio;
+    setGeminiAspectRatio(ratio);
+    setImageSettings(operator, {
+      ...currentSettings,
+      aspectRatio: ratio
+    });
+  };
+  
+  const handleGeminiImageSizeChange = (value: string) => {
+    const size = value as '1K' | '2K' | '4K';
+    setGeminiImageSize(size);
+    setImageSettings(operator, {
+      ...currentSettings,
+      imageSize: size
+    });
+  };
 
   // Calculate estimated tokens for OpenAI
   const getEstimatedTokens = () => {
@@ -208,7 +233,7 @@ export default function ImageGenerationSettingsDialog({
         <DialogHeader>
           <DialogTitle>{t('imageGenerationSettings')}</DialogTitle>
           <DialogDescription>
-            {t('imageGenerationSettingsDescription')} {operator === 'openrouter' ? 'OpenRouter' : operator === 'openai' ? 'OpenAI' : operator === 'grok' ? 'Grok' : operator}
+            {t('imageGenerationSettingsDescription')} {operator === 'openrouter' ? 'OpenRouter' : operator === 'openai' ? 'OpenAI' : operator === 'grok' ? 'Grok' : operator === 'gemini' ? 'Gemini' : operator}
           </DialogDescription>
         </DialogHeader>
         
@@ -415,7 +440,49 @@ export default function ImageGenerationSettingsDialog({
             </>
           )}
           
-          {operator !== 'openrouter' && operator !== 'openai' && operator !== 'grok' && (
+          {operator === 'gemini' && (
+            <>
+              {/* Aspect Ratio */}
+              <div className="space-y-2">
+                <Label htmlFor="gemini-aspect-ratio">{t('aspectRatio')}</Label>
+                <Select value={geminiAspectRatio} onValueChange={handleGeminiAspectRatioChange}>
+                  <SelectTrigger id="gemini-aspect-ratio">
+                    <SelectValue placeholder={t('selectAspectRatio')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ASPECT_RATIOS.map((ratio) => (
+                      <SelectItem key={ratio.value} value={ratio.value}>
+                        {t(ratio.labelKey)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t('aspectRatioDescription')}
+                </p>
+              </div>
+
+              {/* Image Size */}
+              <div className="space-y-2">
+                <Label htmlFor="gemini-image-size">{t('imageResolution')}</Label>
+                <Select value={geminiImageSize} onValueChange={handleGeminiImageSizeChange}>
+                  <SelectTrigger id="gemini-image-size">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1K">1K (1024px)</SelectItem>
+                    <SelectItem value="2K">2K (2048px)</SelectItem>
+                    <SelectItem value="4K">4K (4096px)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t('geminiImageResolutionDescription')}
+                </p>
+              </div>
+            </>
+          )}
+          
+          {operator !== 'openrouter' && operator !== 'openai' && operator !== 'grok' && operator !== 'gemini' && (
             <p className="text-sm text-muted-foreground">
               {t('imageGenerationNotAvailable')}
             </p>

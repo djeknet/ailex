@@ -908,6 +908,27 @@
   "errorReadingFile": {
     "message": "Error reading file"
   },
+  "dropImagesHere": {
+    "message": "Drop images here"
+  },
+  "modelFilters": {
+    "message": "Model Filters"
+  },
+  "minContext": {
+    "message": "Min Context"
+  },
+  "inputModalities": {
+    "message": "Input"
+  },
+  "outputModalities": {
+    "message": "Output"
+  },
+  "resetFilters": {
+    "message": "Reset"
+  },
+  "filteredModels": {
+    "message": "Filtered Models"
+  },
   "errorCapturingScreenshot": {
     "message": "Error capturing screenshot"
   },
@@ -2110,6 +2131,12 @@
   },
   "responseFormatDescription": {
     "message": "How to receive generated images: embedded (base64) or hosted URL"
+  },
+  "imageResolution": {
+    "message": "Image Resolution"
+  },
+  "geminiImageResolutionDescription": {
+    "message": "Higher resolution produces better quality images but takes longer to generate. 4K available only for Gemini 3 Pro."
   }
 }
 

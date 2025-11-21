@@ -18,6 +18,10 @@ export interface ImageGenerationSettings {
   // Grok
   n?: number; // 1-10 images
   responseFormat?: 'url' | 'b64_json';
+  
+  // Gemini
+  aspectRatio?: '1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '4:5' | '5:4' | '9:16' | '16:9' | '21:9';
+  imageSize?: '1K' | '2K' | '4K';
 }
 
 interface OperatorSettings {
@@ -45,7 +49,10 @@ const defaultImageSettings: Record<AIOperator, ImageGenerationSettings> = {
     n: 1,
     responseFormat: 'b64_json'
   },
-  gemini: {},
+  gemini: {
+    aspectRatio: '16:9',
+    imageSize: '2K'
+  },
   lmstudio: {}
 };
 

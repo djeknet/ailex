@@ -1,7 +1,9 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, WebSearchSettings, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, ToolCall, GeneratedImage, Citation } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
+import { getModelInfo, API_CONFIG } from '@shared/constants';
 
 export class LMStudioProvider implements AIProvider {
   async chat(
@@ -15,20 +17,35 @@ export class LMStudioProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    _previousResponseId?: string
+    previousResponseId?: string
   ): Promise<AIResponse> {
     console.log('[LMStudio] chat - Starting');
     console.log('[LMStudio] chat - Model:', model);
     console.log('[LMStudio] chat - Endpoint:', endpoint);
     console.log('[LMStudio] chat - Messages count:', messages.length);
     console.log('[LMStudio] chat - Web search enabled:', webSearchEnabled);
+    console.log('[LMStudio] chat - Previous response ID:', previousResponseId);
     
     // Note: LM Studio does not support web search natively as it's a local server
     if (webSearchEnabled) {
       console.warn('[LMStudio] Web search is not supported by LM Studio (local server). Request will proceed without web search.');
     }
     
-    const baseUrl = endpoint || 'http://localhost:1234/v1';
+    const baseUrl = endpoint || API_CONFIG.LMSTUDIO_ENDPOINT;
+    
+    // Определяем, поддерживает ли модель генерацию изображений
+    const modelInfo = getModelInfo(model, 'lmstudio');
+    const modelSupportsImageGeneration = modelInfo?.architecture?.output_modalities?.includes('image') ?? false;
+    console.log('[LMStudio] chat - Model supports image generation:', modelSupportsImageGeneration, {
+      model,
+      hasModelInfo: !!modelInfo,
+      outputModalities: modelInfo?.architecture?.output_modalities
+    });
+    
+    // Use Responses API for image generation or image editing
+    if (modelSupportsImageGeneration || previousResponseId) {
+      return this.chatWithResponses(messages, model, baseUrl, onChunk, signal, tools, _onToolCall, previousResponseId);
+    }
     const url = `${baseUrl}/chat/completions`;
 
     console.log('[LMStudio] chat - Request URL:', url);
@@ -235,11 +252,237 @@ export class LMStudioProvider implements AIProvider {
     }
   }
 
+  // Responses API for image generation (if supported by LM Studio server)
+  private async chatWithResponses(
+    messages: AIMessage[],
+    model: string,
+    baseUrl: string,
+    _onChunk?: (chunk: string) => void,
+    signal?: AbortSignal,
+    tools?: ToolDefinition[],
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    previousResponseId?: string
+  ): Promise<AIResponse> {
+    const url = `${baseUrl}/responses`;
+    
+    console.log('[LMStudio] Using Responses API for image generation');
+    console.log('[LMStudio] Input messages count:', messages.length);
+    
+    // Convert messages to Responses API format
+    const input = messages.map(msg => {
+      if (typeof msg.content === 'string') {
+        return {
+          role: msg.role,
+          content: [{ 
+            type: msg.role === 'assistant' ? 'output_text' : 'input_text', 
+            text: msg.content 
+          }]
+        };
+      } else if (Array.isArray(msg.content)) {
+        const content = msg.content.map(item => {
+          if (item.type === 'text') {
+            return { 
+              type: msg.role === 'assistant' ? 'output_text' : 'input_text', 
+              text: item.text || '' 
+            };
+          } else if (item.type === 'image_url' && item.image_url) {
+            return {
+              type: 'input_image',
+              image_url: item.image_url.url
+            };
+          } else if (item.type === 'document' && item.document) {
+            const dataUrl = item.document.url;
+            const filename = item.document.filename || 'document.pdf';
+            
+            return {
+              type: 'input_file',
+              filename: filename,
+              file_data: dataUrl
+            };
+          }
+          return item;
+        });
+        
+        return {
+          role: msg.role,
+          content
+        };
+      } else {
+        return {
+          role: msg.role,
+          content: [{ 
+            type: msg.role === 'assistant' ? 'output_text' : 'input_text', 
+            text: String(msg.content) 
+          }]
+        };
+      }
+    });
+
+    // Build tools array
+    const responsesTools: any[] = [];
+    
+    // Add custom tools if provided
+    if (tools && tools.length > 0) {
+      responsesTools.push(...tools);
+      console.log('[LMStudio] Added custom tools:', tools.length);
+    }
+
+    // Add image generation tool
+    const imageSettings = useOperatorSettingsStore.getState().getImageSettings('lmstudio');
+    
+    const imageGenTool: any = {
+      type: 'image_generation'
+    };
+    
+    // Add settings if available
+    if (imageSettings.size && imageSettings.size !== 'auto') {
+      imageGenTool.size = imageSettings.size;
+    }
+    
+    if (imageSettings.quality && imageSettings.quality !== 'auto') {
+      imageGenTool.quality = imageSettings.quality;
+    }
+    
+    responsesTools.push(imageGenTool);
+    console.log('[LMStudio] Image generation tool configured:', imageGenTool);
+
+    const requestBody: any = {
+      model,
+      input
+    };
+
+    // Add previous_response_id if editing an image
+    if (previousResponseId) {
+      requestBody.previous_response_id = previousResponseId;
+      console.log('[LMStudio] Using previous_response_id for image editing:', previousResponseId);
+    }
+
+    if (responsesTools.length > 0) {
+      requestBody.tools = responsesTools;
+      requestBody.tool_choice = 'auto';
+    }
+
+    console.log('[LMStudio] Request body:', JSON.stringify(requestBody, null, 2));
+
+    try {
+      const response = await loggedFetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody),
+        signal
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[LMStudio] Responses API error:', errorText);
+        
+        try {
+          const error = JSON.parse(errorText);
+          throw new Error(error.error?.message || error.message || 'LM Studio Responses API error');
+        } catch (parseError) {
+          throw new Error(`LM Studio Responses API error: ${errorText}`);
+        }
+      }
+
+      const data = await response.json();
+      console.log('[LMStudio] Response data:', JSON.stringify(data, null, 2));
+      
+      // Extract content, citations, and images from response
+      let content = '';
+      const citations: Citation[] = [];
+      const generatedImages: GeneratedImage[] = [];
+      let responseId: string | undefined;
+      
+      // Store response ID for image editing
+      if (data.id) {
+        responseId = data.id;
+        console.log('[LMStudio] Response ID:', responseId);
+      }
+      
+      if (data.output && Array.isArray(data.output)) {
+        for (const item of data.output) {
+          // Extract text messages
+          if (item.type === 'message' && item.content) {
+            for (const contentItem of item.content) {
+              if (contentItem.type === 'output_text') {
+                if (contentItem.text) {
+                  content += contentItem.text;
+                }
+                
+                // Extract citations from annotations
+                if (contentItem.annotations) {
+                  for (const annotation of contentItem.annotations) {
+                    if (annotation.type === 'url_citation') {
+                      citations.push({
+                        url: annotation.url || '',
+                        title: annotation.title || '',
+                        cited_text: contentItem.text?.substring(
+                          annotation.start_index || 0,
+                          annotation.end_index || 0
+                        ) || ''
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          // Extract generated images
+          if (item.type === 'image_generation_call' && item.result) {
+            const format = item.format || 'png';
+            generatedImages.push({
+              type: 'image_url',
+              image_url: {
+                url: `data:image/${format};base64,${item.result}`
+              },
+              response_id: responseId,
+              image_generation_call_id: item.id
+            });
+            console.log('[LMStudio] Generated image extracted:', {
+              id: item.id,
+              format,
+              hasResponseId: !!responseId
+            });
+          }
+        }
+      }
+
+      // Fallback to output_text if no content found
+      if (!content && data.output_text) {
+        content = data.output_text;
+      }
+
+      console.log('[LMStudio] Extracted content:', { length: content.length, hasContent: !!content });
+      console.log('[LMStudio] Extracted citations:', citations.length);
+      console.log('[LMStudio] Extracted images:', generatedImages.length);
+      
+      return {
+        content: content || '',
+        tokens: data.usage ? {
+          total: data.usage.total_tokens || 0,
+          input: data.usage.prompt_tokens || 0,
+          output: data.usage.completion_tokens || 0
+        } : undefined,
+        model,
+        operator: 'lmstudio',
+        citations: citations.length > 0 ? citations : undefined,
+        images: generatedImages.length > 0 ? generatedImages : undefined,
+        response_id: responseId
+      };
+    } catch (error) {
+      console.error('[LMStudio] Responses API error:', error);
+      throw error;
+    }
+  }
+
   async listModels(_apiKey: string, endpoint?: string): Promise<any[]> {
     console.log('[LMStudio] listModels - Starting');
     console.log('[LMStudio] listModels - Endpoint:', endpoint);
     
-    const baseUrl = endpoint || 'http://localhost:1234/v1';
+    const baseUrl = endpoint || API_CONFIG.LMSTUDIO_ENDPOINT;
     const url = `${baseUrl}/models`;
 
     console.log('[LMStudio] listModels - Request URL:', url);

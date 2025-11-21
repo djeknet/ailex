@@ -13,7 +13,8 @@ export interface AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[], // Доступные инструменты
     onToolCall?: (toolCall: ToolCall) => Promise<any>, // Callback при вызове инструмента
-    previousResponseId?: string // ID предыдущего ответа для редактирования (OpenAI)
+    previousResponseId?: string, // ID предыдущего ответа для редактирования (OpenAI)
+    editingImageBase64?: string // base64 изображения для редактирования (Gemini)
   ): Promise<AIResponse>;
   listModels(apiKey: string, endpoint?: string): Promise<any[]>;
   testConnection(apiKey: string, endpoint?: string): Promise<boolean>;

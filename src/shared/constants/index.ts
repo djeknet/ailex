@@ -29,6 +29,16 @@ const MODELS_DATABASE: ModelData[] = modelsData.data as ModelData[];
 // Кеш для результатов getModelInfo
 const modelInfoCache = new Map<string, ModelData | null>();
 
+// Mapping of operator names to their prefixes in models.json
+const OPERATOR_PREFIX_MAP: Record<string, string> = {
+  'gemini': 'google',
+  'openai': 'openai',
+  'anthropic': 'anthropic',
+  'grok': 'x-ai',
+  'openrouter': '', // OpenRouter uses direct model IDs
+  'lmstudio': '' // LM Studio uses custom models
+};
+
 // Helper to get detailed model information
 export function getModelInfo(modelName: string, operator?: string): ModelData | null {
   if (!modelName) {
@@ -39,7 +49,9 @@ export function getModelInfo(modelName: string, operator?: string): ModelData | 
   // Build search ID
   let searchId = modelName;
   if (operator && operator !== 'lmstudio' && !modelName.includes('/')) {
-    searchId = `${operator}/${modelName}`;
+    // Use mapped prefix for the operator
+    const prefix = OPERATOR_PREFIX_MAP[operator] || operator;
+    searchId = prefix ? `${prefix}/${modelName}` : modelName;
   }
   
   // Проверяем кеш
@@ -51,6 +63,7 @@ export function getModelInfo(modelName: string, operator?: string): ModelData | 
   console.log('[getModelInfo] Searching for model:', {
     originalModelName: modelName,
     operator,
+    mappedPrefix: operator ? OPERATOR_PREFIX_MAP[operator] : undefined,
     searchId,
     databaseSize: MODELS_DATABASE.length
   });
@@ -140,6 +153,22 @@ export function getModelInfo(modelName: string, operator?: string): ModelData | 
   
   modelInfoCache.set(cacheKey, null);
   return null;
+}
+
+// Helper to get context length range from models database
+export function getContextRange(): { min: number; max: number } {
+  const contexts = MODELS_DATABASE
+    .map(m => m.context_length)
+    .filter(c => c > 0);
+  
+  if (contexts.length === 0) {
+    return { min: 0, max: 2000000 };
+  }
+  
+  return {
+    min: Math.min(...contexts),
+    max: Math.max(...contexts)
+  };
 }
 
 // =============================================================================

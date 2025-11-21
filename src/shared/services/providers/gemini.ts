@@ -1,7 +1,9 @@
 import { AIProvider } from './base';
-import { AIMessage, AIResponse, WebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
+import { AIMessage, AIResponse, WebSearchSettings, Citation, ToolCall, GeneratedImage } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
+import { getModelInfo } from '@shared/constants';
 
 /**
  * Извлекает цитаты из groundingMetadata Gemini ответа
@@ -61,7 +63,8 @@ export class GeminiProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    _previousResponseId?: string
+    _previousResponseId?: string,
+    editingImageBase64?: string
   ): Promise<AIResponse> {
     console.log('[Gemini] chat - Starting');
     console.log('[Gemini] chat - Model:', model);
@@ -129,7 +132,12 @@ export class GeminiProvider implements AIProvider {
       }
       // Handle regular content
       else if (typeof msg.content === 'string') {
-        parts = [{ text: msg.content }];
+        // Для assistant с пустым контентом (только изображение) не добавляем text part
+        if (msg.role === 'assistant' && !msg.content.trim()) {
+          // Пропускаем пустые сообщения модели (они возникают когда только изображение)
+          continue;
+        }
+        parts = [{ text: msg.content || ' ' }]; // Используем пробел если совсем пусто для user
       } else if (Array.isArray(msg.content)) {
         // Multimodal content
         parts = msg.content.map(item => {
@@ -167,6 +175,19 @@ export class GeminiProvider implements AIProvider {
 
     console.log('[Gemini] chat - Converted messages:', JSON.stringify(contents, null, 2));
 
+    // Определяем, поддерживает ли модель генерацию изображений
+    const modelInfo = getModelInfo(model, 'gemini');
+    const modelSupportsImageGeneration = modelInfo?.architecture?.output_modalities?.includes('image') ?? false;
+    console.log('[Gemini] chat - Model supports image generation:', modelSupportsImageGeneration, {
+      model,
+      hasModelInfo: !!modelInfo,
+      outputModalities: modelInfo?.architecture?.output_modalities
+    });
+    
+    // Получаем настройки генерации изображений
+    const imageSettings = useOperatorSettingsStore.getState().getImageSettings('gemini');
+    console.log('[Gemini] chat - Image settings:', imageSettings);
+
     const requestBody: any = {
       contents,
       generationConfig: {
@@ -176,6 +197,44 @@ export class GeminiProvider implements AIProvider {
         maxOutputTokens: 8192
       }
     };
+    
+    // Добавляем response_modalities и image_config для моделей с поддержкой изображений
+    if (modelSupportsImageGeneration) {
+      requestBody.generationConfig.response_modalities = ['TEXT', 'IMAGE'];
+      requestBody.generationConfig.image_config = {
+        aspect_ratio: imageSettings.aspectRatio || '16:9',
+        image_size: imageSettings.imageSize || '2K'
+      };
+      console.log('[Gemini] chat - Added image generation config:', requestBody.generationConfig);
+    }
+    
+    // Если передан editingImageBase64, добавляем изображение в последнее сообщение пользователя
+    if (editingImageBase64 && contents.length > 0) {
+      console.log('[Gemini] chat - Adding editing image to last user message');
+      
+      // Найдем последнее сообщение пользователя
+      for (let i = contents.length - 1; i >= 0; i--) {
+        if (contents[i].role === 'user') {
+          // Добавляем изображение к parts
+          const base64Data = editingImageBase64.replace(/^data:image\/\w+;base64,/, '');
+          const mimeType = editingImageBase64.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/png';
+          
+          (contents[i].parts as any[]).push({
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Data
+            }
+          });
+          
+          console.log('[Gemini] chat - Added editing image to message:', {
+            messageIndex: i,
+            mimeType,
+            base64Length: base64Data.length
+          });
+          break;
+        }
+      }
+    }
     
     // Build tools array
     const geminiTools: any[] = [];
@@ -222,19 +281,33 @@ export class GeminiProvider implements AIProvider {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('[Gemini] chat - Error response:', errorText);
+      
+      let errorMessage = 'Gemini API error';
+      
       try {
         const errorData = JSON.parse(errorText);
         console.error('[Gemini] chat - Parsed error:', errorData);
         
         // Gemini может вернуть как объект, так и массив с объектом ошибки
         const error = Array.isArray(errorData) ? errorData[0] : errorData;
-        const errorMessage = error.error?.message || 'Gemini API error';
         
-        throw new Error(errorMessage);
+        // Извлекаем сообщение об ошибке
+        errorMessage = error?.error?.message || error?.message || 'Gemini API error';
+        
+        // Если это ошибка квоты, делаем сообщение более читаемым
+        if (error?.error?.code === 429 || error?.error?.status === 'RESOURCE_EXHAUSTED') {
+          // Извлекаем основную часть сообщения до деталей
+          const mainMessage = errorMessage.split('\n*')[0].trim();
+          errorMessage = mainMessage;
+        }
       } catch (parseError) {
-        console.error('[Gemini] chat - Failed to parse error response');
-        throw new Error(`Gemini API error: ${errorText}`);
+        // Если не удалось распарсить JSON, возвращаем первые 500 символов
+        console.error('[Gemini] chat - Failed to parse error response:', parseError);
+        const shortError = errorText.length > 500 ? errorText.substring(0, 500) + '...' : errorText;
+        errorMessage = shortError;
       }
+      
+      throw new Error(errorMessage);
     }
 
     if (onChunk && response.body) {
@@ -248,6 +321,7 @@ export class GeminiProvider implements AIProvider {
         let outputTokens = 0;
         let citations: Citation[] = [];
         const toolCalls: ToolCall[] = [];
+        const generatedImages: GeneratedImage[] = [];
         let chunkCount = 0;
       let buffer = '';
 
@@ -302,7 +376,7 @@ export class GeminiProvider implements AIProvider {
                     onChunk(content); // Send immediately to UI
                   }
 
-                  // Handle function calls
+                  // Handle function calls and images
                   const parts = json.candidates?.[0]?.content?.parts;
                   if (parts) {
                     for (const part of parts) {
@@ -317,6 +391,24 @@ export class GeminiProvider implements AIProvider {
                         };
                         toolCalls.push(toolCall);
                         console.log('[Gemini] Function call detected:', toolCall.function.name);
+                      }
+                      
+                      // Handle generated images
+                      if (part.inlineData && part.inlineData.mimeType?.startsWith('image/')) {
+                        const base64Data = part.inlineData.data;
+                        const mimeType = part.inlineData.mimeType;
+                        const generatedImage: GeneratedImage = {
+                          type: 'image_url',
+                          image_url: {
+                            url: `data:${mimeType};base64,${base64Data}`
+                          },
+                          base64Image: base64Data // Сохраняем для редактирования
+                        };
+                        generatedImages.push(generatedImage);
+                        console.log('[Gemini] Generated image detected:', {
+                          mimeType,
+                          base64Length: base64Data.length
+                        });
                       }
                     }
                   }
@@ -364,7 +456,8 @@ export class GeminiProvider implements AIProvider {
         inputTokens,
         outputTokens,
         citationsCount: citations.length,
-        toolCallsCount: toolCalls.length
+        toolCallsCount: toolCalls.length,
+        generatedImagesCount: generatedImages.length
       });
 
       return {
@@ -376,6 +469,7 @@ export class GeminiProvider implements AIProvider {
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
         tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        images: generatedImages.length > 0 ? generatedImages : undefined,
         finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'gemini'
@@ -391,8 +485,9 @@ export class GeminiProvider implements AIProvider {
       // Extract citations
       const citations = data.candidates?.[0] ? extractCitations(data.candidates[0]) : [];
       
-      // Extract function calls
+      // Extract function calls and images
       const toolCalls: ToolCall[] = [];
+      const generatedImages: GeneratedImage[] = [];
       const parts = data.candidates?.[0]?.content?.parts;
       if (parts) {
         for (const part of parts) {
@@ -406,6 +501,23 @@ export class GeminiProvider implements AIProvider {
               }
             });
           }
+          
+          // Extract generated images
+          if (part.inlineData && part.inlineData.mimeType?.startsWith('image/')) {
+            const base64Data = part.inlineData.data;
+            const mimeType = part.inlineData.mimeType;
+            generatedImages.push({
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${base64Data}`
+              },
+              base64Image: base64Data // Сохраняем для редактирования
+            });
+            console.log('[Gemini] Generated image extracted:', {
+              mimeType,
+              base64Length: base64Data.length
+            });
+          }
         }
       }
       
@@ -417,11 +529,12 @@ export class GeminiProvider implements AIProvider {
         finishReason: data.candidates?.[0]?.finishReason,
         citationsCount: citations.length,
         toolCallsCount: toolCalls.length,
+        generatedImagesCount: generatedImages.length,
         content: content.substring(0, 200)
       });
       
-      if (!content) {
-        console.warn('[Gemini] chat - Empty content received, full response:', data);
+      if (!content && generatedImages.length === 0) {
+        console.warn('[Gemini] chat - Empty content and no images received, full response:', data);
       }
       
       return {
@@ -433,6 +546,7 @@ export class GeminiProvider implements AIProvider {
         } : undefined,
         citations: citations.length > 0 ? citations : undefined,
         tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+        images: generatedImages.length > 0 ? generatedImages : undefined,
         finish_reason: toolCalls.length > 0 ? 'tool_calls' : 'stop',
         model,
         operator: 'gemini'

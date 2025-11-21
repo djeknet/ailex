@@ -1,4 +1,4 @@
-import { Download, X } from 'lucide-react';
+import { Download } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -59,16 +59,6 @@ export default function ImageViewerDialog({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
         <div className="relative">
-          {/* Close button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          
           {/* Download button */}
           <Button
             variant="ghost"

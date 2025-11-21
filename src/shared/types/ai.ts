@@ -71,8 +71,9 @@ export interface GeneratedImage {
   image_url: {
     url: string; // base64 data URL
   };
-  response_id?: string; // ID ответа для редактирования
+  response_id?: string; // ID ответа для редактирования (OpenAI)
   image_generation_call_id?: string; // ID вызова генерации
+  base64Image?: string; // base64 данные для редактирования (Gemini)
 }
 
 // Web Search Types

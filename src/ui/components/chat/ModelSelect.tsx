@@ -1,13 +1,15 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Check, Star, Settings } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Check, Star, Settings, Settings2 } from 'lucide-react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useChatStore } from '@shared/stores/chatStore';
 import { useFavoriteModels } from '@shared/hooks/useFavoriteModels';
+import { useModelFilters } from '@shared/hooks/useModelFilters';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { cn } from '@shared/utils/cn';
 import { getModelInfo } from '@shared/constants';
 import { Button } from '@/ui/components/ui/button';
 import ImageGenerationSettingsDialog from './ImageGenerationSettingsDialog';
+import ModelFiltersDialog from './ModelFiltersDialog';
 import {
   Command,
   CommandEmpty,
@@ -35,9 +37,11 @@ export default function ModelSelect() {
   const { operators } = useSettingsStore();
   const { selectedOperator, setSelectedOperator } = useChatStore();
   const { isFavorite, toggleFavorite } = useFavoriteModels();
+  const { matchesFilters, hasActiveFilters } = useModelFilters();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [filtersDialogOpen, setFiltersDialogOpen] = useState(false);
 
   const configuredOperators = operators.filter(op => op.selectedModel && op.models && op.models.length > 0);
 
@@ -74,8 +78,14 @@ export default function ModelSelect() {
     return `$${(price * 1000000).toFixed(2)}`;
   };
 
-  // Custom filter function - search by word start
+  // Custom filter function - search by word start + advanced filters
   const filterModels = (model: any, operator: string) => {
+    // Apply advanced filters first
+    if (!matchesFilters(model, operator as AIOperator)) {
+      return false;
+    }
+    
+    // Then apply search query
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
@@ -197,12 +207,29 @@ export default function ModelSelect() {
         </Tooltip>
         <PopoverContent className="w-[300px] p-0" align="end">
           <Command shouldFilter={false}>
-            <CommandInput 
-              placeholder={t('searchModel')}
-              className="h-9"
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-            />
+            <div className="relative">
+              <CommandInput 
+                placeholder={t('searchModel')}
+                className="h-9 pr-10"
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1 h-7 w-7"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false);
+                  setFiltersDialogOpen(true);
+                }}
+              >
+                <Settings2 className="h-4 w-4" />
+                {hasActiveFilters() && (
+                  <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-primary" />
+                )}
+              </Button>
+            </div>
             <CommandList>
               <CommandEmpty>{t('modelNotFound')}</CommandEmpty>
               
@@ -339,6 +366,19 @@ export default function ModelSelect() {
           operator={selectedOperator.operator}
         />
       )}
+      
+      {/* Model Filters Dialog */}
+      <ModelFiltersDialog
+        open={filtersDialogOpen}
+        onOpenChange={setFiltersDialogOpen}
+        operators={configuredOperators}
+        onSelectModel={(operator, modelId) => {
+          setSelectedOperator({
+            ...operator,
+            selectedModel: modelId
+          });
+        }}
+      />
     </TooltipProvider>
   );
 }

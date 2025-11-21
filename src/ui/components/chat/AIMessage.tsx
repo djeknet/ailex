@@ -114,7 +114,7 @@ export default function AIMessage({
   };
 
   // Helper function to render generated images
-  const renderGeneratedImages = (generatedImagesJson?: string, responseId?: string) => {
+  const renderGeneratedImages = (generatedImagesJson?: string, responseId?: string, messageId?: string, operator?: string) => {
     if (!generatedImagesJson) return null;
     
     try {
@@ -123,16 +123,23 @@ export default function AIMessage({
       
       return (
         <div className="mt-3 flex flex-wrap gap-3">
-          {images.map((img, idx) => (
-            <GeneratedImage
-              key={idx}
-              src={img.image_url.url}
-              alt={`Generated image ${idx + 1}`}
-              responseId={img.response_id || responseId}
-              imageGenerationCallId={img.image_generation_call_id}
-              onEdit={handleEditImage}
-            />
-          ))}
+          {images.map((img, idx) => {
+            // Для Gemini используем ID сообщения, для OpenAI - response_id
+            const editId = operator === 'gemini' 
+              ? messageId 
+              : (img.response_id || responseId);
+              
+            return (
+              <GeneratedImage
+                key={idx}
+                src={img.image_url.url}
+                alt={`Generated image ${idx + 1}`}
+                responseId={editId}
+                imageGenerationCallId={img.image_generation_call_id}
+                onEdit={editId ? handleEditImage : undefined}
+              />
+            );
+          })}
         </div>
       );
     } catch (error) {
@@ -327,22 +334,23 @@ export default function AIMessage({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Rewrite button */}
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <WandSparkles className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent>{t('rewrite')}</TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent align="start" className="w-64">
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              {t('rewriteAnswer')}
-            </DropdownMenuLabel>
+        {/* Rewrite button - only show if there's text to rewrite */}
+        {text && text.trim() && (
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <WandSparkles className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>{t('rewrite')}</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="start" className="w-64">
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                {t('rewriteAnswer')}
+              </DropdownMenuLabel>
             
             <DropdownMenuItem onClick={() => onRewrite && onRewrite(msgId, 'longer')}>
               <ChevronsUpDown className="h-4 w-4 mr-2" />
@@ -418,6 +426,7 @@ export default function AIMessage({
             </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
       </div>
     </TooltipProvider>
   );
@@ -449,7 +458,7 @@ export default function AIMessage({
               </div>
               
               {/* Show generated images if any */}
-              {renderGeneratedImages(message.generatedImages, message.responseId)}
+              {renderGeneratedImages(message.generatedImages, message.responseId, message.id, message.operator)}
               
               {renderActionButtons(message.text, message.id, message.operator, message.model)}
             </div>,
@@ -462,7 +471,7 @@ export default function AIMessage({
                 </div>
                 
                 {/* Show generated images if any */}
-                {renderGeneratedImages(branch.generatedImages, branch.responseId)}
+                {renderGeneratedImages(branch.generatedImages, branch.responseId, branch.id, branch.operator)}
                 
                 {renderActionButtons(branch.text, branch.id, branch.operator, branch.model)}
               </div>
@@ -526,7 +535,7 @@ export default function AIMessage({
       </div>
       
       {/* Show generated images if any */}
-      {renderGeneratedImages(message.generatedImages)}
+      {renderGeneratedImages(message.generatedImages, message.responseId, message.id, message.operator)}
       
       {/* Action buttons for AI messages without branches */}
       {renderActionButtons(message.text, message.id, message.operator, message.model)}

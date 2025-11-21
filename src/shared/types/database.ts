@@ -31,11 +31,14 @@ export interface ChatMessage {
   // Tool calling информация
   toolCalls?: ToolExecution[]; // Информация о выполненных инструментах
   
-  // Attachment metadata
+  // Attachment metadata (старые поля для обратной совместимости)
   attach_type?: 'file' | 'image' | 'dom'; // Type of attached content
   attach_name?: string; // Name of file or DOM element
   xpath?: string; // XPath for DOM elements
   file_data?: string; // Base64 data for files and images
+  
+  // Multiple attachments (новое поле)
+  attachments?: string; // JSON array of MessageAttachment objects
   
   // Generated images metadata
   generatedImages?: string; // JSON array of GeneratedImage objects
@@ -53,6 +56,14 @@ export interface ChatMessage {
   
   // Instruction metadata
   instructionId?: string; // ID of the instruction used for this message
+}
+
+// Type for individual attachment
+export interface MessageAttachment {
+  type: 'file' | 'image' | 'dom';
+  name: string;
+  data: string;
+  xpath?: string;
 }
 
 export interface ChatFolder {
