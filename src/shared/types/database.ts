@@ -63,6 +63,7 @@ export interface MessageAttachment {
   type: 'file' | 'image' | 'dom';
   name: string;
   data: string;
+  mimeType?: string; // MIME type for images and files
   xpath?: string;
 }
 

@@ -25,6 +25,20 @@ export class AnthropicProvider implements AIProvider {
     console.log('[Anthropic] Streaming:', !!onChunk);
     console.log('[Anthropic] onChunk type:', typeof onChunk);
     console.log('[Anthropic] onChunk value:', onChunk);
+    
+    // Log incoming messages to debug MIME type issue
+    messages.forEach((msg, idx) => {
+      if (msg.role === 'user' && Array.isArray(msg.content)) {
+        const images = msg.content.filter((c: any) => c.type === 'image_url');
+        if (images.length > 0) {
+          console.log(`[Anthropic] INCOMING message ${idx} has ${images.length} images:`);
+          images.forEach((img: any, imgIdx: number) => {
+            const url = img.image_url?.url || '';
+            console.log(`  [Anthropic] Incoming image ${imgIdx}: ${url.substring(0, 50)}`);
+          });
+        }
+      }
+    });
 
     const baseUrl = endpoint || 'https://api.anthropic.com/v1';
     const url = `${baseUrl}/messages`;
@@ -65,16 +79,23 @@ export class AnthropicProvider implements AIProvider {
           } else if (item.type === 'image_url' && item.image_url) {
             // Convert to Anthropic image format
             const dataUrl = item.image_url.url;
+            console.log('[Anthropic] Processing image_url, data URL starts with:', dataUrl.substring(0, 100));
             
             // Extract MIME type from data URL
             let mediaType = 'image/png'; // default
-            const mimeMatch = dataUrl.match(/^data:(image\/[a-z]+);base64,/);
+            const mimeMatch = dataUrl.match(/^data:(image\/[a-z0-9+.-]+);base64,/i);
+            console.log('[Anthropic] MIME regex match result:', mimeMatch);
             if (mimeMatch) {
               mediaType = mimeMatch[1];
+              console.log('[Anthropic] Extracted MIME type:', mediaType);
+            } else {
+              console.warn('[Anthropic] Could not extract MIME type from data URL, using default:', mediaType);
             }
             
             // Extract base64 data
-            const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+            const base64Data = dataUrl.replace(/^data:image\/[a-z0-9+.-]+;base64,/i, '');
+            console.log('[Anthropic] Base64 data length:', base64Data.length);
+            console.log('[Anthropic] First 50 chars of base64:', base64Data.substring(0, 50));
             
             return {
               type: 'image',
@@ -108,6 +129,12 @@ export class AnthropicProvider implements AIProvider {
             };
           }
           return { type: 'text', text: '' };
+        }).filter(item => {
+          // Filter out empty text blocks
+          if (item.type === 'text' && (!item.text || !item.text.trim())) {
+            return false;
+          }
+          return true;
         });
       } else {
         content = String(msg.content);

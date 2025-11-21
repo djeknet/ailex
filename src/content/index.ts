@@ -17,6 +17,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   (async () => {
     try {
       switch (message.type) {
+        case 'PING':
+          // Simple ping-pong for availability check
+          sendResponse({ success: true, pong: true });
+          break;
+
         case 'GET_PAGE_CONTEXT':
           const contextData = extractPageContext(
             message.data?.type || 'text',

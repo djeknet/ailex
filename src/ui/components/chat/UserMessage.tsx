@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChatMessage, MessageAttachment } from '@shared/types/database';
 import { useTranslation } from '@shared/i18n/useTranslation';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, RefreshCcw } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
 import {
   Tooltip,
@@ -26,6 +26,8 @@ interface UserMessageProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   messageBranches?: Record<string, MessageBranch[]>;
+  onRetry?: (messageId: string) => void;
+  isLastUserMessage?: boolean;
 }
 
 export default function UserMessage({
@@ -36,10 +38,12 @@ export default function UserMessage({
   onCopy,
   onMouseEnter,
   onMouseLeave,
-  messageBranches = {}
+  messageBranches = {},
+  onRetry,
+  isLastUserMessage = false
 }: UserMessageProps) {
   const { t } = useTranslation();
-  const [viewerImage, setViewerImage] = useState<{base64: string; name: string} | null>(null);
+  const [viewerImage, setViewerImage] = useState<{base64: string; name: string; mimeType?: string} | null>(null);
 
   const handleCopyClick = () => {
     if (onCopy) {
@@ -122,26 +126,47 @@ export default function UserMessage({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        {/* Copy button - appears on hover to the left */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`h-8 w-8 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-                onClick={handleCopyClick}
-              >
-                {isCopied ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('copy')}</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {/* Action buttons - appear on hover to the left */}
+        <div className="flex items-center gap-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                  onClick={handleCopyClick}
+                >
+                  {isCopied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('copy')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* Retry button - only for last user message without response */}
+          {isLastUserMessage && onRetry && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-8 w-8 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                    onClick={() => onRetry(message.id)}
+                  >
+                    <RefreshCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('retryRequest')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
 
         {/* User message */}
         <div className="flex flex-col gap-2">
@@ -177,7 +202,7 @@ export default function UserMessage({
                   {imageAttachments.map((img, idx) => (
                     <img
                       key={idx}
-                      src={`data:image/png;base64,${img.data}`}
+                      src={`data:${img.mimeType || 'image/png'};base64,${img.data}`}
                       alt={img.name || `Image ${idx + 1}`}
                       className="w-full rounded cursor-pointer hover:opacity-80 transition-opacity border border-border object-cover"
                       style={{ 
@@ -186,7 +211,8 @@ export default function UserMessage({
                       }}
                       onClick={() => setViewerImage({ 
                         base64: img.data, 
-                        name: img.name || `image-${idx + 1}.png` 
+                        name: img.name || `image-${idx + 1}.png`,
+                        mimeType: img.mimeType
                       })}
                     />
                   ))}
@@ -226,6 +252,7 @@ export default function UserMessage({
           onClose={() => setViewerImage(null)}
           imageBase64={viewerImage.base64}
           imageName={viewerImage.name}
+          mimeType={viewerImage.mimeType}
         />
       )}
     </div>

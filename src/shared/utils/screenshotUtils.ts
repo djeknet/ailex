@@ -7,6 +7,74 @@ export interface CaptureArea {
   height: number;
 }
 
+// Convert SVG to PNG
+export async function convertSvgToPng(svgBase64: string): Promise<{ data: string; mimeType: string }> {
+  console.log('[convertSvgToPng] Converting SVG to PNG');
+  console.log('[convertSvgToPng] Input base64 length:', svgBase64.length);
+  console.log('[convertSvgToPng] First 50 chars:', svgBase64.substring(0, 50));
+  
+  return new Promise((resolve, reject) => {
+    try {
+      // Create data URL directly from base64
+      const dataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+      console.log('[convertSvgToPng] Created data URL');
+      
+      const img = new Image();
+      
+      img.onload = () => {
+        try {
+          console.log('[convertSvgToPng] SVG loaded, dimensions:', img.width, 'x', img.height);
+          
+          // Create canvas with SVG dimensions
+          const canvas = document.createElement('canvas');
+          // Use natural dimensions if available, otherwise fallback
+          canvas.width = img.naturalWidth || img.width || 100;
+          canvas.height = img.naturalHeight || img.height || 100;
+          
+          console.log('[convertSvgToPng] Canvas size:', canvas.width, 'x', canvas.height);
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+          
+          // Fill with white background (SVG might have transparency)
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw SVG on canvas
+          ctx.drawImage(img, 0, 0);
+          
+          // Convert to PNG
+          const pngDataUrl = canvas.toDataURL('image/png');
+          const pngBase64 = pngDataUrl.split(',')[1];
+          
+          console.log('[convertSvgToPng] Conversion successful, PNG base64 length:', pngBase64.length);
+          console.log('[convertSvgToPng] PNG first 50 chars:', pngBase64.substring(0, 50));
+          
+          resolve({ data: pngBase64, mimeType: 'image/png' });
+        } catch (error) {
+          console.error('[convertSvgToPng] Error during conversion:', error);
+          reject(error);
+        }
+      };
+      
+      img.onerror = (error) => {
+        console.error('[convertSvgToPng] Error loading SVG:', error);
+        reject(new Error('Failed to load SVG image'));
+      };
+      
+      // Set cross-origin to anonymous to allow canvas export
+      img.crossOrigin = 'anonymous';
+      img.src = dataUrl;
+    } catch (error) {
+      console.error('[convertSvgToPng] Error:', error);
+      reject(error);
+    }
+  });
+}
+
 // Capture screenshot of current tab
 export async function captureScreenshot(area?: CaptureArea): Promise<string> {
   try {
@@ -66,8 +134,26 @@ async function cropImage(dataUrl: string, area: CaptureArea): Promise<string> {
 }
 
 // Compress image to target size
-export async function compressImage(base64: string, maxSizeMB: number): Promise<string> {
-  const dataUrl = `data:image/png;base64,${base64}`;
+// Returns { data: base64, mimeType: string }
+export async function compressImage(
+  base64: string, 
+  maxSizeMB: number, 
+  mimeType: string = 'image/png'
+): Promise<{ data: string; mimeType: string }> {
+  console.log('[compressImage] Input MIME type:', mimeType);
+  console.log('[compressImage] Input data length:', base64.length);
+  
+  // Calculate target size
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  const currentSizeBytes = (base64.length * 3) / 4; // Approximate base64 to bytes
+  
+  // For SVG, convert to PNG first
+  if (mimeType === 'image/svg+xml') {
+    console.log('[compressImage] SVG detected, converting to PNG');
+    return await convertSvgToPng(base64);
+  }
+  
+  const dataUrl = `data:${mimeType};base64,${base64}`;
   
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -75,20 +161,21 @@ export async function compressImage(base64: string, maxSizeMB: number): Promise<
       const canvas = document.createElement('canvas');
       let { width, height } = img;
       
-      // Calculate target size
-      const maxSizeBytes = maxSizeMB * 1024 * 1024;
-      const currentSizeBytes = (base64.length * 3) / 4; // Approximate base64 to bytes
-      
       if (currentSizeBytes <= maxSizeBytes) {
         // No compression needed
-        resolve(base64);
+        console.log('[compressImage] No compression needed');
+        resolve({ data: base64, mimeType });
         return;
       }
+      
+      console.log('[compressImage] Compression needed, current size:', (currentSizeBytes / 1024 / 1024).toFixed(2), 'MB');
       
       // Reduce dimensions proportionally
       const ratio = Math.sqrt(maxSizeBytes / currentSizeBytes);
       width = Math.floor(width * ratio);
       height = Math.floor(height * ratio);
+      
+      console.log('[compressImage] Resizing to:', width, 'x', height);
       
       canvas.width = width;
       canvas.height = height;
@@ -102,15 +189,30 @@ export async function compressImage(base64: string, maxSizeMB: number): Promise<
       // Draw resized image
       ctx.drawImage(img, 0, 0, width, height);
       
+      // Determine output format
+      // Use JPEG for better compression, unless it's PNG with transparency
+      let outputFormat = 'image/jpeg';
+      if (mimeType === 'image/png' || mimeType === 'image/webp') {
+        // Check if image has transparency
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const hasTransparency = imageData.data.some((_, i) => i % 4 === 3 && imageData.data[i] < 255);
+        if (hasTransparency) {
+          outputFormat = 'image/png';
+          console.log('[compressImage] Image has transparency, keeping PNG format');
+        }
+      }
+      
       // Try different quality levels
       let quality = 0.9;
       let compressedDataUrl: string;
       let compressedBase64: string;
       
       do {
-        compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        compressedDataUrl = canvas.toDataURL(outputFormat, quality);
         compressedBase64 = compressedDataUrl.split(',')[1];
         const compressedSize = (compressedBase64.length * 3) / 4;
+        
+        console.log('[compressImage] Quality:', quality, 'Size:', (compressedSize / 1024 / 1024).toFixed(2), 'MB');
         
         if (compressedSize <= maxSizeBytes || quality <= 0.1) {
           break;
@@ -119,9 +221,13 @@ export async function compressImage(base64: string, maxSizeMB: number): Promise<
         quality -= 0.1;
       } while (quality > 0);
       
-      resolve(compressedBase64);
+      console.log('[compressImage] Final output format:', outputFormat, 'Quality:', quality);
+      resolve({ data: compressedBase64, mimeType: outputFormat });
     };
-    img.onerror = reject;
+    img.onerror = (error) => {
+      console.error('[compressImage] Error loading image:', error);
+      reject(error);
+    };
     img.src = dataUrl;
   });
 }

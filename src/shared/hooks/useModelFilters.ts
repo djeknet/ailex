@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import type { AIOperator } from '@shared/types/ai';
-import { getModelInfo } from '@shared/constants';
+import { getModelInfo, getContextRange } from '@shared/constants';
 
 const STORAGE_KEY = 'ailex_model_filters';
 
 export interface ModelFilters {
-  minContext: number;
+  minContext: number | null;
   inputModalities: string[];
   outputModalities: string[];
   operators: AIOperator[];
 }
 
 const DEFAULT_FILTERS: ModelFilters = {
-  minContext: 0,
+  minContext: null,
   inputModalities: [],
   outputModalities: [],
   operators: []
@@ -53,8 +53,9 @@ export function useModelFilters() {
 
   // Check if filters are active (not default)
   const hasActiveFilters = () => {
+    const { min: minContext } = getContextRange();
     return (
-      filters.minContext > 0 ||
+      (filters.minContext !== null && filters.minContext > minContext) ||
       filters.inputModalities.length > 0 ||
       filters.outputModalities.length > 0 ||
       filters.operators.length > 0
@@ -69,7 +70,7 @@ export function useModelFilters() {
 
     // Check context length
     const contextLength = modelInfo?.context_length || model.context_length || 0;
-    if (contextLength > 0 && filters.minContext > 0 && contextLength < filters.minContext) {
+    if (filters.minContext !== null && contextLength > 0 && contextLength < filters.minContext) {
       console.log('[useModelFilters] ❌ Context too small:', contextLength, '<', filters.minContext);
       return false;
     }

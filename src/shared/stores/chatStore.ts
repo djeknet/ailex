@@ -48,11 +48,12 @@ interface ChatStore {
     pageContext?: string, 
     replyTo?: string, 
     actionLabel?: string,
-    attachments?: Array<{type: 'file' | 'image' | 'dom'; name: string; data: string; xpath?: string}>,
+    attachments?: Array<{type: 'file' | 'image' | 'dom'; name: string; data: string; xpath?: string; mimeType?: string}>,
     webSearchEnabled?: boolean,
     instructionData?: { id: string; content: string },
     quotedText?: string,
-    previousResponseId?: string
+    previousResponseId?: string,
+    retryMessageId?: string // ID существующего сообщения для повтора
   ) => Promise<void>;
   setSelectedOperator: (operator: AIOperatorConfig | null) => void;
   setPageContextEnabled: (enabled: boolean) => void;
@@ -122,7 +123,7 @@ export const useChatStore = create<ChatStore>()(
     }
   },
 
-  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId) => {
+  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId, retryMessageId) => {
     const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController, editingImageResponseId } = get();
     
     if (!currentChat || !selectedOperator) {
@@ -224,7 +225,8 @@ export const useChatStore = create<ChatStore>()(
         type: att.type,
         name: att.name,
         data: att.data,
-        xpath: att.xpath
+        xpath: att.xpath,
+        mimeType: (att as any).mimeType // Preserve MIME type for images
       }));
       
       // First attachment for backward compatibility
@@ -249,40 +251,55 @@ export const useChatStore = create<ChatStore>()(
       }
       
       // Create user message with metadata (page context NOT included in text)
-      const userMessage: ChatMessage = {
-        id: `msg_${Date.now()}_user`,
-        createdAt: Date.now(),
-        chatId: currentChat.id,
-        isUser: true,
-        text: contentForDatabase, // Save only user text + text attachments (NO page context)
-        tokens: 0,
-        replyTo,
-        actionLabel,
-        quotedText, // Save quoted text from context menu actions
-        webSearch: webSearchEnabled, // Save web search flag
-        
-        // NEW: Save all attachments as JSON
-        attachments: allAttachments.length > 0 ? JSON.stringify(allAttachments) : undefined,
-        
-        // OLD: Save first attachment for backward compatibility
-        attach_type: firstAttachment?.type,
-        attach_name: firstAttachment?.name,
-        xpath: firstAttachment?.xpath,
-        file_data: firstAttachment?.type === 'image' || (firstAttachment?.type === 'file' && binaryFileAttachments.length > 0) 
-          ? firstAttachment.data 
-          : undefined,
-        // Save page context metadata (not actual content)
-        pageContextEnabled: pageContext && effectivePageContextEnabled ? true : undefined,
-        pageContextType: pageContext && effectivePageContextEnabled ? pageContextType : undefined,
-        pageContextHash: pageContextHash,
-        pageUrl: currentUrl,
-        pageTitle: pageContext && effectivePageContextEnabled ? pageTitle : undefined,
-        pageIcon: pageContext && effectivePageContextEnabled ? pageIcon : undefined,
-        // Save instruction ID
-        instructionId: instructionData?.id
-      };
+      let userMessage: ChatMessage;
+      
+      // If retrying, use existing message instead of creating new one
+      if (retryMessageId) {
+        const existingMessage = get().messages.find(m => m.id === retryMessageId);
+        if (existingMessage && existingMessage.isUser) {
+          userMessage = existingMessage;
+          console.log('[chatStore] Retrying existing message:', retryMessageId);
+        } else {
+          console.error('[chatStore] Retry message not found:', retryMessageId);
+          return;
+        }
+      } else {
+        // Create new user message
+        userMessage = {
+          id: `msg_${Date.now()}_user`,
+          createdAt: Date.now(),
+          chatId: currentChat.id,
+          isUser: true,
+          text: contentForDatabase, // Save only user text + text attachments (NO page context)
+          tokens: 0,
+          replyTo,
+          actionLabel,
+          quotedText, // Save quoted text from context menu actions
+          webSearch: webSearchEnabled, // Save web search flag
+          
+          // NEW: Save all attachments as JSON
+          attachments: allAttachments.length > 0 ? JSON.stringify(allAttachments) : undefined,
+          
+          // OLD: Save first attachment for backward compatibility
+          attach_type: firstAttachment?.type,
+          attach_name: firstAttachment?.name,
+          xpath: firstAttachment?.xpath,
+          file_data: firstAttachment?.type === 'image' || (firstAttachment?.type === 'file' && binaryFileAttachments.length > 0) 
+            ? firstAttachment.data 
+            : undefined,
+          // Save page context metadata (not actual content)
+          pageContextEnabled: pageContext && effectivePageContextEnabled ? true : undefined,
+          pageContextType: pageContext && effectivePageContextEnabled ? pageContextType : undefined,
+          pageContextHash: pageContextHash,
+          pageUrl: currentUrl,
+          pageTitle: pageContext && effectivePageContextEnabled ? pageTitle : undefined,
+          pageIcon: pageContext && effectivePageContextEnabled ? pageIcon : undefined,
+          // Save instruction ID
+          instructionId: instructionData?.id
+        };
 
-      await addMessage(userMessage);
+        await addMessage(userMessage);
+      }
 
       // Get updated messages AFTER adding user message
       const messages = get().messages;
@@ -336,12 +353,20 @@ export const useChatStore = create<ChatStore>()(
             if (images.length > 0 || files.some(f => f.data.match(/^[A-Za-z0-9+/=]+$/))) {
               const contentParts: any[] = [{ type: 'text', text: messageContent }];
               
-              // Add all images
+              // Add all images (already converted to PNG at upload time if needed)
               for (const img of images) {
+                const mimeType = img.mimeType || 'image/png';
+                const imageData = img.data;
+                
+                console.log('[chatStore] Adding image to content:', img.name, 'with MIME type:', mimeType);
+                
+                const imageUrl = `data:${mimeType};base64,${imageData}`;
+                console.log('[chatStore] Created image URL:', imageUrl.substring(0, 100) + '...');
+                
                 contentParts.push({
                   type: 'image_url',
                   image_url: {
-                    url: `data:image/png;base64,${img.data}`
+                    url: imageUrl
                   }
                 });
               }
@@ -403,6 +428,26 @@ export const useChatStore = create<ChatStore>()(
         currentChatMessages: chatMessages.length,
         filteredMessages: aiMessages.length,
         excludedBranches: messages.filter(m => m.chatId === currentChat.id && m.branchId).length
+      });
+      
+      // Log each aiMessage to debug
+      aiMessages.forEach((msg, idx) => {
+        if (msg.role === 'user' && Array.isArray(msg.content)) {
+          console.log(`[chatStore] aiMessage ${idx} full content:`, JSON.stringify(msg.content.map(c => ({
+            type: c.type,
+            text: c.type === 'text' ? c.text?.substring(0, 50) : undefined,
+            imageUrl: c.type === 'image_url' ? c.image_url?.url?.substring(0, 50) : undefined
+          })), null, 2));
+          
+          const images = msg.content.filter((c: any) => c.type === 'image_url');
+          if (images.length > 0) {
+            console.log(`[chatStore] aiMessage ${idx} has ${images.length} images:`);
+            images.forEach((img: any, imgIdx: number) => {
+              const url = img.image_url?.url || '';
+              console.log(`  Image ${imgIdx}: ${url.substring(0, 50)}`);
+            });
+          }
+        }
       });
 
       // Determine if we should add language instruction

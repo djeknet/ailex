@@ -473,6 +473,12 @@
   "copy": {
     "message": "Copy"
   },
+  "retryRequest": {
+    "message": "Retry request"
+  },
+  "pageNeedsRefresh": {
+    "message": "Page needs refresh"
+  },
   "copyWithFormatting": {
     "message": "Copy with formatting"
   },

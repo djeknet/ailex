@@ -470,6 +470,12 @@
   "copy": {
     "message": "Копировать"
   },
+  "retryRequest": {
+    "message": "Повторить запрос"
+  },
+  "pageNeedsRefresh": {
+    "message": "Нужно обновить страницу"
+  },
   "copyWithFormatting": {
     "message": "Копировать с форматированием"
   },

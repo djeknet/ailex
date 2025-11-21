@@ -2,10 +2,10 @@ import { Download } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from '@/ui/components/ui/dialog';
 import { Button } from '@/ui/components/ui/button';
-import { useTranslation } from '@shared/i18n/useTranslation';
-import { createFileDownload } from '@shared/utils/fileUtils';
+import { VisuallyHidden } from '@/ui/components/ui/visually-hidden';
 import { useEffect } from 'react';
 
 interface ImageViewerDialogProps {
@@ -13,15 +13,16 @@ interface ImageViewerDialogProps {
   onClose: () => void;
   imageBase64: string;
   imageName: string;
+  mimeType?: string;
 }
 
 export default function ImageViewerDialog({ 
   open, 
   onClose, 
   imageBase64, 
-  imageName 
+  imageName,
+  mimeType = 'image/png'
 }: ImageViewerDialogProps) {
-  const { t } = useTranslation();
   
   // Handle Esc key
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function ImageViewerDialog({
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'image/png' });
+    const blob = new Blob([byteArray], { type: mimeType });
     
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -58,6 +59,9 @@ export default function ImageViewerDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+        <VisuallyHidden>
+          <DialogTitle>{imageName}</DialogTitle>
+        </VisuallyHidden>
         <div className="relative">
           {/* Download button */}
           <Button
@@ -71,7 +75,7 @@ export default function ImageViewerDialog({
           
           {/* Image */}
           <img
-            src={`data:image/png;base64,${imageBase64}`}
+            src={`data:${mimeType};base64,${imageBase64}`}
             alt={imageName}
             className="w-full h-auto max-h-[90vh] object-contain"
           />

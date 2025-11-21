@@ -68,6 +68,7 @@ interface Attachment {
 interface ImageAttachment {
   data: string;
   name: string;
+  mimeType?: string;
 }
 
 export default function MessageInput() {
@@ -83,6 +84,7 @@ export default function MessageInput() {
   const [pageContextType, setPageContextType] = useState<PageContextType>('text');
   const [siteFavicon, setSiteFavicon] = useState<string | null>(null);
   const [isSystemPage, setIsSystemPage] = useState(false);
+  const [contentScriptAvailable, setContentScriptAvailable] = useState(true);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   
   // Tools dropdown state
@@ -167,6 +169,18 @@ export default function MessageInput() {
         // Disable page context on system pages
         if (isSystem) {
           setPageContextEnabled(false);
+          setContentScriptAvailable(false);
+        } else {
+          // Check content script availability on non-system pages
+          if (tab.id && pageContextEnabled) {
+            try {
+              await chrome.tabs.sendMessage(tab.id, { type: 'PING' });
+              setContentScriptAvailable(true);
+            } catch (error) {
+              console.warn('[MessageInput] Content script not available');
+              setContentScriptAvailable(false);
+            }
+          }
         }
         
         // Set favicon
@@ -212,6 +226,7 @@ export default function MessageInput() {
         console.error('Error checking tab:', error);
         setSiteFavicon(null);
         setIsSystemPage(false);
+        setContentScriptAvailable(false);
       }
     };
 
@@ -229,7 +244,7 @@ export default function MessageInput() {
       chrome.tabs.onUpdated.removeListener(handleTabUpdate);
       chrome.tabs.onActivated.removeListener(handleTabUpdate);
     };
-  }, [pendingMessage, instructions]);
+  }, [pendingMessage, instructions, pageContextEnabled]);
 
   // Show tooltip when web search is activated
   useEffect(() => {
@@ -373,6 +388,8 @@ export default function MessageInput() {
     if (!files || files.length === 0) return;
 
     for (const file of Array.from(files)) {
+      console.log('[MessageInput] File selected:', file.name, 'type:', file.type);
+      
       // Validate image size
       if (!validateFileSize(file, maxImageSize)) {
         alert(t('fileTooLarge').replace('{size}', `${maxImageSize}MB`));
@@ -380,20 +397,35 @@ export default function MessageInput() {
       }
 
       try {
-        let data = await readFileAsBase64(file);
+        let mimeType = file.type || 'image/png';
+        console.log('[MessageInput] MIME type determined:', mimeType);
         
-        // Compress if needed
+        let data = await readFileAsBase64(file);
+        console.log('[MessageInput] Base64 data length:', data.length);
+        
+        // Always process through compressImage (handles SVG conversion and compression)
         const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
-        if (sizeInMB > maxImageSize) {
-          data = await compressImage(data, maxImageSize);
+        console.log('[MessageInput] Image size:', sizeInMB.toFixed(2), 'MB');
+        
+        // Process if SVG or if size exceeds limit
+        if (mimeType === 'image/svg+xml' || sizeInMB > maxImageSize) {
+          console.log('[MessageInput] Processing image with MIME type:', mimeType);
+          const processed = await compressImage(data, maxImageSize, mimeType);
+          data = processed.data;
+          mimeType = processed.mimeType;
+          console.log('[MessageInput] Processed data length:', data.length, 'new MIME type:', mimeType);
         }
 
-        setAttachedImages(prev => [...prev, {
+        const attachment = {
           data,
-          name: file.name
-        }]);
+          name: file.name,
+          mimeType
+        };
+        console.log('[MessageInput] Adding attachment:', { name: attachment.name, mimeType: attachment.mimeType, dataLength: attachment.data.length });
+        
+        setAttachedImages(prev => [...prev, attachment]);
       } catch (error) {
-        console.error('Error reading image:', error);
+        console.error('[MessageInput] Error reading image:', error);
         alert(t('errorReadingFile'));
       }
     }
@@ -418,13 +450,17 @@ export default function MessageInput() {
       
       // Compress if needed
       const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
+      let mimeType = 'image/png';
       if (sizeInMB > maxImageSize) {
-        data = await compressImage(data, maxImageSize);
+        const compressed = await compressImage(data, maxImageSize, 'image/png');
+        data = compressed.data;
+        mimeType = compressed.mimeType;
       }
 
       setAttachedImages(prev => [...prev, {
         data,
-        name: `screenshot_${Date.now()}.png`
+        name: `screenshot_${Date.now()}.png`,
+        mimeType
       }]);
     } catch (error) {
       console.error('Error capturing screenshot:', error);
@@ -476,13 +512,17 @@ export default function MessageInput() {
       
       // Compress if needed
       const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
+      let mimeType = 'image/png';
       if (sizeInMB > maxImageSize) {
-        data = await compressImage(data, maxImageSize);
+        const compressed = await compressImage(data, maxImageSize, 'image/png');
+        data = compressed.data;
+        mimeType = compressed.mimeType;
       }
 
       setAttachedImages(prev => [...prev, {
         data,
-        name: `photo_${Date.now()}.png`
+        name: `photo_${Date.now()}.png`,
+        mimeType
       }]);
     } catch (error) {
       console.error('Error processing photo:', error);
@@ -521,7 +561,10 @@ export default function MessageInput() {
     const files = Array.from(e.dataTransfer.files);
     const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
+    // Process dropped files
     for (const file of imageFiles) {
+      console.log('[MessageInput] Dropped file:', file.name, 'type:', file.type);
+      
       // Validate image size
       if (!validateFileSize(file, maxImageSize)) {
         alert(t('fileTooLarge').replace('{size}', `${maxImageSize}MB`));
@@ -529,21 +572,134 @@ export default function MessageInput() {
       }
 
       try {
+        let mimeType = file.type || 'image/png';
+        console.log('[MessageInput] Dropped file MIME type:', mimeType);
+        
         let data = await readFileAsBase64(file);
         
-        // Compress if needed
+        // Always process through compressImage (handles SVG conversion and compression)
         const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
-        if (sizeInMB > maxImageSize) {
-          data = await compressImage(data, maxImageSize);
+        
+        // Process if SVG or if size exceeds limit
+        if (mimeType === 'image/svg+xml' || sizeInMB > maxImageSize) {
+          console.log('[MessageInput] Processing dropped image with MIME type:', mimeType);
+          const processed = await compressImage(data, maxImageSize, mimeType);
+          data = processed.data;
+          mimeType = processed.mimeType;
+          console.log('[MessageInput] Processed, new MIME type:', mimeType);
         }
 
-        setAttachedImages(prev => [...prev, {
+        const attachment = {
           data,
-          name: file.name
-        }]);
+          name: file.name,
+          mimeType
+        };
+        console.log('[MessageInput] Adding dropped attachment:', { name: attachment.name, mimeType: attachment.mimeType });
+        
+        setAttachedImages(prev => [...prev, attachment]);
       } catch (error) {
-        console.error('Error reading dropped image:', error);
+        console.error('[MessageInput] Error reading dropped image:', error);
         alert(t('errorReadingFile'));
+      }
+    }
+
+    // If no files, try to get image URLs from dataTransfer
+    if (imageFiles.length === 0) {
+      const html = e.dataTransfer.getData('text/html');
+      const text = e.dataTransfer.getData('text/plain');
+      
+      console.log('[MessageInput] No files dropped, checking for URLs');
+      
+      // Try to extract image URL from HTML first (more reliable)
+      let imageUrl: string | null = null;
+      if (html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const img = doc.querySelector('img');
+        if (img?.src) {
+          imageUrl = img.src;
+          console.log('[MessageInput] Found image URL in HTML:', imageUrl);
+        }
+      }
+      
+      // If no image in HTML, try plain text URL
+      if (!imageUrl && text) {
+        try {
+          const url = new URL(text);
+          if (url.protocol === 'http:' || url.protocol === 'https:') {
+            imageUrl = text;
+            console.log('[MessageInput] Using plain text URL:', imageUrl);
+          }
+        } catch {
+          // Not a valid URL
+        }
+      }
+      
+      // Download and process the image
+      if (imageUrl) {
+        try {
+          console.log('[MessageInput] Downloading image from URL:', imageUrl);
+          const response = await fetch(imageUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.statusText}`);
+          }
+          
+          const blob = await response.blob();
+          const mimeType = blob.type || 'image/png';
+          console.log('[MessageInput] Downloaded image MIME type:', mimeType);
+          
+          // Check if it's an image
+          if (!mimeType.startsWith('image/')) {
+            alert(t('invalidFileType'));
+            return;
+          }
+          
+          // Convert blob to base64
+          const reader = new FileReader();
+          reader.onload = async () => {
+            try {
+              let data = reader.result as string;
+              // Remove data URL prefix if present
+              data = data.replace(/^data:image\/[a-z+]+;base64,/, '');
+              
+              let finalMimeType = mimeType;
+              
+              // Always process through compressImage (handles SVG conversion and compression)
+              const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
+              console.log('[MessageInput] Downloaded image size:', sizeInMB.toFixed(2), 'MB');
+              
+              // Process if SVG or if size exceeds limit
+              if (mimeType === 'image/svg+xml' || sizeInMB > maxImageSize) {
+                console.log('[MessageInput] Processing downloaded image with MIME type:', mimeType);
+                const processed = await compressImage(data, maxImageSize, mimeType);
+                data = processed.data;
+                finalMimeType = processed.mimeType;
+                console.log('[MessageInput] Processed, new MIME type:', finalMimeType);
+              }
+              
+              // Extract filename from URL
+              const urlObj = new URL(imageUrl);
+              const pathSegments = urlObj.pathname.split('/');
+              const fileName = pathSegments[pathSegments.length - 1] || `image_${Date.now()}`;
+              
+              const attachment = {
+                data,
+                name: fileName,
+                mimeType: finalMimeType
+              };
+              console.log('[MessageInput] Adding downloaded image attachment:', { name: attachment.name, mimeType: attachment.mimeType });
+              
+              setAttachedImages(prev => [...prev, attachment]);
+            } catch (error) {
+              console.error('[MessageInput] Error processing downloaded image:', error);
+              alert(t('errorReadingFile'));
+            }
+          };
+          reader.readAsDataURL(blob);
+        } catch (error) {
+          console.error('[MessageInput] Error downloading image:', error);
+          alert(t('errorReadingFile'));
+        }
       }
     }
   };
@@ -559,12 +715,16 @@ export default function MessageInput() {
     
     if (!modelCapabilities.supportsImages) return;
     
-    // Check if dragged items contain images
-    const hasImages = Array.from(e.dataTransfer.items).some(
+    // Check if dragged items contain images (files or HTML with images)
+    const hasImageFiles = Array.from(e.dataTransfer.items).some(
       item => item.type.startsWith('image/')
     );
     
-    if (hasImages) {
+    const hasImageUrl = Array.from(e.dataTransfer.types).some(
+      type => type === 'text/html' || type === 'text/plain'
+    );
+    
+    if (hasImageFiles || hasImageUrl) {
       setIsDragging(true);
     }
   };
@@ -602,12 +762,23 @@ export default function MessageInput() {
     // Prepare attachments
     const attachments = [
       ...attachedFiles,
-      ...attachedImages.map(img => ({
-        type: 'image' as const,
-        name: img.name,
-        data: img.data
-      }))
+      ...attachedImages.map(img => {
+        console.log('[MessageInput] Preparing image attachment for submit:', { name: img.name, mimeType: img.mimeType, dataLength: img.data?.length });
+        return {
+          type: 'image' as const,
+          name: img.name,
+          data: img.data,
+          mimeType: img.mimeType
+        };
+      })
     ];
+    
+    console.log('[MessageInput] Total attachments to send:', attachments.length);
+    attachments.forEach((att, idx) => {
+      if (att.type === 'image') {
+        console.log(`[MessageInput] Attachment ${idx}:`, { type: att.type, name: att.name, mimeType: att.mimeType });
+      }
+    });
     
     // Clear attachments
     setAttachedFiles([]);
@@ -1009,7 +1180,9 @@ export default function MessageInput() {
                                 }}
                               />
                               {pageContextEnabled && (
-                                <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-green-500" />
+                                <span className={`absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ${
+                                  contentScriptAvailable ? 'bg-green-500' : 'bg-red-500'
+                                }`} />
                               )}
                             </>
                           ) : (
@@ -1019,7 +1192,12 @@ export default function MessageInput() {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {isSystemPage ? t('unavailableOnSystemPages') : t('currentPageContext')}
+                      {isSystemPage 
+                        ? t('unavailableOnSystemPages') 
+                        : !contentScriptAvailable 
+                          ? t('pageNeedsRefresh')
+                          : t('currentPageContext')
+                      }
                     </TooltipContent>
                   </Tooltip>
                   <DropdownMenu>

@@ -5,6 +5,7 @@ interface ImagePreviewProps {
   images: Array<{
     data: string;
     name: string;
+    mimeType?: string;
   }>;
   onRemove: (index: number) => void;
 }
@@ -20,7 +21,7 @@ export default function ImagePreview({ images, onRemove }: ImagePreviewProps) {
           className="relative group"
         >
           <img
-            src={`data:image/png;base64,${image.data}`}
+            src={`data:${image.mimeType || 'image/png'};base64,${image.data}`}
             alt={image.name}
             className="w-20 h-20 object-cover rounded border border-border"
           />

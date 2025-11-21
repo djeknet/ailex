@@ -125,6 +125,44 @@ export default function MessageList() {
     }
   };
 
+  // Handle retry - resend user message without creating duplicate
+  const handleRetry = async (messageId: string) => {
+    try {
+      const message = messages.find(m => m.id === messageId);
+      if (!message || !message.isUser) return;
+
+      // Get attachments
+      const getAttachments = () => {
+        if (message.attachments) {
+          try {
+            return JSON.parse(message.attachments);
+          } catch (error) {
+            console.error('[MessageList] Failed to parse attachments:', error);
+          }
+        }
+        return [];
+      };
+
+      const attachments = getAttachments();
+
+      // Resend the message with all its metadata and retryMessageId to avoid duplication
+      await sendUserMessage(
+        message.text,
+        undefined, // pageContext будет получен заново если включен
+        message.replyTo,
+        message.actionLabel,
+        attachments,
+        message.webSearch,
+        message.instructionId ? { id: message.instructionId, content: '' } : undefined,
+        message.quotedText,
+        undefined, // previousResponseId
+        messageId // retryMessageId - использовать существующее сообщение
+      );
+    } catch (error) {
+      console.error('[MessageList] Error retrying message:', error);
+    }
+  };
+
   // Handle question click with automatic model switching
   const handleQuestionClick = async (question: string, operator?: string, model?: string) => {
     // If operator and model are provided (from branch), switch to that model
@@ -369,8 +407,63 @@ export default function MessageList() {
         }
         
         // Handle images and binary files - create multimodal content
+        // First try new format (attachments)
+        if (m.isUser && m.attachments) {
+          try {
+            const attachments = JSON.parse(m.attachments);
+            const imageAttachments = attachments.filter((a: any) => a.type === 'image');
+            const fileAttachments = attachments.filter((a: any) => a.type === 'file' && a.data.match(/^[A-Za-z0-9+/=]+$/));
+            
+            // If has images or binary files, create multimodal content
+            if (imageAttachments.length > 0 || fileAttachments.length > 0) {
+              const contentParts: any[] = [{ type: 'text', text: content }];
+              
+              // Add images (already converted to PNG at upload time if needed)
+              for (const img of imageAttachments) {
+                const mimeType = img.mimeType || 'image/png';
+                const imageData = img.data;
+                
+                contentParts.push({
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mimeType};base64,${imageData}`
+                  }
+                });
+              }
+              
+              // Add binary files
+              for (const file of fileAttachments) {
+                const ext = file.name.split('.').pop()?.toLowerCase();
+                let mimeType = 'application/octet-stream';
+                if (ext === 'pdf') mimeType = 'application/pdf';
+                else if (ext === 'doc') mimeType = 'application/msword';
+                else if (ext === 'docx') mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                
+                contentParts.push({
+                  type: 'document',
+                  document: {
+                    mimeType,
+                    data: file.data
+                  }
+                });
+              }
+              
+              contextMessages.push({
+                role: 'user',
+                content: contentParts
+              });
+              continue; // Skip adding as text message below
+            }
+          } catch (error) {
+            console.error('[MessageList] Error parsing attachments:', error);
+          }
+        }
+        
+        // Fallback to old format for backward compatibility
         if (m.isUser && m.attach_type === 'image' && m.file_data) {
           // For images, use multimodal format
+          // Try to get mimeType from old data if available
+          const mimeType = 'image/png'; // Default for old format
           contextMessages.push({
             role: 'user',
             content: [
@@ -378,7 +471,7 @@ export default function MessageList() {
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:image/png;base64,${m.file_data}`
+                  url: `data:${mimeType};base64,${m.file_data}`
                 }
               }
             ]
@@ -692,7 +785,12 @@ export default function MessageList() {
       <ConversationContent className="p-4 space-y-4 text-base max-w-full">
         {messages
           .filter(msg => !msg.branchId) // Filter out branch messages from main list
-          .map((message) => (
+          .map((message, index, filteredMessages) => {
+            // Determine if this is the last user message without a response
+            const isLastUserMessage = message.isUser && 
+              index === filteredMessages.length - 1;
+            
+            return (
             <MessageItem
               key={message.id}
               message={message}
@@ -711,11 +809,14 @@ export default function MessageList() {
               onBranchChange={(branchIndex) => {
                 setActiveBranches(prev => ({ ...prev, [message.id]: branchIndex }));
               }}
+              onRetry={handleRetry}
               operators={operators}
               isLoading={isLoading}
               generatingQuestionsForMessage={generatingQuestionsForMessage}
+              isLastUserMessage={isLastUserMessage}
             />
-          ))
+            );
+          })
         }
 
         {error && (

@@ -34,11 +34,13 @@ interface MessageItemProps {
   onMouseLeave?: () => void;
   onQuestionClick?: (question: string, operator?: string, model?: string) => void;
   onBranchChange?: (branchIndex: number) => void;
+  onRetry?: (messageId: string) => void;
   
   // Config
   operators?: AIOperatorConfig[];
   isLoading?: boolean;
   generatingQuestionsForMessage?: string | null;
+  isLastUserMessage?: boolean;
 }
 
 export default function MessageItem({
@@ -56,9 +58,11 @@ export default function MessageItem({
   onMouseLeave,
   onQuestionClick,
   onBranchChange,
+  onRetry,
   operators = [],
   isLoading = false,
-  generatingQuestionsForMessage
+  generatingQuestionsForMessage,
+  isLastUserMessage = false
 }: MessageItemProps) {
   const branches = messageBranches[message.id] || [];
   const hasBranches = branches.length > 0;
@@ -74,6 +78,8 @@ export default function MessageItem({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         messageBranches={messageBranches}
+        onRetry={onRetry}
+        isLastUserMessage={isLastUserMessage}
       />
     );
   }

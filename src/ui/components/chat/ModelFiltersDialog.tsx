@@ -100,11 +100,11 @@ export default function ModelFiltersDialog({
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">{t('minContext')}</label>
               <span className="text-sm text-muted-foreground">
-                {formatContextLength(filters.minContext || minContext)}
+                {formatContextLength(filters.minContext ?? minContext)}
               </span>
             </div>
             <Slider
-              value={[filters.minContext || minContext]}
+              value={[filters.minContext ?? minContext]}
               min={minContext}
               max={maxContext}
               step={1000}
