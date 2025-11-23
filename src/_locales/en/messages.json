@@ -2143,6 +2143,33 @@
   },
   "geminiImageResolutionDescription": {
     "message": "Higher resolution produces better quality images but takes longer to generate. 4K available only for Gemini 3 Pro."
+  },
+  "selectTabs": {
+    "message": "Select tabs"
+  },
+  "noTabsAvailable": {
+    "message": "No tabs available"
+  },
+  "selectAll": {
+    "message": "Select all"
+  },
+  "deselectAll": {
+    "message": "Deselect all"
+  },
+  "tabsSelected": {
+    "message": "{count} tabs selected"
+  },
+  "tabsNavigation": {
+    "message": "↑↓ Navigate • Enter/Tab Select"
+  },
+  "tabsMaxLimit": {
+    "message": "Max {max} tabs"
+  },
+  "tabMention": {
+    "message": "Tab mention"
+  },
+  "confirm": {
+    "message": "Confirm"
   }
 }
 

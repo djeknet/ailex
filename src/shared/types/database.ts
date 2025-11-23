@@ -60,11 +60,15 @@ export interface ChatMessage {
 
 // Type for individual attachment
 export interface MessageAttachment {
-  type: 'file' | 'image' | 'dom';
+  type: 'file' | 'image' | 'dom' | 'tab';
   name: string;
   data: string;
   mimeType?: string; // MIME type for images and files
   xpath?: string;
+  // For tab attachments
+  tabUrl?: string; // URL of the tab
+  tabTitle?: string; // Title of the tab
+  tabFavicon?: string; // Favicon URL of the tab
 }
 
 export interface ChatFolder {

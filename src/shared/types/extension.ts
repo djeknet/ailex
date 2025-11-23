@@ -78,3 +78,11 @@ export interface UIState {
   activeModal?: string;
 }
 
+// Tab reference for @ mentions
+export interface TabReference {
+  id: number; // Chrome tab ID
+  title: string;
+  url: string;
+  favicon?: string;
+}
+

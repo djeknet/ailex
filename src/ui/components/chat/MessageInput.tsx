@@ -55,14 +55,25 @@ import EditImageBadge from './EditImageBadge';
 import ImagePreview from './ImagePreview';
 import WebSearchSettingsDialog from './WebSearchSettingsDialog';
 import ToolsCommandDropdown from './ToolsCommandDropdown';
+import TabMentionDropdown from './TabMentionDropdown';
+import TabMentionBadge from './TabMentionBadge';
+import { TabReference } from '@shared/types/extension';
 
 type PageContextType = 'text' | 'dom' | 'html';
 
-interface Attachment {
+interface FileAttachment {
   type: 'file' | 'dom';
   name: string;
   data: string;
   xpath?: string;
+}
+
+interface TabAttachment {
+  type: 'tab';
+  name: string;
+  data: string;
+  tabUrl?: string;
+  tabTitle?: string;
 }
 
 interface ImageAttachment {
@@ -90,9 +101,13 @@ export default function MessageInput() {
   // Tools dropdown state
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   
+  // Tab mention dropdown state
+  const [showTabMentionDropdown, setShowTabMentionDropdown] = useState(false);
+  
   // Attachment state
-  const [attachedFiles, setAttachedFiles] = useState<Attachment[]>([]);
+  const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([]);
   const [attachedImages, setAttachedImages] = useState<ImageAttachment[]>([]);
+  const [attachedTabs, setAttachedTabs] = useState<TabReference[]>([]);
   const [isSelectingElement, setIsSelectingElement] = useState(false);
   const [isSelectingScreenshot, setIsSelectingScreenshot] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
@@ -320,6 +335,13 @@ export default function MessageInput() {
   useEffect(() => {
     const shouldShow = text.startsWith('/') && text.length > 0;
     setShowToolsDropdown(shouldShow);
+  }, [text]);
+
+  // Track "@" symbol for tab mention dropdown
+  useEffect(() => {
+    // Show dropdown if text contains "@" and no tabs selected yet or still typing
+    const shouldShow = text.includes('@') && text.length > 0;
+    setShowTabMentionDropdown(shouldShow);
   }, [text]);
 
   const handleCancelSelection = async () => {
@@ -551,6 +573,32 @@ export default function MessageInput() {
     setShowToolsDropdown(false);
   };
 
+  const handleTabSelect = (tabs: TabReference[]) => {
+    if (tabs.length > 0) {
+      // Add tabs to attached tabs
+      setAttachedTabs(prev => {
+        // Merge with existing, avoid duplicates
+        const existing = new Map(prev.map(t => [t.id, t]));
+        tabs.forEach(t => existing.set(t.id, t));
+        return Array.from(existing.values());
+      });
+    }
+    
+    // Remove "@" and everything after it from text
+    setText(prev => {
+      const atIndex = prev.lastIndexOf('@');
+      if (atIndex !== -1) {
+        return prev.substring(0, atIndex);
+      }
+      return prev;
+    });
+    setShowTabMentionDropdown(false);
+  };
+
+  const handleRemoveTab = (tabId: number) => {
+    setAttachedTabs(prev => prev.filter(t => t.id !== tabId));
+  };
+
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -746,6 +794,7 @@ export default function MessageInput() {
     const content = message.text!.trim();
     setText('');
     setShowToolsDropdown(false); // Скрыть dropdown при отправке
+    setShowTabMentionDropdown(false); // Скрыть tab dropdown при отправке
     
     // Prepare instruction data if selected
     let instructionData: { id: string; content: string } | undefined;
@@ -760,7 +809,16 @@ export default function MessageInput() {
     }
     
     // Prepare attachments
-    const attachments = [
+    const attachments: Array<{
+      type: 'file' | 'image' | 'dom' | 'tab';
+      name: string;
+      data: string;
+      xpath?: string;
+      mimeType?: string;
+      tabUrl?: string;
+      tabTitle?: string;
+      tabFavicon?: string;
+    }> = [
       ...attachedFiles,
       ...attachedImages.map(img => {
         console.log('[MessageInput] Preparing image attachment for submit:', { name: img.name, mimeType: img.mimeType, dataLength: img.data?.length });
@@ -773,16 +831,99 @@ export default function MessageInput() {
       })
     ];
     
+    // Get tab contents if tabs are attached (BEFORE clearing attachedTabs)
+    const tabsToProcess = [...attachedTabs]; // Make a copy
+    
+    console.log('[MessageInput] Tabs to process:', tabsToProcess.length, tabsToProcess);
+    
+    if (tabsToProcess.length > 0) {
+      console.log('[MessageInput] Fetching content for', tabsToProcess.length, 'tabs');
+      
+      // Get model's context limit for token calculation
+      const modelName = selectedOperator?.selectedModel || '';
+      const operator = selectedOperator?.operator;
+      const modelLimit = getModelContextLimit(modelName, operator);
+      const maxContextTokens = Math.floor(modelLimit * 0.3); // 30% for tab contents
+      
+      for (const tab of tabsToProcess) {
+        try {
+          console.log('[MessageInput] Processing tab:', tab.id, tab.title);
+          
+          // Send message to get page context
+          const response = await chrome.tabs.sendMessage(tab.id, {
+            type: 'GET_PAGE_CONTEXT',
+            data: { 
+              type: pageContextType,
+              maxTokens: maxContextTokens
+            }
+          });
+          
+          if (response?.success && response.data) {
+            const contextData = response.data;
+            const content = contextData.content || contextData;
+            
+            console.log('[MessageInput] Got content for tab:', {
+              tabTitle: tab.title,
+              tabUrl: tab.url,
+              contentLength: content.length,
+              contentType: typeof content,
+              contentPreview: content.substring(0, 200)
+            });
+            
+            // Add as tab attachment with ALL required fields
+            attachments.push({
+              type: 'tab' as const,
+              name: tab.title,
+              data: content,
+              tabUrl: tab.url,
+              tabTitle: tab.title,
+              tabFavicon: tab.favicon
+            });
+            
+            console.log('[MessageInput] Added tab attachment:', {
+              type: 'tab',
+              name: tab.title,
+              tabUrl: tab.url,
+              tabTitle: tab.title,
+              tabFavicon: tab.favicon,
+              dataLength: content.length
+            });
+          } else {
+            console.warn('[MessageInput] No data in response for tab:', {
+              tabTitle: tab.title,
+              responseSuccess: response?.success,
+              hasData: !!response?.data,
+              response: response
+            });
+          }
+        } catch (error) {
+          console.error('[MessageInput] Error getting tab content:', tab.title, error);
+          // Skip this tab if error
+        }
+      }
+    }
+    
     console.log('[MessageInput] Total attachments to send:', attachments.length);
     attachments.forEach((att, idx) => {
       if (att.type === 'image') {
         console.log(`[MessageInput] Attachment ${idx}:`, { type: att.type, name: att.name, mimeType: att.mimeType });
+      } else if (att.type === 'tab') {
+        console.log(`[MessageInput] Attachment ${idx}:`, { 
+          type: att.type, 
+          name: att.name, 
+          url: att.tabUrl,
+          dataLength: att.data?.length || 0,
+          dataPreview: att.data?.substring(0, 100)
+        });
+      } else {
+        console.log(`[MessageInput] Attachment ${idx}:`, { type: att.type, name: att.name });
       }
     });
     
-    // Clear attachments
+    // Clear attachments AFTER processing
     setAttachedFiles([]);
     setAttachedImages([]);
+    setAttachedTabs([]);
 
     // Get page context if enabled
     let pageContext = '';
@@ -972,6 +1113,13 @@ export default function MessageInput() {
           visible={showToolsDropdown}
         />
         
+        {/* Tab Mention Dropdown */}
+        <TabMentionDropdown
+          text={text}
+          onSelect={handleTabSelect}
+          visible={showTabMentionDropdown}
+        />
+        
         {/* Hidden file inputs */}
         <input
           ref={fileInputRef}
@@ -1000,7 +1148,7 @@ export default function MessageInput() {
             )}
             
             {/* File/DOM badges above textarea */}
-            {(attachedFiles.length > 0 || editingImageResponseId) && (
+            {(attachedFiles.length > 0 || attachedTabs.length > 0 || editingImageResponseId) && (
               <div className="flex flex-wrap gap-1 items-center mb-2" style={{ width: '100%', padding: '5px', paddingBottom: '0px' }}>
                 {/* Edit image badge */}
                 {editingImageResponseId && (
@@ -1017,6 +1165,15 @@ export default function MessageInput() {
                     type={file.type}
                     name={file.name}
                     onRemove={() => handleRemoveFile(index)}
+                  />
+                ))}
+                
+                {/* Tab mention badges */}
+                {attachedTabs.map((tab) => (
+                  <TabMentionBadge
+                    key={tab.id}
+                    tab={tab}
+                    onRemove={() => handleRemoveTab(tab.id)}
                   />
                 ))}
               </div>

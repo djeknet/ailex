@@ -54,6 +54,7 @@ export default function MessageList() {
   const [messageBranches, setMessageBranches] = useState<Record<string, MessageBranch[]>>({});
   const [activeBranches, setActiveBranches] = useState<Record<string, number>>({});
   const [comparingMessageId, setComparingMessageId] = useState<string | null>(null);
+  const [compareAbortController, setCompareAbortController] = useState<AbortController | null>(null);
   const [compareError, setCompareError] = useState<{ messageId: string; error: string } | null>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [showTruncationDialog, setShowTruncationDialog] = useState(false);
@@ -75,6 +76,15 @@ export default function MessageList() {
     
     getCurrentTabUrl();
   }, []);
+
+  // Cleanup comparison AbortController on unmount
+  useEffect(() => {
+    return () => {
+      if (compareAbortController) {
+        compareAbortController.abort();
+      }
+    };
+  }, [compareAbortController]);
 
   // Show truncation dialog when context was truncated
   useEffect(() => {
@@ -313,9 +323,23 @@ export default function MessageList() {
     operator: AIOperatorConfig,
     modelId: string
   ) => {
-    // Set loading state
+    // Temporary branch ID (defined outside try-catch for access in error handling)
+    const tempBranchId = `msg_${Date.now()}_branch`;
+    
+    // Cancel previous comparison if exists
+    if (compareAbortController) {
+      console.log('[MessageList] Cancelling previous comparison request');
+      compareAbortController.abort();
+    }
+
+    // Create new AbortController for this comparison
+    const controller = new AbortController();
+    setCompareAbortController(controller);
+    
+    // Set loading state - use chatStore's isLoading to show stop button
     setComparingMessageId(messageId);
     setCompareError(null);
+    useChatStore.setState({ isLoading: true, activeRequestController: controller });
 
     try {
       // Find the original user message that triggered this AI response
@@ -413,6 +437,34 @@ export default function MessageList() {
             const attachments = JSON.parse(m.attachments);
             const imageAttachments = attachments.filter((a: any) => a.type === 'image');
             const fileAttachments = attachments.filter((a: any) => a.type === 'file' && a.data.match(/^[A-Za-z0-9+/=]+$/));
+            const tabAttachments = attachments.filter((a: any) => a.type === 'tab');
+            
+            // Add tab contents to message content (BEFORE creating multimodal)
+            if (tabAttachments.length > 0) {
+              console.log('[MessageList] Processing tab attachments for comparison:', {
+                tabCount: tabAttachments.length,
+                tabs: tabAttachments.map((t: any) => ({
+                  title: t.tabTitle || t.name,
+                  url: t.tabUrl,
+                  dataLength: t.data?.length || 0
+                }))
+              });
+              
+              content += '\n\n--- Referenced Tabs ---';
+              tabAttachments.forEach((tab: any, index: number) => {
+                content += `\n\nTab ${index + 1}: ${tab.tabTitle || tab.name}`;
+                if (tab.tabUrl) {
+                  content += ` (${tab.tabUrl})`;
+                }
+                if (tab.data) {
+                  content += `\nContent:\n${tab.data}`;
+                } else {
+                  console.warn('[MessageList] Tab attachment missing data:', tab);
+                }
+              });
+              
+              console.log('[MessageList] Final content length with tabs:', content.length);
+            }
             
             // If has images or binary files, create multimodal content
             if (imageAttachments.length > 0 || fileAttachments.length > 0) {
@@ -531,7 +583,6 @@ export default function MessageList() {
       // Accumulate streaming content and update branch state in real-time
       let accumulatedContent = '';
       let streamingBranchMessage: ChatMessage | null = null;
-      const tempBranchId = `msg_${Date.now()}_branch`;
 
       // Send the request with the full context
       const response = await sendAIMessage(
@@ -591,7 +642,8 @@ export default function MessageList() {
           }
         },
         userMessage.webSearch, // Pass web search flag from original message
-        webSearchSettings // Pass web search settings
+        webSearchSettings, // Pass web search settings
+        controller.signal // Pass abort signal for cancellation
       );
 
       console.log('[MessageList] Response received:', {
@@ -700,7 +752,43 @@ export default function MessageList() {
         }, 500);
       }
     } catch (error) {
-      console.error('Error comparing response:', error);
+      // Check if error is AbortError
+      const isAborted = error instanceof Error && 
+        (error.name === 'AbortError' || error.message.includes('aborted'));
+      
+      if (isAborted) {
+        console.log('[MessageList] Comparison request was aborted');
+        // Remove the temporary streaming branch from messageBranches
+        setMessageBranches(prev => {
+          const updated = { ...prev };
+          if (updated[messageId] && updated[messageId].length > 0) {
+            // Remove the last branch (the one that was streaming)
+            const lastBranch = updated[messageId][updated[messageId].length - 1];
+            if (lastBranch.id === tempBranchId) {
+              updated[messageId] = updated[messageId].slice(0, -1);
+            }
+          }
+          return updated;
+        });
+        
+        // Reset active branch index
+        setActiveBranches(prev => {
+          const updated = { ...prev };
+          const branchCount = messageBranches[messageId]?.length || 0;
+          if (branchCount > 0) {
+            updated[messageId] = branchCount - 1; // Go back to previous branch
+          } else {
+            delete updated[messageId]; // No branches left, show original
+          }
+          return updated;
+        });
+        
+        // Don't show error for aborted requests
+        return;
+      }
+      
+      // Log error only for non-abort errors
+      console.error('[MessageList] Error comparing response:', error);
       
       // Determine user-friendly error message
       const errorMessage = error instanceof Error ? error.message : t('errorUnknownCompare');
@@ -721,6 +809,9 @@ export default function MessageList() {
       setCompareError({ messageId, error: userFriendlyError });
     } finally {
       setComparingMessageId(null);
+      setCompareAbortController(null);
+      // Reset loading state
+      useChatStore.setState({ isLoading: false, activeRequestController: null });
     }
   };
 

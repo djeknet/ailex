@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Chat, ChatMessage, ChatFolder, MessageAttachment } from '@shared/types/database';
-import { AIOperatorConfig, AIOperator, AIMessage, ToolCall } from '@shared/types/ai';
+import { AIOperatorConfig, AIOperator, AIMessage } from '@shared/types/ai';
 import { chatAPI, historyAPI, folderAPI } from '@shared/utils/messaging';
 import { sendMessage as sendAIMessage, generateImage as generateAIImage } from '@shared/services/aiService';
 import { PageContextType, HistoryMode } from '@shared/types/extension';
@@ -48,7 +48,7 @@ interface ChatStore {
     pageContext?: string, 
     replyTo?: string, 
     actionLabel?: string,
-    attachments?: Array<{type: 'file' | 'image' | 'dom'; name: string; data: string; xpath?: string; mimeType?: string}>,
+    attachments?: Array<{type: 'file' | 'image' | 'dom' | 'tab'; name: string; data: string; xpath?: string; mimeType?: string; tabUrl?: string; tabTitle?: string; tabFavicon?: string}>,
     webSearchEnabled?: boolean,
     instructionData?: { id: string; content: string },
     quotedText?: string,
@@ -226,8 +226,21 @@ export const useChatStore = create<ChatStore>()(
         name: att.name,
         data: att.data,
         xpath: att.xpath,
-        mimeType: (att as any).mimeType // Preserve MIME type for images
+        mimeType: (att as any).mimeType, // Preserve MIME type for images
+        // Preserve tab-specific fields
+        tabUrl: (att as any).tabUrl,
+        tabTitle: (att as any).tabTitle,
+        tabFavicon: (att as any).tabFavicon
       }));
+      
+      console.log('[chatStore] Prepared allAttachments for saving:', allAttachments.map(att => ({
+        type: att.type,
+        name: att.name,
+        dataLength: att.data?.length || 0,
+        dataPreview: att.data?.substring(0, 100),
+        tabUrl: att.tabUrl,
+        tabTitle: att.tabTitle
+      })));
       
       // First attachment for backward compatibility
       const firstAttachment = attachments[0];
@@ -247,6 +260,7 @@ export const useChatStore = create<ChatStore>()(
           } else if (attachment.type === 'dom') {
             contentForDatabase += `\n\nSelected DOM element (${attachment.name}):\n${attachment.data}`;
           }
+          // Note: tab attachments are displayed as badges, no need to add text
         }
       }
       
@@ -280,10 +294,10 @@ export const useChatStore = create<ChatStore>()(
           // NEW: Save all attachments as JSON
           attachments: allAttachments.length > 0 ? JSON.stringify(allAttachments) : undefined,
           
-          // OLD: Save first attachment for backward compatibility
-          attach_type: firstAttachment?.type,
-          attach_name: firstAttachment?.name,
-          xpath: firstAttachment?.xpath,
+          // OLD: Save first attachment for backward compatibility (skip 'tab' type as it's not supported in old format)
+          attach_type: firstAttachment?.type !== 'tab' ? firstAttachment?.type : undefined,
+          attach_name: firstAttachment?.type !== 'tab' ? firstAttachment?.name : undefined,
+          xpath: firstAttachment?.type !== 'tab' ? firstAttachment?.xpath : undefined,
           file_data: firstAttachment?.type === 'image' || (firstAttachment?.type === 'file' && binaryFileAttachments.length > 0) 
             ? firstAttachment.data 
             : undefined,
@@ -310,6 +324,12 @@ export const useChatStore = create<ChatStore>()(
       const aiMessages: AIMessage[] = await Promise.all(chatMessages.map(async (m, idx) => {
         // Message text includes attachments but NOT page context
         let messageContent = m.text;
+        
+        console.log(`[chatStore] Processing message ${idx} (${m.id}):`, {
+          isUser: m.isUser,
+          hasAttachments: !!m.attachments,
+          attachmentsLength: m.attachments?.length || 0
+        });
         
         // Add page context dynamically for AI (only if needed)
         if (m.pageContextEnabled && m.isUser && m.pageContextHash && pageContext && m.pageUrl === currentUrl) {
@@ -348,6 +368,35 @@ export const useChatStore = create<ChatStore>()(
             const atts: MessageAttachment[] = JSON.parse(m.attachments);
             const images = atts.filter(a => a.type === 'image');
             const files = atts.filter(a => a.type === 'file');
+            const tabs = atts.filter(a => a.type === 'tab');
+            
+            // Add tab contents to message content
+            if (tabs.length > 0) {
+              console.log('[chatStore] Processing tab attachments for AI:', {
+                tabCount: tabs.length,
+                tabs: tabs.map(t => ({
+                  title: t.tabTitle || t.name,
+                  url: t.tabUrl,
+                  dataLength: t.data?.length || 0,
+                  dataPreview: t.data?.substring(0, 100)
+                }))
+              });
+              
+              messageContent += '\n\n--- Referenced Tabs ---';
+              tabs.forEach((tab, index) => {
+                messageContent += `\n\nTab ${index + 1}: ${tab.tabTitle || tab.name}`;
+                if (tab.tabUrl) {
+                  messageContent += ` (${tab.tabUrl})`;
+                }
+                if (tab.data) {
+                  messageContent += `\nContent:\n${tab.data}`;
+                } else {
+                  console.warn('[chatStore] Tab attachment missing data:', tab);
+                }
+              });
+              
+              console.log('[chatStore] Final message content length with tabs:', messageContent.length);
+            }
             
             // Build content parts array for multimodal
             if (images.length > 0 || files.some(f => f.data.match(/^[A-Za-z0-9+/=]+$/))) {
@@ -1353,30 +1402,11 @@ ${responseContext}`;
   setGeneratingQuestionsForMessage: (messageId) => set({ generatingQuestionsForMessage: messageId }),
 
   stopGeneration: async () => {
-    const { activeRequestController, currentChat, loadingChats, messages } = get();
+    const { activeRequestController, currentChat, loadingChats } = get();
     
     if (activeRequestController && currentChat) {
       console.log('[chatStore] Stopping generation...');
       activeRequestController.abort();
-      
-      // Find the last user message
-      const lastUserMessage = messages.filter(m => m.isUser && m.chatId === currentChat.id).pop();
-      
-      if (lastUserMessage) {
-        console.log('[chatStore] Deleting last user message:', lastUserMessage.id);
-        
-        // Delete message from database
-        try {
-          await historyAPI.deleteMessage(lastUserMessage.id);
-        } catch (error) {
-          console.error('[chatStore] Error deleting message:', error);
-        }
-        
-        // Remove message from state
-        set(state => ({
-          messages: state.messages.filter(m => m.id !== lastUserMessage.id)
-        }));
-      }
       
       // Clear loading state
       const newLoadingChats = new Set(loadingChats);
@@ -1389,8 +1419,10 @@ ${responseContext}`;
         activeRequestController: null
       });
       
-      // Return the user's message text to restore it in the input
-      return lastUserMessage?.text || '';
+      console.log('[chatStore] Generation stopped, user message preserved in history');
+      
+      // Return empty string (no need to restore message in input)
+      return '';
     }
     
     return '';

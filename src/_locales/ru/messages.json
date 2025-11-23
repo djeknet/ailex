@@ -2253,5 +2253,32 @@
   },
   "responseFormatDescription": {
     "message": "Как получить сгенерированные изображения: встроенные (base64) или размещённые по URL"
+  },
+  "selectTabs": {
+    "message": "Выберите вкладки"
+  },
+  "noTabsAvailable": {
+    "message": "Нет доступных вкладок"
+  },
+  "selectAll": {
+    "message": "Выбрать все"
+  },
+  "deselectAll": {
+    "message": "Снять выделение"
+  },
+  "tabsSelected": {
+    "message": "Выбрано вкладок: {count}"
+  },
+  "tabsNavigation": {
+    "message": "↑↓ Навигация • Enter/Tab Выбор"
+  },
+  "tabsMaxLimit": {
+    "message": "Макс. {max} вкладок"
+  },
+  "tabMention": {
+    "message": "Упоминание вкладки"
+  },
+  "confirm": {
+    "message": "Подтвердить"
   }
 }

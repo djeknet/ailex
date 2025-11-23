@@ -15,7 +15,9 @@ import InstructionBadge from './InstructionBadge';
 import QuotedMessage from './QuotedMessage';
 import ImageViewerDialog from './ImageViewerDialog';
 import AttachmentBadge from './AttachmentBadge';
+import TabMentionBadge from './TabMentionBadge';
 import type { MessageBranch } from './MessageItem';
+import type { TabReference } from '@shared/types/extension';
 
 interface UserMessageProps {
   message: ChatMessage;
@@ -76,6 +78,7 @@ export default function UserMessage({
   const imageAttachments = attachments.filter(a => a.type === 'image');
   const fileAttachments = attachments.filter(a => a.type === 'file');
   const domAttachments = attachments.filter(a => a.type === 'dom');
+  const tabAttachments = attachments.filter(a => a.type === 'tab');
 
   // Helper to find quoted message
   const getQuotedMessage = () => {
@@ -219,7 +222,7 @@ export default function UserMessage({
                 </div>
               )}
               
-              {/* Display text with inline file/dom badges */}
+              {/* Display text with inline file/dom/tab badges */}
               <div className="flex flex-wrap items-center gap-1 max-w-full">
                 {/* Display file/dom badges inline */}
                 {fileAttachments.map((file, idx) => (
@@ -238,6 +241,22 @@ export default function UserMessage({
                     readonly={true}
                   />
                 ))}
+                {/* Display tab badges */}
+                {tabAttachments.map((tab, idx) => {
+                  console.log('[UserMessage] Tab attachment:', tab);
+                  return (
+                    <TabMentionBadge
+                      key={`tab-${idx}`}
+                      tab={{
+                        id: idx, // Dummy ID for display
+                        title: tab.tabTitle || tab.name,
+                        url: tab.tabUrl || '',
+                        favicon: tab.tabFavicon
+                      }}
+                      readonly={true}
+                    />
+                  );
+                })}
                 <Response>{message.text}</Response>
               </div>
             </div>
