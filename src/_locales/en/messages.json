@@ -857,6 +857,9 @@
   "takeScreenshot": {
     "message": "Take screenshot"
   },
+  "takeFullPageScreenshot": {
+    "message": "Full Page Screenshot"
+  },
   "takePhoto": {
     "message": "Take photo"
   },
@@ -1496,6 +1499,36 @@
   "deleteToolConfirm": {
     "message": "Are you sure you want to delete this tool?"
   },
+  "importTool": {
+    "message": "Import"
+  },
+  "exportTool": {
+    "message": "Export"
+  },
+  "success": {
+    "message": "Success"
+  },
+  "invalidJsonApiHeaders": {
+    "message": "Invalid JSON format for API Headers"
+  },
+  "importErrorInvalidJson": {
+    "message": "File is not valid JSON"
+  },
+  "importErrorMissingFields": {
+    "message": "Missing required fields: {fields}"
+  },
+  "importErrorCommandExists": {
+    "message": "Tool with command \"{command}\" already exists"
+  },
+  "importErrorInvalidCommand": {
+    "message": "Command must start with \"/\" and contain only lowercase letters, numbers, and hyphens"
+  },
+  "importSuccess": {
+    "message": "Tool successfully imported!"
+  },
+  "importErrorGeneric": {
+    "message": "Error importing tool: {message}"
+  },
   "fillPersonalInfo": {
     "message": "Fill in personal information in settings"
   },
@@ -1889,9 +1922,6 @@
   "toolExample_selectOption_prompt": {
     "message": "Call execute-dom-function with functionName: \"selectOption\" and params: {\"selector\": \"#country\", \"value\": \"USA\"}"
   },
-  "tool_fillFormFields": {
-    "message": "Fill Form Fields"
-  },
   "toolExample_fillMultipleFields_desc": {
     "message": "Fill multiple fields"
   },
@@ -2170,6 +2200,96 @@
   },
   "confirm": {
     "message": "Confirm"
+  },
+  "settingsManagement": {
+    "message": "Settings Management"
+  },
+  "settingsManagementDescription": {
+    "message": "Export or import extension settings"
+  },
+  "exportSettings": {
+    "message": "Export Settings"
+  },
+  "exportSettingsDescription": {
+    "message": "Export will save all settings to a JSON file with decrypted API keys"
+  },
+  "importSettings": {
+    "message": "Import Settings"
+  },
+  "importSettingsDescription": {
+    "message": "Select a JSON file with exported settings"
+  },
+  "selectFile": {
+    "message": "Select file"
+  },
+  "selectImportOptions": {
+    "message": "Select what to import"
+  },
+  "importOperators": {
+    "message": "Operators (API keys, models, endpoints)"
+  },
+  "importGeneralSettings": {
+    "message": "General Settings (theme, language, history mode)"
+  },
+  "importPersonalInfo": {
+    "message": "Personal Information"
+  },
+  "importInstructions": {
+    "message": "Instructions (general and site-specific)"
+  },
+  "importSuccessDescription": {
+    "message": "All selected settings have been successfully imported"
+  },
+  "importError": {
+    "message": "Import Error"
+  },
+  "invalidFileFormat": {
+    "message": "Invalid file format. Make sure you selected a valid settings JSON file."
+  },
+  "invalidJSON": {
+    "message": "File is not valid JSON"
+  },
+  "missingVersion": {
+    "message": "File is missing version information"
+  },
+  "missingExportDate": {
+    "message": "File is missing export date"
+  },
+  "missingEncryptionData": {
+    "message": "File is missing encryption data"
+  },
+  "invalidOperators": {
+    "message": "Invalid operators data format"
+  },
+  "invalidGeneralSettings": {
+    "message": "Invalid general settings format"
+  },
+  "invalidPersonalInfo": {
+    "message": "Invalid personal info format"
+  },
+  "invalidInstructions": {
+    "message": "Invalid instructions format"
+  },
+  "importing": {
+    "message": "Importing..."
+  },
+  "import": {
+    "message": "Import"
+  },
+  "version": {
+    "message": "Version"
+  },
+  "exportDate": {
+    "message": "Export Date"
+  },
+  "youtubePlayerResponseNotFound": {
+    "message": "ytInitialPlayerResponse not found on the page"
+  },
+  "youtubeSubtitlesNotFound": {
+    "message": "No subtitles found for this video"
+  },
+  "youtubeSubtitlesBaseUrlNotFound": {
+    "message": "Subtitles baseUrl not found"
   }
 }
 

@@ -4,7 +4,7 @@
  */
 
 // Static salt for key derivation (you can change this to a random value during build)
-const ENCRYPTION_SALT = 'ailex-extension-v1';
+export const ENCRYPTION_SALT = 'ailex-extension-v1';
 
 /**
  * Derives a crypto key from the extension's identity
@@ -127,5 +127,16 @@ export function isEncrypted(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Gets encryption metadata for export/import
+ * @returns Object containing encryption salt and runtime ID
+ */
+export function getEncryptionMetadata() {
+  return {
+    encryptionSalt: ENCRYPTION_SALT,
+    encryptionKey: chrome.runtime.id
+  };
 }
 

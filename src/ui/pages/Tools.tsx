@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToolsStore } from '@shared/stores/toolsStore';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { CustomTool } from '@shared/types/database';
+import * as toolsService from '@shared/services/toolsService';
 import { Button } from '@/ui/components/ui/button';
 import { Input } from '@/ui/components/ui/input';
 import { Label } from '@/ui/components/ui/label';
 import { Textarea } from '@/ui/components/ui/textarea';
 import { Switch } from '@/ui/components/ui/switch';
+import { Import } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -23,13 +25,22 @@ import {
   DialogTitle,
 } from '@/ui/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/components/ui/alert-dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/ui/select';
-import { Plus, Edit, Trash2, Save, X, Wrench, BookOpen, MousePointer2, Lightbulb } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Wrench, BookOpen, MousePointer2, Lightbulb, Download, Upload } from 'lucide-react';
 import { Alert, AlertDescription } from '@/ui/components/ui/alert';
 import DOMFunctionsModal from '@/ui/components/tools/DOMFunctionsModal';
 import AvailableToolsModal from '@/ui/components/tools/AvailableToolsModal';
@@ -53,6 +64,12 @@ export default function Tools() {
   const [isAvailableToolsModalOpen, setIsAvailableToolsModalOpen] = useState(false);
   const [isSelectingElement, setIsSelectingElement] = useState(false);
   const [promptTextareaRef, setPromptTextareaRef] = useState<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; description: string }>({
+    isOpen: false,
+    title: '',
+    description: ''
+  });
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -175,6 +192,10 @@ export default function Tools() {
     clearError();
   };
 
+  const showAlert = (title: string, description: string) => {
+    setAlertDialog({ isOpen: true, title, description });
+  };
+
   const handleSave = async () => {
     try {
       // Парсим API headers если они заполнены
@@ -183,7 +204,7 @@ export default function Tools() {
         try {
           apiHeaders = JSON.parse(formData.apiHeaders);
         } catch (e) {
-          alert('Неверный формат JSON для API Headers');
+          showAlert(t('error'), t('invalidJsonApiHeaders'));
           return;
         }
       }
@@ -218,6 +239,105 @@ export default function Tools() {
     }
   };
 
+  const handleExportTool = (tool: CustomTool) => {
+    // Извлекаем только необходимые поля для экспорта
+    const exportData = {
+      name: tool.name,
+      description: tool.description,
+      icon: tool.icon,
+      command: tool.command,
+      urlPattern: tool.urlPattern || '',
+      prompt: tool.prompt,
+      apiUrl: tool.apiUrl || '',
+      apiMethod: tool.apiMethod || 'POST',
+      apiHeaders: tool.apiHeaders || {}
+    };
+
+    // Создаем Blob с JSON данными
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Создаем ссылку для скачивания
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${tool.command.replace('/', '')}_tool.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportTool = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Читаем файл
+      const text = await file.text();
+      
+      // Парсим JSON
+      let toolData: any;
+      try {
+        toolData = JSON.parse(text);
+      } catch (e) {
+        showAlert(t('error'), t('importErrorInvalidJson'));
+        return;
+      }
+
+      // Валидация обязательных полей
+      const requiredFields = ['name', 'description', 'command', 'prompt'];
+      const missingFields = requiredFields.filter(field => !toolData[field] || toolData[field].trim() === '');
+      
+      if (missingFields.length > 0) {
+        showAlert(t('error'), t('importErrorMissingFields').replace('{fields}', missingFields.join(', ')));
+        return;
+      }
+
+      // Проверка уникальности команды
+      const isUnique = await toolsService.isCommandUnique(toolData.command);
+      if (!isUnique) {
+        showAlert(t('error'), t('importErrorCommandExists').replace('{command}', toolData.command));
+        return;
+      }
+
+      // Валидация формата команды
+      if (!toolsService.validateCommand(toolData.command)) {
+        showAlert(t('error'), t('importErrorInvalidCommand'));
+        return;
+      }
+
+      // Парсим API headers если они есть
+      let apiHeaders: Record<string, string> | undefined;
+      if (toolData.apiHeaders && typeof toolData.apiHeaders === 'object') {
+        apiHeaders = toolData.apiHeaders;
+      }
+
+      // Создаем инструмент с enabled: true
+      const newToolData = {
+        name: toolData.name,
+        description: toolData.description,
+        icon: toolData.icon || '🔧',
+        command: toolData.command,
+        urlPattern: toolData.urlPattern || '',
+        prompt: toolData.prompt,
+        enabled: true,
+        apiUrl: toolData.apiUrl || undefined,
+        apiMethod: toolData.apiUrl ? (toolData.apiMethod || 'POST') : undefined,
+        apiHeaders: toolData.apiUrl && apiHeaders ? apiHeaders : undefined
+      };
+
+      await createCustomTool(newToolData);
+      showAlert(t('success'), t('importSuccess'));
+      
+    } catch (error) {
+      console.error('Error importing tool:', error);
+      showAlert(t('error'), t('importErrorGeneric').replace('{message}', error instanceof Error ? error.message : t('unknownError')));
+    } finally {
+      // Очищаем input для возможности повторного импорта того же файла
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="flex flex-col h-full p-4 overflow-auto">
       <div className="flex justify-between items-center mb-6">
@@ -225,11 +345,25 @@ export default function Tools() {
           <h1 className="text-2xl font-bold">{t('toolsPageTitle')}</h1>
           <p className="text-muted-foreground">{t('toolsPageDescription')}</p>
         </div>
-        <Button onClick={() => handleOpenDialog()}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t('createTool')}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} title={t('importTool')}>
+            <Import className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => handleOpenDialog()} title={t('createTool')}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t('createTool')}
+          </Button>
+        </div>
       </div>
+
+      {/* Скрытый input для выбора файла */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleImportTool}
+        style={{ display: 'none' }}
+      />
 
       {error && (
         <Alert variant="destructive" className="mb-4">
@@ -273,6 +407,15 @@ export default function Tools() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-1 ml-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleExportTool(tool)}
+                        title={t('exportTool')}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -509,6 +652,21 @@ export default function Tools() {
         open={isAvailableToolsModalOpen}
         onOpenChange={setIsAvailableToolsModalOpen}
       />
+      
+      {/* Alert Dialog */}
+      <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{alertDialog.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertDialog({ ...alertDialog, isOpen: false })}>
+              {t('ok')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

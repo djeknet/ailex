@@ -466,6 +466,33 @@ export default function MessageInput() {
     }
   };
 
+  const handleTakeFullPageScreenshot = async () => {
+    if (!modelCapabilities.supportsImages) return;
+    
+    try {
+      // Capture full visible area without cropping
+      let data = await captureScreenshot();
+      
+      // Compress if needed
+      const sizeInMB = (data.length * 3) / 4 / 1024 / 1024;
+      let mimeType = 'image/png';
+      if (sizeInMB > maxImageSize) {
+        const compressed = await compressImage(data, maxImageSize, 'image/png');
+        data = compressed.data;
+        mimeType = compressed.mimeType;
+      }
+
+      setAttachedImages(prev => [...prev, {
+        data,
+        name: `fullpage_screenshot_${Date.now()}.png`,
+        mimeType
+      }]);
+    } catch (error) {
+      console.error('Error capturing full page screenshot:', error);
+      alert(t('errorCapturingScreenshot'));
+    }
+  };
+
   const handleScreenshotCapture = async (area: { x: number; y: number; width: number; height: number }) => {
     try {
       let data = await captureScreenshot(area);
@@ -1235,6 +1262,14 @@ export default function MessageInput() {
                         >
                           <Monitor className="h-4 w-4" />
                           {t('takeScreenshot')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={handleTakeFullPageScreenshot}
+                          disabled={!modelCapabilities.supportsImages}
+                          title={!modelCapabilities.supportsImages ? t('featureNotAvailableForModel') : ''}
+                        >
+                          <Square className="h-4 w-4" />
+                          {t('takeFullPageScreenshot')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={handleTakePhoto}

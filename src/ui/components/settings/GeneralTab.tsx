@@ -9,17 +9,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Theme, SupportedLanguage } from '@shared/types/common';
 import { HistoryMode } from '@shared/types/extension';
 import { historyAPI, chatAPI } from '@shared/utils/messaging';
-import { Trash2, CheckCircle2 } from 'lucide-react';
+import { Trash2, CheckCircle2, Download, Upload } from 'lucide-react';
 import { UI_LANGUAGES, SUPPORTED_LANGUAGES } from '@shared/constants';
+import ImportDialog from './ImportDialog';
 
 export default function GeneralTab() {
   const { t } = useTranslation();
-  const { theme, language, historyMode, showAISuggestions, developerMode, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setDeveloperMode } = useSettingsStore();
+  const { theme, language, historyMode, showAISuggestions, developerMode, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setDeveloperMode, exportSettings } = useSettingsStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [stats, setStats] = useState({ chats: 0, messages: 0, sizeKb: 0 });
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   useEffect(() => {
     if (isDialogOpen && !isDeleted) {
@@ -68,6 +70,32 @@ export default function GeneralTab() {
     setTimeout(() => {
       setIsDeleted(false);
     }, 300);
+  };
+
+  const handleExportSettings = async () => {
+    try {
+      const data = await exportSettings();
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const filename = `ailex-settings-${timestamp}.json`;
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting settings:', error);
+    }
+  };
+
+  const handleImportSettings = () => {
+    setIsImportDialogOpen(true);
   };
 
   return (
@@ -166,6 +194,41 @@ export default function GeneralTab() {
         </p>
       </div>
 
+      {/* Export/Import Settings Section */}
+      <div className="pt-4 border-t space-y-4">
+        <div>
+          <h3 className="text-lg font-medium">{t('settingsManagement')}</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('settingsManagementDescription')}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleExportSettings}
+            className="w-full"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {t('exportSettings')}
+          </Button>
+
+          <Button 
+            variant="outline" 
+            onClick={handleImportSettings}
+            className="w-full"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {t('importSettings')}
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          {t('exportSettingsDescription')}
+        </p>
+      </div>
+
+      {/* Delete History Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
         <DialogContent>
           <DialogHeader>
@@ -233,6 +296,9 @@ export default function GeneralTab() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Import Dialog */}
+      <ImportDialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen} />
     </div>
   );
 }

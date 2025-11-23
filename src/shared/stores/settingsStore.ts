@@ -1,8 +1,35 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ExtensionSettings, Instruction } from '@shared/types/extension';
-import { encryptApiKey, decryptApiKey } from '@shared/utils/encryption';
+import { encryptApiKey, decryptApiKey, getEncryptionMetadata } from '@shared/utils/encryption';
 import { i18nService } from '@shared/i18n/i18nService';
+
+export interface ExportedSettings {
+  version: string;
+  exportDate: string;
+  encryptionKey: string;
+  encryptionSalt: string;
+  operators: ExtensionSettings['operators'];
+  generalSettings: {
+    theme: ExtensionSettings['theme'];
+    language: ExtensionSettings['language'];
+    historyMode: ExtensionSettings['historyMode'];
+    showAISuggestions: boolean;
+    developerMode?: boolean;
+  };
+  personalInfo?: ExtensionSettings['personalInfo'];
+  instructions: {
+    general?: string;
+    siteSpecific: Instruction[];
+  };
+}
+
+export interface ImportOptions {
+  operators: boolean;
+  generalSettings: boolean;
+  personalInfo: boolean;
+  instructions: boolean;
+}
 
 interface SettingsStore extends ExtensionSettings {
   activeView: 'chat' | 'settings' | 'history' | 'help' | 'tools';
@@ -21,6 +48,9 @@ interface SettingsStore extends ExtensionSettings {
   updateInstruction: (instruction: Instruction) => void;
   deleteInstruction: (id: string) => void;
   initializeSettings: () => Promise<void>;
+  exportSettings: () => Promise<ExportedSettings>;
+  importSettings: (data: ExportedSettings, options: ImportOptions) => Promise<void>;
+  validateImportData: (data: any) => { valid: boolean; error?: string };
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -231,6 +261,138 @@ export const useSettingsStore = create<SettingsStore>()(
             }
           );
         });
+      },
+
+      exportSettings: async () => {
+        const state = _get();
+        const { encryptionKey, encryptionSalt } = getEncryptionMetadata();
+
+        // Prepare operators with decrypted API keys (they are already decrypted in memory)
+        const operatorsForExport = state.operators.map((op) => ({
+          operator: op.operator,
+          apiKey: op.apiKey,
+          endpoint: op.endpoint,
+          selectedModel: op.selectedModel
+        }));
+
+        const exportData: ExportedSettings = {
+          version: '1.0.0',
+          exportDate: new Date().toISOString(),
+          encryptionKey,
+          encryptionSalt,
+          operators: operatorsForExport,
+          generalSettings: {
+            theme: state.theme,
+            language: state.language,
+            historyMode: state.historyMode,
+            showAISuggestions: state.showAISuggestions,
+            developerMode: state.developerMode
+          },
+          personalInfo: state.personalInfo,
+          instructions: {
+            general: state.generalInstruction,
+            siteSpecific: state.instructions
+          }
+        };
+
+        return exportData;
+      },
+
+      validateImportData: (data: any) => {
+        // Check if data is an object
+        if (!data || typeof data !== 'object') {
+          return { valid: false, error: 'invalidFileFormat' };
+        }
+
+        // Check version
+        if (!data.version || typeof data.version !== 'string') {
+          return { valid: false, error: 'missingVersion' };
+        }
+
+        // Check exportDate
+        if (!data.exportDate || typeof data.exportDate !== 'string') {
+          return { valid: false, error: 'missingExportDate' };
+        }
+
+        // Check encryption metadata
+        if (!data.encryptionKey || !data.encryptionSalt) {
+          return { valid: false, error: 'missingEncryptionData' };
+        }
+
+        // Check operators structure
+        if (data.operators && !Array.isArray(data.operators)) {
+          return { valid: false, error: 'invalidOperators' };
+        }
+
+        // Check generalSettings structure
+        if (data.generalSettings && typeof data.generalSettings !== 'object') {
+          return { valid: false, error: 'invalidGeneralSettings' };
+        }
+
+        // Check personalInfo structure
+        if (data.personalInfo && typeof data.personalInfo !== 'object') {
+          return { valid: false, error: 'invalidPersonalInfo' };
+        }
+
+        // Check instructions structure
+        if (data.instructions) {
+          if (typeof data.instructions !== 'object') {
+            return { valid: false, error: 'invalidInstructions' };
+          }
+          if (data.instructions.siteSpecific && !Array.isArray(data.instructions.siteSpecific)) {
+            return { valid: false, error: 'invalidInstructions' };
+          }
+        }
+
+        return { valid: true };
+      },
+
+      importSettings: async (data: ExportedSettings, options: ImportOptions) => {
+        const state = _get();
+
+        // Import operators
+        if (options.operators && data.operators) {
+          // Re-encrypt API keys for storage
+          const operatorsWithEncryption = await Promise.all(
+            data.operators.map(async (op) => ({
+              ...op,
+              models: [] // Will be loaded from cache
+            }))
+          );
+          
+          await state.updateOperators(operatorsWithEncryption);
+        }
+
+        // Import general settings
+        if (options.generalSettings && data.generalSettings) {
+          const { theme, language, historyMode, showAISuggestions, developerMode } = data.generalSettings;
+          
+          if (theme) state.setTheme(theme);
+          if (language) await state.setLanguage(language);
+          if (historyMode) state.setHistoryMode(historyMode);
+          if (showAISuggestions !== undefined) state.setShowAISuggestions(showAISuggestions);
+          if (developerMode !== undefined) state.setDeveloperMode(developerMode);
+        }
+
+        // Import personal info
+        if (options.personalInfo && data.personalInfo) {
+          state.updatePersonalInfo(data.personalInfo);
+        }
+
+        // Import instructions
+        if (options.instructions && data.instructions) {
+          // Import general instruction
+          if (data.instructions.general) {
+            state.updateGeneralInstruction(data.instructions.general);
+          }
+
+          // Import site-specific instructions
+          if (data.instructions.siteSpecific && Array.isArray(data.instructions.siteSpecific)) {
+            // Clear existing instructions and add imported ones
+            set({ instructions: data.instructions.siteSpecific });
+            chrome.storage.sync.set({ instructions: data.instructions.siteSpecific });
+          }
+        }
       }
     }),
     {

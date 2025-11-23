@@ -976,6 +976,9 @@
   "takeScreenshot": {
     "message": "Сделать скриншот"
   },
+  "takeFullPageScreenshot": {
+    "message": "Скриншот страницы"
+  },
   "takePhoto": {
     "message": "Сделать фото"
   },
@@ -1614,6 +1617,36 @@
   },
   "deleteToolConfirm": {
     "message": "Вы уверены, что хотите удалить этот инструмент?"
+  },
+  "importTool": {
+    "message": "Импорт"
+  },
+  "exportTool": {
+    "message": "Экспорт"
+  },
+  "success": {
+    "message": "Успех"
+  },
+  "invalidJsonApiHeaders": {
+    "message": "Неверный формат JSON для API Headers"
+  },
+  "importErrorInvalidJson": {
+    "message": "Файл не является валидным JSON"
+  },
+  "importErrorMissingFields": {
+    "message": "Отсутствуют обязательные поля: {fields}"
+  },
+  "importErrorCommandExists": {
+    "message": "Инструмент с командой \"{command}\" уже существует"
+  },
+  "importErrorInvalidCommand": {
+    "message": "Команда должна начинаться с \"/\" и содержать только буквы, цифры и дефисы"
+  },
+  "importSuccess": {
+    "message": "Инструмент успешно импортирован!"
+  },
+  "importErrorGeneric": {
+    "message": "Ошибка при импорте: {message}"
   },
   "fillPersonalInfo": {
     "message": "Заполните личную информацию в настройках"
@@ -2280,5 +2313,89 @@
   },
   "confirm": {
     "message": "Подтвердить"
+  },
+  "settingsManagement": {
+    "message": "Управление настройками"
+  },
+  "settingsManagementDescription": {
+    "message": "Экспортируйте или импортируйте настройки расширения"
+  },
+  "exportSettings": {
+    "message": "Экспорт настроек"
+  },
+  "exportSettingsDescription": {
+    "message": "Экспорт сохранит все настройки в JSON файл с расшифрованными API ключами"
+  },
+  "importSettings": {
+    "message": "Импорт настроек"
+  },
+  "importSettingsDescription": {
+    "message": "Выберите JSON файл с экспортированными настройками"
+  },
+  "selectFile": {
+    "message": "Выберите файл"
+  },
+  "selectImportOptions": {
+    "message": "Выберите, что импортировать"
+  },
+  "importOperators": {
+    "message": "Операторы (API ключи, модели, endpoints)"
+  },
+  "importGeneralSettings": {
+    "message": "Общие настройки (тема, язык, режим истории)"
+  },
+  "importPersonalInfo": {
+    "message": "Личная информация"
+  },
+  "importInstructions": {
+    "message": "Инструкции (общая и для сайтов)"
+  },
+  "importSuccess": {
+    "message": "Импорт завершён успешно"
+  },
+  "importSuccessDescription": {
+    "message": "Все выбранные настройки были успешно импортированы"
+  },
+  "importError": {
+    "message": "Ошибка импорта"
+  },
+  "invalidFileFormat": {
+    "message": "Неверный формат файла. Убедитесь, что выбран правильный JSON файл настроек."
+  },
+  "invalidJSON": {
+    "message": "Файл не является корректным JSON"
+  },
+  "missingVersion": {
+    "message": "В файле отсутствует версия формата данных"
+  },
+  "missingExportDate": {
+    "message": "В файле отсутствует дата экспорта"
+  },
+  "missingEncryptionData": {
+    "message": "В файле отсутствуют данные шифрования"
+  },
+  "invalidOperators": {
+    "message": "Неверный формат данных операторов"
+  },
+  "invalidGeneralSettings": {
+    "message": "Неверный формат общих настроек"
+  },
+  "invalidPersonalInfo": {
+    "message": "Неверный формат личной информации"
+  },
+  "invalidInstructions": {
+    "message": "Неверный формат инструкций"
+  },
+  "importing": {
+    "message": "Импорт..."
+  },
+  "import": {
+    "message": "Импортировать"
+  },
+  "version": {
+    "message": "Версия"
+  },
+  "exportDate": {
+    "message": "Дата экспорта"
   }
 }

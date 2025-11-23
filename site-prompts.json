@@ -1,0 +1,554 @@
+{
+  "amazon.com": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": ["#productTitle", "h1#title", "span#productTitle", "meta[name='title']"],
+        "prompts": [
+          { "text": "Проанализируй отзывы: отсей фейковые и составь честный список плюсов и минусов.", "capabilities": ["context"] },
+          { "text": "Проверь цену этого товара на других сайтах (Walmart, eBay) и найди дешевле.", "capabilities": ["context", "search"] },
+          { "text": "Посмотри на фото из отзывов и сравни с рекламными. Есть ли явные отличия?", "capabilities": ["vision", "context"] },
+          { "text": "Найди видеообзор этого товара на YouTube и выдели главные проблемы.", "capabilities": ["context", "search"] }
+        ]
+      },
+      "search": {
+        "selectors": ["span.a-color-state", "#search", "title"],
+        "prompts": [
+          { "text": "Выбери 3 лучших товара со страницы по соотношению цена/рейтинг.", "capabilities": ["context"] },
+          { "text": "Есть ли здесь товары с подозрительно накрученными отзывами?", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "ebay.com": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": ["h1.x-item-title__mainTitle", "#itemTitle", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проверь репутацию продавца: были ли у него негативные отзывы за последний месяц?", "capabilities": ["context", "search"] },
+          { "text": "Сравни цену с 'Купить сейчас' и аукционами. Как выгоднее?", "capabilities": ["context"] },
+          { "text": "Посмотри историю цен на этот товар в интернете: это хорошая сделка?", "capabilities": ["search"] }
+        ]
+      }
+    }
+  },
+
+  "walmart.com": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": ["h1[itemprop='name']", "h1#main-title", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Сформируй краткий отчет: плюсы, минусы и скрытые недостатки из отзывов.", "capabilities": ["context"] },
+          { "text": "Сравни цену с Amazon прямо сейчас.", "capabilities": ["context", "search"] },
+          { "text": "Найди этот же товар под другим брендом (White Label) дешевле.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "aliexpress.com": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": [".product-title-text", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "По фото товара найди оригинал бренда. Это копия или оригинал?", "capabilities": ["vision", "search", "context"] },
+          { "text": "Проанализируй рейтинг магазина и отзывы: безопасно ли здесь покупать?", "capabilities": ["context"] },
+          { "text": "Найди этот товар на Amazon/Wildberries, чтобы понять реальную наценку.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "etsy.com": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": ["h1.wt-text-body-03", "h1[data-buy-box-listing-title]", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проверь через поиск по картинке: это действительно ручная работа или перепродажа с AliExpress?", "capabilities": ["vision", "search", "context"] },
+          { "text": "Выдели упоминания о качестве материалов в отзывах.", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "youtube.com": {
+    "category": "video",
+    "pageTypes": {
+      "video": {
+        "selectors": ["h1.ytd-watch-metadata", "#title h1", "meta[name='title']"],
+        "prompts": [
+          { "text": "Сделай подробный конспект видео с таймкодами (TL;DR).", "capabilities": ["context", "transcribe_youtube"] },
+          { "text": "Проанализируй комментарии: о чем спорят люди и какой общий настрой?", "capabilities": ["context", "transcribe_youtube"] },
+          { "text": "Найди видео, опровергающие факты из этого ролика.", "capabilities": ["search", "transcribe_youtube"] },
+          { "text": "Если это туториал, преврати его в текстовую пошаговую инструкцию.", "capabilities": ["context", "transcribe_youtube"] }
+        ]
+      },
+      "channel": {
+        "selectors": ["#channel-name", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "О чем этот канал? Сделай анализ тематики и аудитории.", "capabilities": ["context"] },
+          { "text": "Какие видео на канале самые популярные и почему?", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "netflix.com": {
+    "category": "entertainment",
+    "pageTypes": {
+      "title": {
+        "selectors": ["h1.title-title", ".preview-modal-player-title-link", "img.preview-modal-boxart-logo"],
+        "prompts": [
+          { "text": "Стоит ли смотреть? Проверь рейтинги на IMDb и Rotten Tomatoes.", "capabilities": ["context", "search"] },
+          { "text": "Кратко напомни сюжет предыдущих сезонов (без спойлеров к этому).", "capabilities": ["context", "search"] },
+          { "text": "Найди похожие сериалы с рейтингом выше 8.0.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "imdb.com": {
+    "category": "entertainment",
+    "pageTypes": {
+      "title": {
+        "selectors": ["h1[data-testid='hero__pageTitle']", "h1"],
+        "prompts": [
+          { "text": "Проверь 'Parents Guide': есть ли сцены, не подходящие для детей?", "capabilities": ["context"] },
+          { "text": "Где можно посмотреть этот фильм онлайн (стриминги)?", "capabilities": ["context", "search"] },
+          { "text": "Объясни концовку фильма (Осторожно: спойлеры!).", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "cnn.com": {
+    "category": "news",
+    "pageTypes": {
+      "article": {
+        "selectors": ["h1.headline__text", "article h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Сделай буллеты с ключевыми фактами статьи.", "capabilities": ["context"] },
+          { "text": "Проверь факты: есть ли подтверждение в других авторитетных источниках?", "capabilities": ["context", "search"] },
+          { "text": "Оцени уровень политической предвзятости текста.", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "nytimes.com": {
+    "category": "news",
+    "pageTypes": {
+      "article": {
+        "selectors": ["h1[data-testid='headline']", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Сделай краткое резюме (Summary) статьи.", "capabilities": ["context"] },
+          { "text": "Найди альтернативные мнения по этой теме.", "capabilities": ["context", "search"] },
+          { "text": "Объясни контекст: что привело к этим событиям?", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "bbc.com": {
+    "category": "news",
+    "pageTypes": {
+      "article": {
+        "selectors": ["h1#main-heading", "article h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Кратко перескажи суть новости.", "capabilities": ["context"] },
+          { "text": "Есть ли более свежая информация по этой теме (Update)?", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "airbnb.com": {
+    "category": "travel",
+    "pageTypes": {
+      "listing": {
+        "selectors": ["h1[data-testid='title']", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проанализируй отзывы: есть ли жалобы на грязь, шум или хозяина?", "capabilities": ["context"] },
+          { "text": "Проверь локацию: безопасно ли там гулять ночью?", "capabilities": ["context", "search"] },
+          { "text": "Найди скрытые платежи в описании (уборка, налоги).", "capabilities": ["context"] },
+          { "text": "Посмотри вид из окна на фото и проверь по картам — это правда?", "capabilities": ["vision", "search", "context"] }
+        ]
+      }
+    }
+  },
+
+  "booking.com": {
+    "category": "travel",
+    "pageTypes": {
+      "hotel": {
+        "selectors": ["h2.pp-header__title", "#hp_hotel_name", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Выпиши ТОП-3 плюса и ТОП-3 минуса из свежих отзывов.", "capabilities": ["context"] },
+          { "text": "Сравни цену на этот отель на сайте отеля и других агрегаторах.", "capabilities": ["context", "search"] },
+          { "text": "Как далеко отсюда до главных достопримечательностей?", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "maps.google.com": {
+    "category": "places",
+    "pageTypes": {
+      "place": {
+        "selectors": ["h1.DUwDvf", "h1", "title"],
+        "prompts": [
+          { "text": "Сделай сводку по отзывам: что хвалят, а что ругают?", "capabilities": ["context"] },
+          { "text": "Посмотри на фото меню/еды и посоветуй, что заказать.", "capabilities": ["vision", "context"] },
+          { "text": "Найди места с рейтингом выше поблизости.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "yelp.com": {
+    "category": "places",
+    "pageTypes": {
+      "business": {
+        "selectors": ["h1.css-1se8maq", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Стоит ли идти? Оцени соотношение плохих и хороших отзывов.", "capabilities": ["context"] },
+          { "text": "Какие блюда упоминают чаще всего как 'вкусные'?", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "wikipedia.org": {
+    "category": "reference",
+    "pageTypes": {
+      "article": {
+        "selectors": ["#firstHeading", "h1"],
+        "prompts": [
+          { "text": "Объясни эту тему простыми словами (ELI5).", "capabilities": ["context"] },
+          { "text": "Составь хронологию (Timeline) ключевых событий.", "capabilities": ["context"] },
+          { "text": "Найди современные исследования, которые дополняют эту статью.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "coursera.org": {
+    "category": "education",
+    "pageTypes": {
+      "course": {
+        "selectors": ["h1[data-e2e='hero-title']", "h1"],
+        "prompts": [
+          { "text": "Стоит ли проходить? Оцени актуальность программы на 2024-25 год.", "capabilities": ["context", "search"] },
+          { "text": "Поможет ли этот сертификат при поиске работы? (Мнения с Reddit).", "capabilities": ["context", "search"] },
+          { "text": "Найди бесплатные аналоги этого курса на YouTube.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "linkedin.com": {
+    "category": "business",
+    "pageTypes": {
+      "profile": {
+        "selectors": ["h1.text-heading-xlarge", ".pv-text-details__left-panel h1"],
+        "prompts": [
+          { "text": "Напиши персонализированный инвайт (Connection Request) для этого человека.", "capabilities": ["context"] },
+          { "text": "Сделай Summary профиля в стиле рекрутера: сильные/слабые стороны.", "capabilities": ["context"] }
+        ]
+      },
+      "company": {
+        "selectors": ["h1", ".org-top-card-summary__title"],
+        "prompts": [
+          { "text": "Подготовь меня к собеседованию: культура компании и частые вопросы.", "capabilities": ["context", "search"] },
+          { "text": "Найди отзывы сотрудников об этой компании.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "glassdoor.com": {
+    "category": "jobs",
+    "pageTypes": {
+      "company": {
+        "selectors": ["h1", "h2"],
+        "prompts": [
+          { "text": "Выдели 'красные флаги' в отзывах сотрудников.", "capabilities": ["context"] },
+          { "text": "Сравни предлагаемую зарплату с рыночной.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "github.com": {
+    "category": "dev",
+    "pageTypes": {
+      "repo": {
+        "selectors": ["strong[itemprop='name'] a", "#repository-container-header strong a"],
+        "prompts": [
+          { "text": "Объясни, что делает этот код и как его запустить (из README).", "capabilities": ["context"] },
+          { "text": "Посмотри на структуру файлов (дерево) и оцени архитектуру.", "capabilities": ["vision", "context"] },
+          { "text": "Проанализируй Issues: какие баги встречаются чаще всего?", "capabilities": ["context"] },
+          { "text": "Найди более популярные или свежие аналоги этой библиотеки.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "stackoverflow.com": {
+    "category": "dev",
+    "pageTypes": {
+      "question": {
+        "selectors": ["#question-header h1", ".question-hyperlink"],
+        "prompts": [
+          { "text": "Объясни лучшее решение простым языком.", "capabilities": ["context"] },
+          { "text": "Проверь, не устарел ли этот код (deprecated)? Найди современный аналог.", "capabilities": ["context", "search"] },
+          { "text": "Напиши юнит-тест для этого фрагмента кода.", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "producthunt.com": {
+    "category": "tech",
+    "pageTypes": {
+      "product": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "В чем уникальность продукта? Сравни с конкурентами.", "capabilities": ["context", "search"] },
+          { "text": "Кто целевая аудитория продукта?", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "medium.com": {
+    "category": "articles",
+    "pageTypes": {
+      "article": {
+        "selectors": ["h1", ".pw-post-title"],
+        "prompts": [
+          { "text": "Сделай краткое резюме статьи (TL;DR).", "capabilities": ["context"] },
+          { "text": "Выдели полезные инсайты в виде чеклиста.", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "reddit.com": {
+    "category": "community",
+    "pageTypes": {
+      "post": {
+        "selectors": ["h1", "shreddit-title"],
+        "prompts": [
+          { "text": "Собери главные аргументы 'За' и 'Против' из обсуждения.", "capabilities": ["context"] },
+          { "text": "Найди самый полезный/залайканный совет в треде.", "capabilities": ["context"] },
+          { "text": "Определи общее настроение (Sentiment) комментаторов.", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "twitter.com": {
+    "category": "social",
+    "pageTypes": {
+      "post": {
+        "selectors": ["article[data-testid='tweet']", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проверь факты из этого твита: правда или фейк?", "capabilities": ["search"] },
+          { "text": "Найди первоисточник информации из твита.", "capabilities": ["search"] },
+          { "text": "Проанализируй тональность обсуждения в комментариях.", "capabilities": ["context"] },
+          { "text": "Есть ли другие мнения экспертов по этой теме?", "capabilities": ["search"] }
+        ]
+      }
+    }
+  },
+
+  "x.com": {
+    "category": "social",
+    "pageTypes": {
+      "post": {
+        "selectors": ["article[data-testid='tweet']", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проверь факты из этого твита: правда или фейк?", "capabilities": ["search"] },
+          { "text": "Найди первоисточник информации из твита.", "capabilities": ["search"] },
+          { "text": "Проанализируй тональность обсуждения в комментариях.", "capabilities": ["context"] },
+          { "text": "Есть ли другие мнения экспертов по этой теме?", "capabilities": ["search"] }
+        ]
+      }
+    }
+  },
+
+  "instagram.com": {
+    "category": "social",
+    "pageTypes": {
+      "post": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Найди оригинал этого фото через обратный поиск.", "capabilities": ["vision", "search", "context"] },
+          { "text": "Проверь, не подделано ли это изображение (фотошоп)?", "capabilities": ["vision", "context"] },
+          { "text": "Найди похожий контент или тренд.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "wildberries.ru": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": ["h1.product-page__title", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проанализируй отзывы: честные плюсы и минусы товара.", "capabilities": ["context"] },
+          { "text": "Проверь динамику цены: сейчас выгодная цена или лучше подождать?", "capabilities": ["context", "search"] },
+          { "text": "Сравни с аналогами на Ozon и Яндекс.Маркете.", "capabilities": ["context", "search"] },
+          { "text": "Проверь фото из отзывов: соответствует ли товар описанию?", "capabilities": ["vision", "context"] }
+        ]
+      }
+    }
+  },
+
+  "ozon.ru": {
+    "category": "ecommerce",
+    "pageTypes": {
+      "product": {
+        "selectors": ["h1[data-widget='webProductHeading']", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Отфильтруй фейковые отзывы и дай объективную оценку.", "capabilities": ["context"] },
+          { "text": "Найди этот товар дешевле на WB или Яндекс.Маркете.", "capabilities": ["context", "search"] },
+          { "text": "Проверь рейтинг продавца: можно ли ему доверять?", "capabilities": ["context"] },
+          { "text": "Сравни характеристики с фото в отзывах реальных покупателей.", "capabilities": ["vision", "context"] }
+        ]
+      }
+    }
+  },
+
+  "avito.ru": {
+    "category": "classifieds",
+    "pageTypes": {
+      "listing": {
+        "selectors": ["h1[itemprop='name']", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проверь объявление на признаки мошенничества.", "capabilities": ["context", "vision"] },
+          { "text": "Оцени адекватность цены: завышена или занижена?", "capabilities": ["context", "search"] },
+          { "text": "Проанализируй фото: есть ли скрытые дефекты?", "capabilities": ["vision", "context"] },
+          { "text": "Найди похожие предложения для сравнения цены.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "coinmarketcap.com": {
+    "category": "crypto",
+    "pageTypes": {
+      "coin": {
+        "selectors": ["h1.sc-65e7f566-0", "h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проанализируй проект: легитимный или возможный скам?", "capabilities": ["context", "search"] },
+          { "text": "Найди последние новости и обновления по этой монете.", "capabilities": ["context", "search"] },
+          { "text": "Сравни с конкурентами в этой нише.", "capabilities": ["context", "search"] },
+          { "text": "Что говорят эксперты о перспективах проекта?", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "tradingview.com": {
+    "category": "trading",
+    "pageTypes": {
+      "chart": {
+        "selectors": ["title", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проанализируй график: какой тренд и ключевые уровни?", "capabilities": ["vision", "context"] },
+          { "text": "Найди мнения трейдеров об этом активе.", "capabilities": ["context", "search"] },
+          { "text": "Какие технические индикаторы сигналят сейчас?", "capabilities": ["vision", "context"] }
+        ]
+      }
+    }
+  },
+
+  "spotify.com": {
+    "category": "music",
+    "pageTypes": {
+      "track": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Найди похожие треки с таким же вайбом.", "capabilities": ["context", "search"] },
+          { "text": "Переведи и объясни текст песни (если не на русском).", "capabilities": ["context", "search"] },
+          { "text": "Расскажи историю создания этой песни.", "capabilities": ["context", "search"] }
+        ]
+      },
+      "playlist": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Проанализируй плейлист и порекомендуй новые треки.", "capabilities": ["context", "search"] },
+          { "text": "Определи жанр и настроение плейлиста.", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "zillow.com": {
+    "category": "realestate",
+    "pageTypes": {
+      "listing": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Оцени цену: справедливая или завышена для этого района?", "capabilities": ["context", "search"] },
+          { "text": "Проверь историю продаж и изменение цены.", "capabilities": ["context", "search"] },
+          { "text": "Какие скрытые проблемы могут быть у этого дома?", "capabilities": ["context", "search"] },
+          { "text": "Проанализируй безопасность и инфраструктуру района.", "capabilities": ["context", "search"] }
+        ]
+      }
+    }
+  },
+
+  "developer.mozilla.org": {
+    "category": "documentation",
+    "pageTypes": {
+      "article": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Объясни эту концепцию простым языком с примером.", "capabilities": ["context"] },
+          { "text": "Покажи совместимость с браузерами и альтернативы.", "capabilities": ["context"] },
+          { "text": "Напиши рабочий пример кода для этого API.", "capabilities": ["context"] },
+          { "text": "Есть ли более современные способы решить эту задачу?", "capabilities": ["search"] }
+        ]
+      }
+    }
+  },
+
+  "allrecipes.com": {
+    "category": "recipes",
+    "pageTypes": {
+      "recipe": {
+        "selectors": ["h1", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "Адаптируй рецепт под продукты, которые есть у меня дома.", "capabilities": ["context"] },
+          { "text": "Сделай версию рецепта более здоровой (меньше калорий/сахара).", "capabilities": ["context"] },
+          { "text": "Проанализируй отзывы: какие есть важные советы от тех, кто готовил?", "capabilities": ["context"] },
+          { "text": "Переведи рецепт в метрическую систему (граммы/мл).", "capabilities": ["context"] }
+        ]
+      }
+    }
+  },
+
+  "default": {
+    "category": "universal",
+    "pageTypes": {
+      "any": {
+        "selectors": ["h1", "title", "meta[property='og:title']"],
+        "prompts": [
+          { "text": "О чем эта страница? Краткое содержание.", "capabilities": ["context"] },
+          { "text": "Проверь факты со страницы: правда или вымысел?", "capabilities": ["context", "search"] },
+          { "text": "Найди похожие сайты или альтернативы по этой теме.", "capabilities": ["context", "search"] },
+          { "text": "Сделай скриншот и объясни, что не так с дизайном/UX.", "capabilities": ["vision", "context"] }
+        ]
+      }
+    }
+  }
+}
