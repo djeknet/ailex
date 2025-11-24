@@ -1,5 +1,6 @@
 import * as dbService from '../services/dbService';
 import * as storageService from '../services/storageService';
+import { handleCustomInstructionRequest } from './contextMenuHandler';
 
 export type MessageType =
   | 'GET_CHAT'
@@ -30,7 +31,11 @@ export type MessageType =
   | 'STOP_PARSING'
   | 'GET_PARSING_STATE'
   | 'UPDATE_PARSING_STATE'
-  | 'NAVIGATE_TAB';
+  | 'NAVIGATE_TAB'
+  | 'GET_CURRENT_TAB_ID'
+  // | 'OPEN_SIDEPANEL_WITH_PROMPT' // Temporarily disabled
+  | 'GET_SITE_PROMPTS_CONFIG'
+  | 'PROCESS_CUSTOM_INSTRUCTION';
 
 export interface Message {
   type: MessageType;
@@ -193,6 +198,70 @@ export async function handleMessage(
 
       case 'NAVIGATE_TAB':
         await chrome.tabs.update(message.data.tabId, { url: message.data.url });
+        return { success: true };
+
+      case 'GET_CURRENT_TAB_ID':
+        // Get active tab ID (for content script widget)
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        return { tabId: activeTab?.id || null };
+
+      // TODO: Temporarily disabled - Chrome doesn't allow programmatic sidepanel opening
+      // Will be re-enabled when extension supports standalone page
+      /*
+      case 'OPEN_SIDEPANEL_WITH_PROMPT':
+        // Open sidepanel and send prompt to it
+        const { prompt } = message.data;
+        
+        // Get the tab that sent the message
+        const tabId = _sender.tab?.id;
+        if (!tabId) {
+          throw new Error('No tab ID found');
+        }
+        
+        // Open sidepanel for this tab
+        await chrome.sidePanel.open({ tabId });
+        
+        // Wait a bit for sidepanel to load, then send the prompt
+        setTimeout(async () => {
+          try {
+            await chrome.runtime.sendMessage({
+              type: 'PROCESS_SITE_PROMPT',
+              data: { prompt }
+            });
+          } catch (error) {
+            console.error('Error sending prompt to sidepanel:', error);
+          }
+        }, 500);
+        
+        return { success: true };
+      */
+
+      case 'GET_SITE_PROMPTS_CONFIG':
+        // Load site-prompts.json and return it
+        try {
+          const configUrl = chrome.runtime.getURL('site-prompts.json');
+          const configResponse = await fetch(configUrl);
+          const config = await configResponse.json();
+          return { success: true, config };
+        } catch (error) {
+          console.error('[background] Error loading site-prompts.json:', error);
+          return { success: false, error: error instanceof Error ? error.message : 'Failed to load configuration' };
+        }
+
+      case 'PROCESS_CUSTOM_INSTRUCTION':
+        // Get the tab ID from sender
+        const tabId = _sender.tab?.id;
+        if (!tabId) {
+          throw new Error('No tab ID found');
+        }
+        
+        const { instruction } = message.data;
+        if (!instruction) {
+          throw new Error('No instruction provided');
+        }
+        
+        // Process the custom instruction
+        await handleCustomInstructionRequest(tabId, instruction);
         return { success: true };
 
       default:

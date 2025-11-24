@@ -4,6 +4,7 @@ import { AIOperatorConfig } from './ai';
 export type { AIOperatorConfig, AIOperator } from './ai';
 export type HistoryMode = 'all' | 'per-site' | 'session';
 export type PageContextType = 'text' | 'dom' | 'html';
+export type ResponseTone = 'professional' | 'friendly' | 'direct' | 'confident' | 'casual';
 
 export interface Instruction {
   id: string;

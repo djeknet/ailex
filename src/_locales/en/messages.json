@@ -1214,6 +1214,120 @@
   "contextMenu_category_instructions": {
     "message": "Process by Instruction"
   },
+  "contextMenu_category_generateResponse": {
+    "message": "Generate Response"
+  },
+  "contextMenu_category_fillByInstruction": {
+    "message": "Fill by Instruction"
+  },
+  "contextMenu_specifyInstruction": {
+    "message": "Specify..."
+  },
+  "customInstructionPlaceholder": {
+    "message": "Enter instruction for filling this field..."
+  },
+  "contextMenu_category_personalData": {
+    "message": "Personal Data"
+  },
+  "tone_professional": {
+    "message": "Professional"
+  },
+  "tone_friendly": {
+    "message": "Friendly"
+  },
+  "tone_direct": {
+    "message": "Direct"
+  },
+  "tone_confident": {
+    "message": "Confident"
+  },
+  "tone_casual": {
+    "message": "Casual"
+  },
+  "personalInfo_firstName": {
+    "message": "First Name"
+  },
+  "personalInfo_lastName": {
+    "message": "Last Name"
+  },
+  "personalInfo_email": {
+    "message": "Email"
+  },
+  "personalInfo_phone": {
+    "message": "Phone"
+  },
+  "personalInfo_country": {
+    "message": "Country"
+  },
+  "personalInfo_state": {
+    "message": "State/Province"
+  },
+  "personalInfo_city": {
+    "message": "City"
+  },
+  "personalInfo_address": {
+    "message": "Address"
+  },
+  "personalInfo_addressLine2": {
+    "message": "Address Line 2"
+  },
+  "personalInfo_zipCode": {
+    "message": "ZIP Code"
+  },
+  "personalInfo_position": {
+    "message": "Position"
+  },
+  "personalInfo_company": {
+    "message": "Company"
+  },
+  "personalInfo_workPhone": {
+    "message": "Work Phone"
+  },
+  "personalInfo_linkedin": {
+    "message": "LinkedIn"
+  },
+  "personalInfo_github": {
+    "message": "GitHub"
+  },
+  "personalInfo_portfolio": {
+    "message": "Portfolio"
+  },
+  "personalInfo_resumeUrl": {
+    "message": "Resume URL"
+  },
+  "personalInfo_orcid": {
+    "message": "ORCID"
+  },
+  "personalInfo_telegram": {
+    "message": "Telegram"
+  },
+  "personalInfo_twitter": {
+    "message": "Twitter"
+  },
+  "personalInfo_facebook": {
+    "message": "Facebook"
+  },
+  "personalInfo_instagram": {
+    "message": "Instagram"
+  },
+  "personalInfo_youtube": {
+    "message": "YouTube"
+  },
+  "personalInfo_tiktok": {
+    "message": "TikTok"
+  },
+  "personalInfo_website": {
+    "message": "Website"
+  },
+  "personalInfo_about": {
+    "message": "About"
+  },
+  "toast_responseGenerated": {
+    "message": "Response generated"
+  },
+  "toast_generationError": {
+    "message": "Generation error"
+  },
   "contextMenu_instruction_prompt": {
     "message": "Process the following text according to the instruction:"
   },
@@ -2290,6 +2404,374 @@
   },
   "youtubeSubtitlesBaseUrlNotFound": {
     "message": "Subtitles baseUrl not found"
+  },
+  "sitePrompt_amazon_product_0": {
+    "message": "Analyze reviews: weed out the fake ones and make an honest list of pros and cons."
+  },
+  "sitePrompt_amazon_product_1": {
+    "message": "Check the price of this product on other sites (Walmart, eBay) and find a cheaper one."
+  },
+  "sitePrompt_amazon_product_2": {
+    "message": "Look at the photos from the reviews and compare them with the promotional ones. Are there any obvious differences?"
+  },
+  "sitePrompt_amazon_product_3": {
+    "message": "Find a video review of this product on YouTube and highlight the main issues."
+  },
+  "sitePrompt_amazon_search_0": {
+    "message": "Choose the 3 best products from the page based on price/rating ratio."
+  },
+  "sitePrompt_amazon_search_1": {
+    "message": "Are there any products here with suspiciously inflated reviews?"
+  },
+  "sitePrompt_ebay_product_0": {
+    "message": "Check the seller's reputation: have they had any negative reviews in the last month?"
+  },
+  "sitePrompt_ebay_product_1": {
+    "message": "Compare the price with ‘Buy Now’ and auctions. Which is more profitable?"
+  },
+  "sitePrompt_ebay_product_2": {
+    "message": "Check the price history for this product on the internet: is it a good deal?"
+  },
+  "sitePrompt_walmart_product_0": {
+    "message": "Generate a brief report: pros, cons, and hidden flaws from reviews."
+  },
+  "sitePrompt_walmart_product_1": {
+    "message": "Compare the price with Amazon right now."
+  },
+  "sitePrompt_walmart_product_2": {
+    "message": "Find the same product under a different brand (White Label) for less."
+  },
+  "sitePrompt_aliexpress_product_0": {
+    "message": "Find the original brand based on the product photo. Is it a copy or the original?"
+  },
+  "sitePrompt_aliexpress_product_1": {
+    "message": "Analyze the store's rating and reviews: is it safe to buy here?"
+  },
+  "sitePrompt_aliexpress_product_2": {
+    "message": "Find this product on Amazon/Wildberries to understand the real markup."
+  },
+  "sitePrompt_etsy_product_0": {
+    "message": "Check via image search: is this really handmade or resold from AliExpress?"
+  },
+  "sitePrompt_etsy_product_1": {
+    "message": "Highlight mentions of material quality in reviews."
+  },
+  "sitePrompt_youtube_video_0": {
+    "message": "Make a detailed summary of the video with timecodes (TL;DR)."
+  },
+  "sitePrompt_youtube_video_1": {
+    "message": "Analyze the comments: what are people arguing about and what is the general mood?"
+  },
+  "sitePrompt_youtube_video_2": {
+    "message": "Find videos that refute the facts in this video."
+  },
+  "sitePrompt_youtube_video_3": {
+    "message": "If it's a tutorial, turn it into a step-by-step text guide."
+  },
+  "sitePrompt_youtube_channel_0": {
+    "message": "What is this channel about? Analyze its topics and audience."
+  },
+  "sitePrompt_youtube_channel_1": {
+    "message": "Which videos on the channel are the most popular and why?"
+  },
+  "sitePrompt_netflix_title_0": {
+    "message": "Is it worth watching? Check the ratings on IMDb and Rotten Tomatoes."
+  },
+  "sitePrompt_netflix_title_1": {
+    "message": "Briefly remind them of the plot of previous seasons (without spoilers for this one)."
+  },
+  "sitePrompt_netflix_title_2": {
+    "message": "Find similar series with a rating above 8.0."
+  },
+  "sitePrompt_imdb_title_0": {
+    "message": "Check the Parents Guide: are there any scenes that are not suitable for children?"
+  },
+  "sitePrompt_imdb_title_1": {
+    "message": "Where can I watch this movie online (streaming)?"
+  },
+  "sitePrompt_imdb_title_2": {
+    "message": "Explain the ending of the movie (Warning: spoilers!)."
+  },
+  "sitePrompt_cnn_article_0": {
+    "message": "Make bullet points with the key facts from the article."
+  },
+  "sitePrompt_cnn_article_1": {
+    "message": "Check the facts: is there confirmation in other authoritative sources?"
+  },
+  "sitePrompt_cnn_article_2": {
+    "message": "Assess the level of political bias in the text."
+  },
+  "sitePrompt_nytimes_article_0": {
+    "message": "Make a brief summary of the article."
+  },
+  "sitePrompt_nytimes_article_1": {
+    "message": "Find alternative opinions on this topic."
+  },
+  "sitePrompt_nytimes_article_2": {
+    "message": "Explain the context: what led to these events?"
+  },
+  "sitePrompt_bbc_article_0": {
+    "message": "Briefly summarize the essence of the news."
+  },
+  "sitePrompt_bbc_article_1": {
+    "message": "Is there any more recent information on this topic (Update)?"
+  },
+  "sitePrompt_airbnb_listing_0": {
+    "message": "Analyze the reviews: are there any complaints about dirt, noise, or the host?"
+  },
+  "sitePrompt_airbnb_listing_1": {
+    "message": "Check the location: is it safe to walk there at night?"
+  },
+  "sitePrompt_airbnb_listing_2": {
+    "message": "Find hidden fees in the description (cleaning, taxes)."
+  },
+  "sitePrompt_airbnb_listing_3": {
+    "message": "Look at the view from the window in the photo and check the maps — is it true?"
+  },
+  "sitePrompt_booking_hotel_0": {
+    "message": "Write down the top 3 pros and top 3 cons from recent reviews."
+  },
+  "sitePrompt_booking_hotel_1": {
+    "message": "Compare the price of this hotel on the hotel website and other aggregators."
+  },
+  "sitePrompt_booking_hotel_2": {
+    "message": "How far is it from here to the main attractions?"
+  },
+  "sitePrompt_yelp_business_0": {
+    "message": "Is it worth going? Evaluate the ratio of bad and good reviews."
+  },
+  "sitePrompt_yelp_business_1": {
+    "message": "Which dishes are most often mentioned as ‘delicious’?"
+  },
+  "sitePrompt_wikipedia_article_0": {
+    "message": "Explain this topic in simple terms (ELI5)."
+  },
+  "sitePrompt_wikipedia_article_1": {
+    "message": "Create a timeline of key events."
+  },
+  "sitePrompt_wikipedia_article_2": {
+    "message": "Find recent research that complements this article."
+  },
+  "sitePrompt_coursera_course_0": {
+    "message": "Is it worth taking? Assess the relevance of the program for 2024-25."
+  },
+  "sitePrompt_coursera_course_1": {
+    "message": "Will this certificate help me find a job? (Opinions from Reddit)."
+  },
+  "sitePrompt_coursera_course_2": {
+    "message": "Find free alternatives to this course on YouTube."
+  },
+  "sitePrompt_linkedin_profile_0": {
+    "message": "Write a personalized invitation (Connection Request) for this person."
+  },
+  "sitePrompt_linkedin_profile_1": {
+    "message": "Create a recruiter-style profile summary: strengths/weaknesses."
+  },
+  "sitePrompt_linkedin_company_0": {
+    "message": "Prepare me for the interview: company culture and frequently asked questions."
+  },
+  "sitePrompt_linkedin_company_1": {
+    "message": "Find employee reviews about this company."
+  },
+  "sitePrompt_glassdoor_company_0": {
+    "message": "Highlight ‘red flags’ in employee reviews."
+  },
+  "sitePrompt_glassdoor_company_1": {
+    "message": "Compare the offered salary with the market rate."
+  },
+  "sitePrompt_github_repo_0": {
+    "message": "Explain what this code does and how to run it (from README)."
+  },
+  "sitePrompt_github_repo_1": {
+    "message": "Look at the file structure (tree) and evaluate the architecture."
+  },
+  "sitePrompt_github_repo_2": {
+    "message": "Analyze Issues: which bugs occur most often?"
+  },
+  "sitePrompt_github_repo_3": {
+    "message": "Find more popular or recent alternatives to this library."
+  },
+  "sitePrompt_stackoverflow_question_0": {
+    "message": "Explain the best solution in simple terms."
+  },
+  "sitePrompt_stackoverflow_question_1": {
+    "message": "Check if this code is deprecated. Find a modern alternative."
+  },
+  "sitePrompt_stackoverflow_question_2": {
+    "message": "Write a unit test for this code snippet."
+  },
+  "sitePrompt_producthunt_product_0": {
+    "message": "What makes this product unique? Compare it with competitors."
+  },
+  "sitePrompt_producthunt_product_1": {
+    "message": "Who is the target audience for the product?"
+  },
+  "sitePrompt_medium_article_0": {
+    "message": "Write a brief summary of the article (TL;DR)."
+  },
+  "sitePrompt_medium_article_1": {
+    "message": "Highlight useful insights in the form of a checklist."
+  },
+  "sitePrompt_reddit_post_0": {
+    "message": "Collect the main arguments ‘For’ and ‘Against’ from the discussion."
+  },
+  "sitePrompt_reddit_post_1": {
+    "message": "Find the most useful/liked advice in the thread."
+  },
+  "sitePrompt_reddit_post_2": {
+    "message": "Determine the overall sentiment of the commenters."
+  },
+  "sitePrompt_twitter_post_0": {
+    "message": "Check the facts from this tweet: true or fake?"
+  },
+  "sitePrompt_twitter_post_1": {
+    "message": "Find the original source of information from the tweet."
+  },
+  "sitePrompt_twitter_post_2": {
+    "message": "Analyze the tone of the discussion in the comments."
+  },
+  "sitePrompt_twitter_post_3": {
+    "message": "Are there other expert opinions on this topic?"
+  },
+  "sitePrompt_x_post_0": {
+    "message": "Check the facts from this tweet: true or fake?"
+  },
+  "sitePrompt_x_post_1": {
+    "message": "Find the original source of information from the tweet."
+  },
+  "sitePrompt_x_post_2": {
+    "message": "Analyze the tone of the discussion in the comments."
+  },
+  "sitePrompt_x_post_3": {
+    "message": "Are there other expert opinions on this topic?"
+  },
+  "sitePrompt_instagram_post_0": {
+    "message": "Find the original of this photo using reverse image search."
+  },
+  "sitePrompt_instagram_post_1": {
+    "message": "Check if this image is fake (Photoshopped)."
+  },
+  "sitePrompt_instagram_post_2": {
+    "message": "Find similar content or trends."
+  },
+  "sitePrompt_wildberries_product_0": {
+    "message": "Analyze reviews: honest pros and cons of the product."
+  },
+  "sitePrompt_wildberries_product_1": {
+    "message": "Check the price dynamics: is the price favorable now or is it better to wait?"
+  },
+  "sitePrompt_wildberries_product_2": {
+    "message": "Compare with similar products on Ozon and Yandex.Market."
+  },
+  "sitePrompt_wildberries_product_3": {
+    "message": "Check photos from reviews: does the product match the description?"
+  },
+  "sitePrompt_ozon_product_0": {
+    "message": "Filter out fake reviews and give an objective assessment."
+  },
+  "sitePrompt_ozon_product_1": {
+    "message": "Find this product cheaper on WB or Yandex.Market."
+  },
+  "sitePrompt_ozon_product_2": {
+    "message": "Check the seller's rating: can they be trusted?"
+  },
+  "sitePrompt_ozon_product_3": {
+    "message": "Compare the characteristics with photos in reviews from real buyers."
+  },
+  "sitePrompt_avito_listing_0": {
+    "message": "Check the ad for signs of fraud."
+  },
+  "sitePrompt_avito_listing_1": {
+    "message": "Assess the adequacy of the price: is it overpriced or underpriced?"
+  },
+  "sitePrompt_avito_listing_2": {
+    "message": "Analyze the photos: are there any hidden defects?"
+  },
+  "sitePrompt_avito_listing_3": {
+    "message": "Find similar offers to compare prices."
+  },
+  "sitePrompt_coinmarketcap_coin_0": {
+    "message": "Analyze the project: is it legitimate or a possible scam?"
+  },
+  "sitePrompt_coinmarketcap_coin_1": {
+    "message": "Find the latest news and updates on this coin."
+  },
+  "sitePrompt_coinmarketcap_coin_2": {
+    "message": "Compare with competitors in this niche."
+  },
+  "sitePrompt_coinmarketcap_coin_3": {
+    "message": "What do experts say about the project's prospects?"
+  },
+  "sitePrompt_tradingview_chart_0": {
+    "message": "Analyze the chart: what is the trend and key levels?"
+  },
+  "sitePrompt_tradingview_chart_1": {
+    "message": "Find traders' opinions about this asset."
+  },
+  "sitePrompt_tradingview_chart_2": {
+    "message": "What technical indicators are signaling now?"
+  },
+  "sitePrompt_spotify_track_0": {
+    "message": "Find similar tracks with the same vibe."
+  },
+  "sitePrompt_spotify_track_1": {
+    "message": "Translate and explain the lyrics (if not in Russian)."
+  },
+  "sitePrompt_spotify_track_2": {
+    "message": "Tell the story behind this song."
+  },
+  "sitePrompt_spotify_playlist_0": {
+    "message": "Analyze the playlist and recommend new tracks."
+  },
+  "sitePrompt_spotify_playlist_1": {
+    "message": "Identify the genre and mood of the playlist."
+  },
+  "sitePrompt_zillow_listing_0": {
+    "message": "Evaluate the price: is it fair or inflated for this area?"
+  },
+  "sitePrompt_zillow_listing_1": {
+    "message": "Check the sales history and price changes."
+  },
+  "sitePrompt_zillow_listing_2": {
+    "message": "What hidden problems might this house have?"
+  },
+  "sitePrompt_zillow_listing_3": {
+    "message": "Analyze the safety and infrastructure of the neighborhood."
+  },
+  "sitePrompt_allrecipes_recipe_0": {
+    "message": "Adapt the recipe to the ingredients I have at home."
+  },
+  "sitePrompt_allrecipes_recipe_1": {
+    "message": "Make a healthier version of the recipe (fewer calories/sugar)."
+  },
+  "sitePrompt_allrecipes_recipe_2": {
+    "message": "Analyze reviews: what important tips do those who have cooked this recipe have?"
+  },
+  "sitePrompt_allrecipes_recipe_3": {
+    "message": "Convert the recipe to the metric system (grams/ml)."
+  },
+  "sitePromptsSectionTitle": {
+    "message": "You might be interested in:"
+  },
+  "sitePrompt_maps_google_place_0": {
+    "message": "Summarize the reviews: what do people praise and what do they criticize?"
+  },
+  "sitePrompt_maps_google_place_1": {
+    "message": "Look at the photos of the menu/food and recommend what to order."
+  },
+  "sitePrompt_maps_google_place_2": {
+    "message": "Find places with higher ratings nearby."
+  },
+  "sitePrompt_developer_mozilla_article_0": {
+    "message": "Explain this concept in simple terms with an example."
+  },
+  "sitePrompt_developer_mozilla_article_1": {
+    "message": "Show browser compatibility and alternatives."
+  },
+  "sitePrompt_developer_mozilla_article_2": {
+    "message": "Write a working code example for this API."
+  },
+  "sitePrompt_developer_mozilla_article_3": {
+    "message": "Are there more modern ways to solve this problem?"
   }
 }
-

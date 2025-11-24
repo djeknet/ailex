@@ -1,7 +1,8 @@
 import { handleMessage } from './handlers/messageHandler';
 import { handleContextMenuClick } from './handlers/contextMenuHandler';
 import { contextCommandCategories } from '@shared/constants/contextCommands';
-import { getLanguageByCode } from '@shared/constants';
+import { getLanguageByCode, RESPONSE_TONES } from '@shared/constants';
+import { PersonalInfo } from '@shared/types/extension';
 
 // Background service worker entry point
 
@@ -79,9 +80,10 @@ async function createContextMenu(language: string) {
   // Получаем название текущего языка для команды перевода
   const currentLanguageName = getLanguageName(language);
 
-  // Загружаем инструкции из sync storage
-  const storageData = await chrome.storage.sync.get(['instructions']);
+  // Загружаем инструкции и личные данные из sync storage
+  const storageData = await chrome.storage.sync.get(['instructions', 'personalInfo']);
   const instructions = storageData.instructions || [];
+  const personalInfo: PersonalInfo = storageData.personalInfo || {};
   
   // Загружаем доступные инструменты
   let availableTools: any[] = [];
@@ -173,6 +175,113 @@ async function createContextMenu(language: string) {
       console.log('[Background] Added', availableTools.length, 'tools to context menu');
     }
 
+    // ========== EDITABLE CONTEXT MENUS ==========
+
+    // 1. Сгенерировать ответ (с тонами)
+    const generateResponseCategoryId = 'category_generateResponse';
+    chrome.contextMenus.create({
+      id: generateResponseCategoryId,
+      title: getTranslation('contextMenu_category_generateResponse'),
+      contexts: ['editable']
+    });
+
+    // Добавляем тоны
+    RESPONSE_TONES.forEach((tone) => {
+      chrome.contextMenus.create({
+        id: `response_tone_${tone}`,
+        parentId: generateResponseCategoryId,
+        title: getTranslation(`tone_${tone}`),
+        contexts: ['editable']
+      });
+    });
+
+    // 2. Заполнить по инструкции (если есть инструкции)
+    const fillByInstructionCategoryId = 'category_fillByInstruction';
+    chrome.contextMenus.create({
+      id: fillByInstructionCategoryId,
+      title: getTranslation('contextMenu_category_fillByInstruction'),
+      contexts: ['editable']
+    });
+
+    // Добавляем "Указать" всегда первым пунктом
+    chrome.contextMenus.create({
+      id: 'fill_instruction_custom',
+      parentId: fillByInstructionCategoryId,
+      title: getTranslation('contextMenu_specifyInstruction'),
+      contexts: ['editable']
+    });
+
+    // Добавляем сохраненные инструкции, если они есть
+    if (instructions.length > 0) {
+      instructions.forEach((instruction: { id: string; name: string }) => {
+        chrome.contextMenus.create({
+          id: `fill_instruction_${instruction.id}`,
+          parentId: fillByInstructionCategoryId,
+          title: instruction.name,
+          contexts: ['editable']
+        });
+      });
+    }
+
+    // 3. Личные данные (только непустые поля)
+    const personalInfoFields: Array<{ key: keyof PersonalInfo; labelKey: string }> = [
+      // Basic Information
+      { key: 'firstName', labelKey: 'personalInfo_firstName' },
+      { key: 'lastName', labelKey: 'personalInfo_lastName' },
+      { key: 'email', labelKey: 'personalInfo_email' },
+      { key: 'phone', labelKey: 'personalInfo_phone' },
+      // Location
+      { key: 'country', labelKey: 'personalInfo_country' },
+      { key: 'state', labelKey: 'personalInfo_state' },
+      { key: 'city', labelKey: 'personalInfo_city' },
+      { key: 'address', labelKey: 'personalInfo_address' },
+      { key: 'addressLine2', labelKey: 'personalInfo_addressLine2' },
+      { key: 'zipCode', labelKey: 'personalInfo_zipCode' },
+      // Professional
+      { key: 'position', labelKey: 'personalInfo_position' },
+      { key: 'company', labelKey: 'personalInfo_company' },
+      { key: 'workPhone', labelKey: 'personalInfo_workPhone' },
+      { key: 'linkedin', labelKey: 'personalInfo_linkedin' },
+      { key: 'github', labelKey: 'personalInfo_github' },
+      { key: 'portfolio', labelKey: 'personalInfo_portfolio' },
+      { key: 'resumeUrl', labelKey: 'personalInfo_resumeUrl' },
+      { key: 'orcid', labelKey: 'personalInfo_orcid' },
+      // Social
+      { key: 'telegram', labelKey: 'personalInfo_telegram' },
+      { key: 'twitter', labelKey: 'personalInfo_twitter' },
+      { key: 'facebook', labelKey: 'personalInfo_facebook' },
+      { key: 'instagram', labelKey: 'personalInfo_instagram' },
+      { key: 'youtube', labelKey: 'personalInfo_youtube' },
+      { key: 'tiktok', labelKey: 'personalInfo_tiktok' },
+      { key: 'website', labelKey: 'personalInfo_website' },
+      // Personal
+      { key: 'about', labelKey: 'personalInfo_about' },
+    ];
+
+    // Фильтруем только непустые поля
+    const nonEmptyFields = personalInfoFields.filter(field => 
+      personalInfo[field.key] && String(personalInfo[field.key]).trim() !== ''
+    );
+
+    if (nonEmptyFields.length > 0) {
+      const personalDataCategoryId = 'category_personalData';
+      chrome.contextMenus.create({
+        id: personalDataCategoryId,
+        title: getTranslation('contextMenu_category_personalData'),
+        contexts: ['editable']
+      });
+
+      // Добавляем поля
+      nonEmptyFields.forEach((field) => {
+        chrome.contextMenus.create({
+          id: `personal_info_${field.key}`,
+          parentId: personalDataCategoryId,
+          title: getTranslation(field.labelKey),
+          contexts: ['editable']
+        });
+      });
+    }
+
     console.log('[Background] Context menu created successfully');
   });
 }
@@ -223,8 +332,8 @@ chrome.contextMenus.onClicked.addListener(handleContextMenuClick);
 
 // Слушаем изменения языка для обновления меню
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
-  if (areaName === 'sync' && (changes.language || changes.instructions)) {
-    console.log('[Background] Language or instructions changed, recreating context menu');
+  if (areaName === 'sync' && (changes.language || changes.instructions || changes.personalInfo)) {
+    console.log('[Background] Language, instructions or personalInfo changed, recreating context menu');
     
     // Получаем текущий язык
     const result = await chrome.storage.sync.get(['language']);

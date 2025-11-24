@@ -23,6 +23,69 @@ export default function Chat() {
   const [pendingContextCommand, setPendingContextCommand] = useState<PendingContextCommand | null>(null);
 
   useEffect(() => {
+    // Check for pending site prompt from widget on initialization
+    const checkPendingSitePrompt = async () => {
+      try {
+        const result = await chrome.storage.local.get('pendingSitePrompt');
+        if (result.pendingSitePrompt) {
+          console.log('[Chat] Found pending site prompt:', result.pendingSitePrompt);
+          const { prompt, currentUrl, tabId } = result.pendingSitePrompt;
+          
+          if (prompt && currentUrl && tabId) {
+            // Wait for chat to be ready
+            if (chatStore.currentChat && chatStore.sendSitePrompt) {
+              console.log('[Chat] Processing pending site prompt');
+              await chatStore.sendSitePrompt(prompt, currentUrl, tabId);
+              // Clear the pending prompt
+              await chrome.storage.local.remove('pendingSitePrompt');
+              console.log('[Chat] Pending site prompt processed and cleared');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[Chat] Error checking pending site prompt:', error);
+      }
+    };
+
+    if (initialized && chatStore.currentChat) {
+      checkPendingSitePrompt();
+    }
+  }, [initialized, chatStore.currentChat, chatStore.sendSitePrompt]);
+
+  useEffect(() => {
+    // Listen for site prompts from widget
+    const handleSitePrompt = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { prompt } = customEvent.detail;
+      
+      console.log('[Chat] Site prompt received from widget:', prompt);
+      
+      // Check if chat is initialized
+      if (!initialized || !chatStore.currentChat) {
+        console.log('[Chat] Not ready, waiting for initialization');
+        // Wait a bit and retry
+        setTimeout(() => {
+          if (chatStore.currentChat && chatStore.sendSitePrompt) {
+            chatStore.sendSitePrompt(prompt);
+          }
+        }, 1000);
+        return;
+      }
+      
+      // Send the prompt
+      if (chatStore.sendSitePrompt) {
+        chatStore.sendSitePrompt(prompt);
+      }
+    };
+
+    window.addEventListener('processSitePrompt', handleSitePrompt);
+
+    return () => {
+      window.removeEventListener('processSitePrompt', handleSitePrompt);
+    };
+  }, [initialized, chatStore]);
+
+  useEffect(() => {
     // Check if operators are configured
     if (operators.length === 0 || !operators.some(op => op.selectedModel)) {
       // Redirect to settings

@@ -1333,6 +1333,120 @@
   "contextMenu_category_instructions": {
     "message": "Обработать по инструкции"
   },
+  "contextMenu_category_generateResponse": {
+    "message": "Сгенерировать ответ"
+  },
+  "contextMenu_category_fillByInstruction": {
+    "message": "Заполнить по инструкции"
+  },
+  "contextMenu_specifyInstruction": {
+    "message": "Указать..."
+  },
+  "customInstructionPlaceholder": {
+    "message": "Введите инструкцию для заполнения этого поля..."
+  },
+  "contextMenu_category_personalData": {
+    "message": "Личные данные"
+  },
+  "tone_professional": {
+    "message": "Профессиональный"
+  },
+  "tone_friendly": {
+    "message": "Дружелюбный"
+  },
+  "tone_direct": {
+    "message": "Прямой"
+  },
+  "tone_confident": {
+    "message": "Уверенный"
+  },
+  "tone_casual": {
+    "message": "Повседневный"
+  },
+  "personalInfo_firstName": {
+    "message": "Имя"
+  },
+  "personalInfo_lastName": {
+    "message": "Фамилия"
+  },
+  "personalInfo_email": {
+    "message": "Email"
+  },
+  "personalInfo_phone": {
+    "message": "Телефон"
+  },
+  "personalInfo_country": {
+    "message": "Страна"
+  },
+  "personalInfo_state": {
+    "message": "Область/Регион"
+  },
+  "personalInfo_city": {
+    "message": "Город"
+  },
+  "personalInfo_address": {
+    "message": "Адрес"
+  },
+  "personalInfo_addressLine2": {
+    "message": "Адрес (строка 2)"
+  },
+  "personalInfo_zipCode": {
+    "message": "Индекс"
+  },
+  "personalInfo_position": {
+    "message": "Должность"
+  },
+  "personalInfo_company": {
+    "message": "Компания"
+  },
+  "personalInfo_workPhone": {
+    "message": "Рабочий телефон"
+  },
+  "personalInfo_linkedin": {
+    "message": "LinkedIn"
+  },
+  "personalInfo_github": {
+    "message": "GitHub"
+  },
+  "personalInfo_portfolio": {
+    "message": "Портфолио"
+  },
+  "personalInfo_resumeUrl": {
+    "message": "Ссылка на резюме"
+  },
+  "personalInfo_orcid": {
+    "message": "ORCID"
+  },
+  "personalInfo_telegram": {
+    "message": "Telegram"
+  },
+  "personalInfo_twitter": {
+    "message": "Twitter"
+  },
+  "personalInfo_facebook": {
+    "message": "Facebook"
+  },
+  "personalInfo_instagram": {
+    "message": "Instagram"
+  },
+  "personalInfo_youtube": {
+    "message": "YouTube"
+  },
+  "personalInfo_tiktok": {
+    "message": "TikTok"
+  },
+  "personalInfo_website": {
+    "message": "Веб-сайт"
+  },
+  "personalInfo_about": {
+    "message": "О себе"
+  },
+  "toast_responseGenerated": {
+    "message": "Ответ сгенерирован"
+  },
+  "toast_generationError": {
+    "message": "Ошибка генерации"
+  },
   "contextMenu_instruction_prompt": {
     "message": "Обработай следующий текст по инструкции:"
   },
@@ -1643,7 +1757,7 @@
     "message": "Команда должна начинаться с \"/\" и содержать только буквы, цифры и дефисы"
   },
   "importSuccess": {
-    "message": "Инструмент успешно импортирован!"
+    "message": "Импорт завершён успешно"
   },
   "importErrorGeneric": {
     "message": "Ошибка при импорте: {message}"
@@ -2032,9 +2146,6 @@
   "toolExample_selectOption_prompt": {
     "message": "Вызови execute-dom-function с functionName: \"selectOption\" и params: {\"selector\": \"#country\", \"value\": \"USA\"}"
   },
-  "tool_fillFormFields": {
-    "message": "Заполнить поля формы"
-  },
   "toolExample_fillMultipleFields_desc": {
     "message": "Заполнить несколько полей"
   },
@@ -2350,9 +2461,6 @@
   "importInstructions": {
     "message": "Инструкции (общая и для сайтов)"
   },
-  "importSuccess": {
-    "message": "Импорт завершён успешно"
-  },
   "importSuccessDescription": {
     "message": "Все выбранные настройки были успешно импортированы"
   },
@@ -2397,5 +2505,374 @@
   },
   "exportDate": {
     "message": "Дата экспорта"
+  },
+  "sitePrompt_amazon_product_0": {
+    "message": "Проанализируй отзывы: отсей фейковые и составь честный список плюсов и минусов."
+  },
+  "sitePrompt_amazon_product_1": {
+    "message": "Проверь цену этого товара на других сайтах (Walmart, eBay) и найди дешевле."
+  },
+  "sitePrompt_amazon_product_2": {
+    "message": "Посмотри на фото из отзывов и сравни с рекламными. Есть ли явные отличия?"
+  },
+  "sitePrompt_amazon_product_3": {
+    "message": "Найди видеообзор этого товара на YouTube и выдели главные проблемы."
+  },
+  "sitePrompt_amazon_search_0": {
+    "message": "Выбери 3 лучших товара со страницы по соотношению цена/рейтинг."
+  },
+  "sitePrompt_amazon_search_1": {
+    "message": "Есть ли здесь товары с подозрительно накрученными отзывами?"
+  },
+  "sitePrompt_ebay_product_0": {
+    "message": "Проверь репутацию продавца: были ли у него негативные отзывы за последний месяц?"
+  },
+  "sitePrompt_ebay_product_1": {
+    "message": "Сравни цену с 'Купить сейчас' и аукционами. Как выгоднее?"
+  },
+  "sitePrompt_ebay_product_2": {
+    "message": "Посмотри историю цен на этот товар в интернете: это хорошая сделка?"
+  },
+  "sitePrompt_walmart_product_0": {
+    "message": "Сформируй краткий отчет: плюсы, минусы и скрытые недостатки из отзывов."
+  },
+  "sitePrompt_walmart_product_1": {
+    "message": "Сравни цену с Amazon прямо сейчас."
+  },
+  "sitePrompt_walmart_product_2": {
+    "message": "Найди этот же товар под другим брендом (White Label) дешевле."
+  },
+  "sitePrompt_aliexpress_product_0": {
+    "message": "По фото товара найди оригинал бренда. Это копия или оригинал?"
+  },
+  "sitePrompt_aliexpress_product_1": {
+    "message": "Проанализируй рейтинг магазина и отзывы: безопасно ли здесь покупать?"
+  },
+  "sitePrompt_aliexpress_product_2": {
+    "message": "Найди этот товар на Amazon/Wildberries, чтобы понять реальную наценку."
+  },
+  "sitePrompt_etsy_product_0": {
+    "message": "Проверь через поиск по картинке: это действительно ручная работа или перепродажа с AliExpress?"
+  },
+  "sitePrompt_etsy_product_1": {
+    "message": "Выдели упоминания о качестве материалов в отзывах."
+  },
+  "sitePrompt_youtube_video_0": {
+    "message": "Сделай подробный конспект видео с таймкодами (TL;DR)."
+  },
+  "sitePrompt_youtube_video_1": {
+    "message": "Проанализируй комментарии: о чем спорят люди и какой общий настрой?"
+  },
+  "sitePrompt_youtube_video_2": {
+    "message": "Найди видео, опровергающие факты из этого ролика."
+  },
+  "sitePrompt_youtube_video_3": {
+    "message": "Если это туториал, преврати его в текстовую пошаговую инструкцию."
+  },
+  "sitePrompt_youtube_channel_0": {
+    "message": "О чем этот канал? Сделай анализ тематики и аудитории."
+  },
+  "sitePrompt_youtube_channel_1": {
+    "message": "Какие видео на канале самые популярные и почему?"
+  },
+  "sitePrompt_netflix_title_0": {
+    "message": "Стоит ли смотреть? Проверь рейтинги на IMDb и Rotten Tomatoes."
+  },
+  "sitePrompt_netflix_title_1": {
+    "message": "Кратко напомни сюжет предыдущих сезонов (без спойлеров к этому)."
+  },
+  "sitePrompt_netflix_title_2": {
+    "message": "Найди похожие сериалы с рейтингом выше 8.0."
+  },
+  "sitePrompt_imdb_title_0": {
+    "message": "Проверь 'Parents Guide': есть ли сцены, не подходящие для детей?"
+  },
+  "sitePrompt_imdb_title_1": {
+    "message": "Где можно посмотреть этот фильм онлайн (стриминги)?"
+  },
+  "sitePrompt_imdb_title_2": {
+    "message": "Объясни концовку фильма (Осторожно: спойлеры!)."
+  },
+  "sitePrompt_cnn_article_0": {
+    "message": "Сделай буллеты с ключевыми фактами статьи."
+  },
+  "sitePrompt_cnn_article_1": {
+    "message": "Проверь факты: есть ли подтверждение в других авторитетных источниках?"
+  },
+  "sitePrompt_cnn_article_2": {
+    "message": "Оцени уровень политической предвзятости текста."
+  },
+  "sitePrompt_nytimes_article_0": {
+    "message": "Сделай краткое резюме (Summary) статьи."
+  },
+  "sitePrompt_nytimes_article_1": {
+    "message": "Найди альтернативные мнения по этой теме."
+  },
+  "sitePrompt_nytimes_article_2": {
+    "message": "Объясни контекст: что привело к этим событиям?"
+  },
+  "sitePrompt_bbc_article_0": {
+    "message": "Кратко перескажи суть новости."
+  },
+  "sitePrompt_bbc_article_1": {
+    "message": "Есть ли более свежая информация по этой теме (Update)?"
+  },
+  "sitePrompt_airbnb_listing_0": {
+    "message": "Проанализируй отзывы: есть ли жалобы на грязь, шум или хозяина?"
+  },
+  "sitePrompt_airbnb_listing_1": {
+    "message": "Проверь локацию: безопасно ли там гулять ночью?"
+  },
+  "sitePrompt_airbnb_listing_2": {
+    "message": "Найди скрытые платежи в описании (уборка, налоги)."
+  },
+  "sitePrompt_airbnb_listing_3": {
+    "message": "Посмотри вид из окна на фото и проверь по картам — это правда?"
+  },
+  "sitePrompt_booking_hotel_0": {
+    "message": "Выпиши ТОП-3 плюса и ТОП-3 минуса из свежих отзывов."
+  },
+  "sitePrompt_booking_hotel_1": {
+    "message": "Сравни цену на этот отель на сайте отеля и других агрегаторах."
+  },
+  "sitePrompt_booking_hotel_2": {
+    "message": "Как далеко отсюда до главных достопримечательностей?"
+  },
+  "sitePrompt_yelp_business_0": {
+    "message": "Стоит ли идти? Оцени соотношение плохих и хороших отзывов."
+  },
+  "sitePrompt_yelp_business_1": {
+    "message": "Какие блюда упоминают чаще всего как 'вкусные'?"
+  },
+  "sitePrompt_wikipedia_article_0": {
+    "message": "Объясни эту тему простыми словами (ELI5)."
+  },
+  "sitePrompt_wikipedia_article_1": {
+    "message": "Составь хронологию (Timeline) ключевых событий."
+  },
+  "sitePrompt_wikipedia_article_2": {
+    "message": "Найди современные исследования, которые дополняют эту статью."
+  },
+  "sitePrompt_coursera_course_0": {
+    "message": "Стоит ли проходить? Оцени актуальность программы на 2024-25 год."
+  },
+  "sitePrompt_coursera_course_1": {
+    "message": "Поможет ли этот сертификат при поиске работы? (Мнения с Reddit)."
+  },
+  "sitePrompt_coursera_course_2": {
+    "message": "Найди бесплатные аналоги этого курса на YouTube."
+  },
+  "sitePrompt_linkedin_profile_0": {
+    "message": "Напиши персонализированный инвайт (Connection Request) для этого человека."
+  },
+  "sitePrompt_linkedin_profile_1": {
+    "message": "Сделай Summary профиля в стиле рекрутера: сильные/слабые стороны."
+  },
+  "sitePrompt_linkedin_company_0": {
+    "message": "Подготовь меня к собеседованию: культура компании и частые вопросы."
+  },
+  "sitePrompt_linkedin_company_1": {
+    "message": "Найди отзывы сотрудников об этой компании."
+  },
+  "sitePrompt_glassdoor_company_0": {
+    "message": "Выдели 'красные флаги' в отзывах сотрудников."
+  },
+  "sitePrompt_glassdoor_company_1": {
+    "message": "Сравни предлагаемую зарплату с рыночной."
+  },
+  "sitePrompt_github_repo_0": {
+    "message": "Объясни, что делает этот код и как его запустить (из README)."
+  },
+  "sitePrompt_github_repo_1": {
+    "message": "Посмотри на структуру файлов (дерево) и оцени архитектуру."
+  },
+  "sitePrompt_github_repo_2": {
+    "message": "Проанализируй Issues: какие баги встречаются чаще всего?"
+  },
+  "sitePrompt_github_repo_3": {
+    "message": "Найди более популярные или свежие аналоги этой библиотеки."
+  },
+  "sitePrompt_stackoverflow_question_0": {
+    "message": "Объясни лучшее решение простым языком."
+  },
+  "sitePrompt_stackoverflow_question_1": {
+    "message": "Проверь, не устарел ли этот код (deprecated)? Найди современный аналог."
+  },
+  "sitePrompt_stackoverflow_question_2": {
+    "message": "Напиши юнит-тест для этого фрагмента кода."
+  },
+  "sitePrompt_producthunt_product_0": {
+    "message": "В чем уникальность продукта? Сравни с конкурентами."
+  },
+  "sitePrompt_producthunt_product_1": {
+    "message": "Кто целевая аудитория продукта?"
+  },
+  "sitePrompt_medium_article_0": {
+    "message": "Сделай краткое резюме статьи (TL;DR)."
+  },
+  "sitePrompt_medium_article_1": {
+    "message": "Выдели полезные инсайты в виде чеклиста."
+  },
+  "sitePrompt_reddit_post_0": {
+    "message": "Собери главные аргументы 'За' и 'Против' из обсуждения."
+  },
+  "sitePrompt_reddit_post_1": {
+    "message": "Найди самый полезный/залайканный совет в треде."
+  },
+  "sitePrompt_reddit_post_2": {
+    "message": "Определи общее настроение (Sentiment) комментаторов."
+  },
+  "sitePrompt_twitter_post_0": {
+    "message": "Проверь факты из этого твита: правда или фейк?"
+  },
+  "sitePrompt_twitter_post_1": {
+    "message": "Найди первоисточник информации из твита."
+  },
+  "sitePrompt_twitter_post_2": {
+    "message": "Проанализируй тональность обсуждения в комментариях."
+  },
+  "sitePrompt_twitter_post_3": {
+    "message": "Есть ли другие мнения экспертов по этой теме?"
+  },
+  "sitePrompt_x_post_0": {
+    "message": "Проверь факты из этого твита: правда или фейк?"
+  },
+  "sitePrompt_x_post_1": {
+    "message": "Найди первоисточник информации из твита."
+  },
+  "sitePrompt_x_post_2": {
+    "message": "Проанализируй тональность обсуждения в комментариях."
+  },
+  "sitePrompt_x_post_3": {
+    "message": "Есть ли другие мнения экспертов по этой теме?"
+  },
+  "sitePrompt_instagram_post_0": {
+    "message": "Найди оригинал этого фото через обратный поиск."
+  },
+  "sitePrompt_instagram_post_1": {
+    "message": "Проверь, не подделано ли это изображение (фотошоп)?"
+  },
+  "sitePrompt_instagram_post_2": {
+    "message": "Найди похожий контент или тренд."
+  },
+  "sitePrompt_wildberries_product_0": {
+    "message": "Проанализируй отзывы: честные плюсы и минусы товара."
+  },
+  "sitePrompt_wildberries_product_1": {
+    "message": "Проверь динамику цены: сейчас выгодная цена или лучше подождать?"
+  },
+  "sitePrompt_wildberries_product_2": {
+    "message": "Сравни с аналогами на Ozon и Яндекс.Маркете."
+  },
+  "sitePrompt_wildberries_product_3": {
+    "message": "Проверь фото из отзывов: соответствует ли товар описанию?"
+  },
+  "sitePrompt_ozon_product_0": {
+    "message": "Отфильтруй фейковые отзывы и дай объективную оценку."
+  },
+  "sitePrompt_ozon_product_1": {
+    "message": "Найди этот товар дешевле на WB или Яндекс.Маркете."
+  },
+  "sitePrompt_ozon_product_2": {
+    "message": "Проверь рейтинг продавца: можно ли ему доверять?"
+  },
+  "sitePrompt_ozon_product_3": {
+    "message": "Сравни характеристики с фото в отзывах реальных покупателей."
+  },
+  "sitePrompt_avito_listing_0": {
+    "message": "Проверь объявление на признаки мошенничества."
+  },
+  "sitePrompt_avito_listing_1": {
+    "message": "Оцени адекватность цены: завышена или занижена?"
+  },
+  "sitePrompt_avito_listing_2": {
+    "message": "Проанализируй фото: есть ли скрытые дефекты?"
+  },
+  "sitePrompt_avito_listing_3": {
+    "message": "Найди похожие предложения для сравнения цены."
+  },
+  "sitePrompt_coinmarketcap_coin_0": {
+    "message": "Проанализируй проект: легитимный или возможный скам?"
+  },
+  "sitePrompt_coinmarketcap_coin_1": {
+    "message": "Найди последние новости и обновления по этой монете."
+  },
+  "sitePrompt_coinmarketcap_coin_2": {
+    "message": "Сравни с конкурентами в этой нише."
+  },
+  "sitePrompt_coinmarketcap_coin_3": {
+    "message": "Что говорят эксперты о перспективах проекта?"
+  },
+  "sitePrompt_tradingview_chart_0": {
+    "message": "Проанализируй график: какой тренд и ключевые уровни?"
+  },
+  "sitePrompt_tradingview_chart_1": {
+    "message": "Найди мнения трейдеров об этом активе."
+  },
+  "sitePrompt_tradingview_chart_2": {
+    "message": "Какие технические индикаторы сигналят сейчас?"
+  },
+  "sitePrompt_spotify_track_0": {
+    "message": "Найди похожие треки с таким же вайбом."
+  },
+  "sitePrompt_spotify_track_1": {
+    "message": "Переведи и объясни текст песни (если не на русском)."
+  },
+  "sitePrompt_spotify_track_2": {
+    "message": "Расскажи историю создания этой песни."
+  },
+  "sitePrompt_spotify_playlist_0": {
+    "message": "Проанализируй плейлист и порекомендуй новые треки."
+  },
+  "sitePrompt_spotify_playlist_1": {
+    "message": "Определи жанр и настроение плейлиста."
+  },
+  "sitePrompt_zillow_listing_0": {
+    "message": "Оцени цену: справедливая или завышена для этого района?"
+  },
+  "sitePrompt_zillow_listing_1": {
+    "message": "Проверь историю продаж и изменение цены."
+  },
+  "sitePrompt_zillow_listing_2": {
+    "message": "Какие скрытые проблемы могут быть у этого дома?"
+  },
+  "sitePrompt_zillow_listing_3": {
+    "message": "Проанализируй безопасность и инфраструктуру района."
+  },
+  "sitePrompt_allrecipes_recipe_0": {
+    "message": "Адаптируй рецепт под продукты, которые есть у меня дома."
+  },
+  "sitePrompt_allrecipes_recipe_1": {
+    "message": "Сделай версию рецепта более здоровой (меньше калорий/сахара)."
+  },
+  "sitePrompt_allrecipes_recipe_2": {
+    "message": "Проанализируй отзывы: какие есть важные советы от тех, кто готовил?"
+  },
+  "sitePrompt_allrecipes_recipe_3": {
+    "message": "Переведи рецепт в метрическую систему (граммы/мл)."
+  },
+  "sitePromptsSectionTitle": {
+    "message": "Возможно вас интересует:"
+  },
+  "sitePrompt_maps_google_place_0": {
+    "message": "Сделай сводку по отзывам: что хвалят, а что ругают?"
+  },
+  "sitePrompt_maps_google_place_1": {
+    "message": "Посмотри на фото меню/еды и посоветуй, что заказать."
+  },
+  "sitePrompt_maps_google_place_2": {
+    "message": "Найди места с рейтингом выше поблизости."
+  },
+  "sitePrompt_developer_mozilla_article_0": {
+    "message": "Объясни эту концепцию простым языком с примером."
+  },
+  "sitePrompt_developer_mozilla_article_1": {
+    "message": "Покажи совместимость с браузерами и альтернативы."
+  },
+  "sitePrompt_developer_mozilla_article_2": {
+    "message": "Напиши рабочий пример кода для этого API."
+  },
+  "sitePrompt_developer_mozilla_article_3": {
+    "message": "Есть ли более современные способы решить эту задачу?"
   }
 }

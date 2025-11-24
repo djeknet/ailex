@@ -15,7 +15,8 @@ export default defineConfig(({ mode }) => {
       viteStaticCopy({
         targets: [
           { src: 'src/_locales', dest: '' },
-          { src: 'icons', dest: '' }
+          { src: 'icons', dest: '' },
+          { src: 'site-prompts.json', dest: '' }
         ]
       })
     ],

@@ -610,3 +610,17 @@ export function getModelCapabilities(modelId: string, operator?: string): ModelC
   };
 }
 
+// =============================================================================
+// 🎭 RESPONSE TONES
+// =============================================================================
+
+export const RESPONSE_TONES = [
+  'professional',
+  'friendly',
+  'direct',
+  'confident',
+  'casual'
+] as const;
+
+export type ResponseTone = typeof RESPONSE_TONES[number];
+

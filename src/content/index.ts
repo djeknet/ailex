@@ -5,10 +5,28 @@ import { startElementSelector, stopElementSelector } from './elementSelector';
 import { startScreenshotSelector, stopScreenshotSelector } from './screenshotSelector';
 import { getElementByXPath, getCleanInnerHTML } from '@shared/utils/domSelector';
 import * as domFunctions from './domFunctions';
+import { showFieldLoader, hideFieldLoader, getSavedActiveElement, clearSavedActiveElement } from './fieldLoader';
+import { showToast } from './toast';
+import { showCustomInstructionPrompt, hideCustomInstructionPrompt, getTargetElement } from './customInstructionPrompt';
+// import { initSiteWidget } from './siteWidget'; // Temporarily disabled
 
 // Content script entry point
 
 console.log('AiLex content script loaded');
+
+// TODO: Temporarily disabled - Site widget feature
+// Will be re-enabled when extension supports standalone page for opening prompts
+/*
+// Initialize site widget after page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => initSiteWidget(), 1000);
+  });
+} else {
+  // DOM already loaded
+  setTimeout(() => initSiteWidget(), 1000);
+}
+*/
 
 // Слушаем сообщения от background/popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -218,6 +236,139 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           }
           break;
 
+        case 'DETECT_PAGE_TYPE':
+          try {
+            const pageTypes = message.data?.pageTypes || {};
+            let detectedType: string | null = null;
+            
+            // Проверяем каждый тип страницы по его селекторам
+            for (const [typeName, typeConfig] of Object.entries(pageTypes)) {
+              const selectors = (typeConfig as any).selectors || [];
+              
+              // Проверяем, существует ли хотя бы один из селекторов
+              for (const selector of selectors) {
+                try {
+                  const element = document.querySelector(selector);
+                  if (element) {
+                    detectedType = typeName;
+                    console.log('[content] Detected page type:', typeName, 'via selector:', selector);
+                    break;
+                  }
+                } catch (error) {
+                  console.warn('[content] Invalid selector:', selector, error);
+                }
+              }
+              
+              if (detectedType) break;
+            }
+            
+            sendResponse({ success: true, pageType: detectedType });
+          } catch (error) {
+            console.error('[content] Error detecting page type:', error);
+            sendResponse({ success: false, error: 'Failed to detect page type' });
+          }
+          break;
+
+        case 'START_FIELD_LOADER':
+          try {
+            const activeElement = document.activeElement as HTMLElement;
+            if (activeElement && (
+              activeElement.tagName === 'INPUT' || 
+              activeElement.tagName === 'TEXTAREA' || 
+              activeElement.isContentEditable
+            )) {
+              showFieldLoader(activeElement);
+              sendResponse({ success: true });
+            } else {
+              sendResponse({ success: false, error: 'No active editable element' });
+            }
+          } catch (error) {
+            console.error('[content] Error showing field loader:', error);
+            sendResponse({ success: false, error: 'Failed to show loader' });
+          }
+          break;
+
+        case 'INSERT_PERSONAL_DATA':
+          try {
+            const text = message.data?.text || '';
+            const inserted = insertTextIntoActiveElement(text);
+            sendResponse({ success: inserted });
+          } catch (error) {
+            console.error('[content] Error inserting personal data:', error);
+            sendResponse({ success: false, error: 'Failed to insert data' });
+          }
+          break;
+
+        case 'INSERT_GENERATED_TEXT':
+          try {
+            hideFieldLoader();
+            
+            const { text, success, error: errorMsg } = message.data || {};
+            
+            if (success && text) {
+              // Use saved element instead of document.activeElement
+              const targetElement = getSavedActiveElement();
+              const inserted = targetElement ? insertTextIntoElement(targetElement, text) : false;
+              
+              if (inserted) {
+                showToast('Response generated', 'success');
+              } else {
+                showToast('Failed to insert text', 'error');
+              }
+              
+              clearSavedActiveElement();
+              sendResponse({ success: inserted });
+            } else {
+              showToast(errorMsg || 'Generation error', 'error');
+              clearSavedActiveElement();
+              sendResponse({ success: false });
+            }
+          } catch (error) {
+            hideFieldLoader();
+            clearSavedActiveElement();
+            console.error('[content] Error inserting generated text:', error);
+            showToast('Failed to insert text', 'error');
+            sendResponse({ success: false, error: 'Failed to insert text' });
+          }
+          break;
+
+        case 'SHOW_CUSTOM_INSTRUCTION_PROMPT':
+          try {
+            const activeElement = document.activeElement as HTMLElement;
+            if (activeElement && (
+              activeElement.tagName === 'INPUT' || 
+              activeElement.tagName === 'TEXTAREA' || 
+              activeElement.isContentEditable
+            )) {
+              showCustomInstructionPrompt(activeElement, (instruction) => {
+                // Save the element for later insertion
+                const elementToFill = getTargetElement();
+                if (elementToFill) {
+                  // Manually save it to fieldLoader
+                  showFieldLoader(elementToFill);
+                }
+                
+                // Send custom instruction to background for processing
+                chrome.runtime.sendMessage({
+                  type: 'PROCESS_CUSTOM_INSTRUCTION',
+                  data: { instruction }
+                });
+              });
+              sendResponse({ success: true });
+            } else {
+              sendResponse({ success: false, error: 'No active editable element' });
+            }
+          } catch (error) {
+            console.error('[content] Error showing custom instruction prompt:', error);
+            sendResponse({ success: false, error: 'Failed to show prompt' });
+          }
+          break;
+
+        case 'HIDE_CUSTOM_INSTRUCTION_PROMPT':
+          hideCustomInstructionPrompt();
+          sendResponse({ success: true });
+          break;
+
         default:
           sendResponse({ success: false, error: 'Unknown message type' });
       }
@@ -232,4 +383,88 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   
   return true;
 });
+
+// Helper function to insert text into the active element
+function insertTextIntoActiveElement(text: string): boolean {
+  const activeElement = document.activeElement as HTMLInputElement | HTMLTextAreaElement | HTMLElement;
+  
+  if (!activeElement) {
+    console.error('[content] No active element');
+    return false;
+  }
+
+  return insertTextIntoElement(activeElement, text);
+}
+
+// Helper function to insert text into a specific element
+function insertTextIntoElement(element: HTMLElement, text: string): boolean {
+  if (!element) {
+    console.error('[content] No element provided');
+    return false;
+  }
+
+  try {
+    // For INPUT and TEXTAREA elements
+    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+      const inputElement = element as HTMLInputElement | HTMLTextAreaElement;
+      const start = inputElement.selectionStart || 0;
+      const end = inputElement.selectionEnd || 0;
+      const currentValue = inputElement.value;
+      
+      // Insert text at cursor position
+      inputElement.value = currentValue.substring(0, start) + text + currentValue.substring(end);
+      
+      // Move cursor to end of inserted text
+      const newPosition = start + text.length;
+      inputElement.selectionStart = newPosition;
+      inputElement.selectionEnd = newPosition;
+      
+      // Focus the element
+      inputElement.focus();
+      
+      // Trigger events for frameworks (React, Vue, etc.)
+      inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+      inputElement.dispatchEvent(new Event('change', { bubbles: true }));
+      
+      console.log('[content] Text inserted into input/textarea');
+      return true;
+    }
+    
+    // For contenteditable elements
+    if (element.isContentEditable) {
+      // Focus the element first
+      element.focus();
+      
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        // No selection, append to end
+        element.textContent = (element.textContent || '') + text;
+      } else {
+        // Insert at selection
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+        
+        // Move cursor to end of inserted text
+        range.setStartAfter(textNode);
+        range.setEndAfter(textNode);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
+      // Trigger input event for contenteditable
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      console.log('[content] Text inserted into contenteditable');
+      return true;
+    }
+    
+    console.warn('[content] Element is not editable:', element.tagName);
+    return false;
+  } catch (error) {
+    console.error('[content] Error inserting text:', error);
+    return false;
+  }
+}
 

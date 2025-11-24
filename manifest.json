@@ -30,7 +30,9 @@
         "src/ui/webcam/index.html", 
         "src/ui/webcam/webcam.js",
         "src/ui/microphone/index.html",
-        "src/ui/microphone/microphone.js"
+        "src/ui/microphone/microphone.js",
+        "src/content/siteWidget.css",
+        "icons/icon-48.png"
       ],
       "matches": ["<all_urls>"]
     }

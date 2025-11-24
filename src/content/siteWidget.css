@@ -1,0 +1,218 @@
+/* Site prompts widget styles */
+#ailex-site-widget {
+  position: fixed;
+  right: -25px;
+  top: 70%;
+  transform: translateY(-50%);
+  z-index: 2147483647;
+  transition: right 0.3s ease;
+  pointer-events: all;
+}
+
+#ailex-site-widget:hover {
+  right: 0;
+}
+
+#ailex-widget-toggle {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.2);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.3s ease;
+  border: none;
+  padding: 0;
+}
+
+#ailex-widget-toggle:hover {
+  box-shadow: -4px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#ailex-widget-toggle img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+#ailex-prompts-panel {
+  position: fixed;
+  right: -400px;
+  top: 54%;
+  transform: translateY(-50%);
+  width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(240 5.9% 90%);
+  border-radius: 12px 0 0 12px;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+  z-index: 2147483646;
+  transition: right 0.3s ease;
+}
+
+#ailex-prompts-panel.active {
+  right: 0;
+}
+
+.ailex-prompts-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid hsl(240 5.9% 90%);
+  background: hsl(0 0% 100%);
+}
+
+.ailex-prompts-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(240 10% 3.9%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ailex-prompts-panel-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: hsl(240 5.9% 10%);
+  font-size: 20px;
+  line-height: 1;
+  transition: opacity 0.2s ease;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ailex-prompts-panel-close:hover {
+  opacity: 0.7;
+  background: hsl(240 4.8% 95.9%);
+}
+
+.ailex-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(80vh - 65px);
+}
+
+.ailex-prompt-item {
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(240 5.9% 90%);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ailex-prompt-item:hover {
+  background: hsl(240 4.8% 95.9%);
+  border-color: hsl(240 5.9% 80%);
+  transform: translateX(-4px);
+}
+
+.ailex-prompt-item:active {
+  transform: translateX(-4px) scale(0.98);
+}
+
+.ailex-prompt-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: 2px;
+}
+
+.ailex-prompt-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+  color: hsl(240 10% 3.9%);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  #ailex-widget-toggle {
+    background: hsl(240 10% 3.9%);
+    border: 1px solid hsl(240 3.7% 15.9%);
+  }
+  
+  #ailex-prompts-panel {
+    background: hsl(240 10% 3.9%);
+    border: 1px solid hsl(240 3.7% 15.9%);
+  }
+  
+  .ailex-prompts-panel-header {
+    border-bottom-color: hsl(240 3.7% 15.9%);
+    background: hsl(240 10% 3.9%);
+  }
+  
+  .ailex-prompts-panel-title {
+    color: hsl(0 0% 98%);
+  }
+  
+  .ailex-prompts-panel-close {
+    color: hsl(0 0% 98%);
+  }
+  
+  .ailex-prompts-panel-close:hover {
+    background: hsl(240 3.7% 15.9%);
+  }
+  
+  .ailex-prompt-item {
+    background: hsl(240 10% 3.9%);
+    border-color: hsl(240 3.7% 15.9%);
+  }
+  
+  .ailex-prompt-item:hover {
+    background: hsl(240 3.7% 15.9%);
+    border-color: hsl(240 3.7% 25%);
+  }
+  
+  .ailex-prompt-text {
+    color: hsl(0 0% 98%);
+  }
+}
+
+/* Scrollbar styling */
+.ailex-prompts-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ailex-prompts-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ailex-prompts-list::-webkit-scrollbar-thumb {
+  background: hsl(240 5.9% 80%);
+  border-radius: 3px;
+}
+
+.ailex-prompts-list::-webkit-scrollbar-thumb:hover {
+  background: hsl(240 5.9% 70%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ailex-prompts-list::-webkit-scrollbar-thumb {
+    background: hsl(240 3.7% 25%);
+  }
+  
+  .ailex-prompts-list::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 3.7% 35%);
+  }
+}
+

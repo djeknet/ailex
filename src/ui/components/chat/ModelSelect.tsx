@@ -106,15 +106,18 @@ export default function ModelSelect() {
     );
   };
 
-  // Build favorites group
-  const favoriteModels: Array<{ operator: AIOperator; model: any; config: AIOperatorConfig }> = [];
-  configuredOperators.forEach(config => {
-    config.models?.forEach(model => {
-      if (isFavorite(config.operator, model.id) && filterModels(model, config.operator)) {
-        favoriteModels.push({ operator: config.operator, model, config });
-      }
+  // Build favorites group - memoized to prevent recalculation on every render
+  const favoriteModels = useMemo(() => {
+    const favorites: Array<{ operator: AIOperator; model: any; config: AIOperatorConfig }> = [];
+    configuredOperators.forEach(config => {
+      config.models?.forEach(model => {
+        if (isFavorite(config.operator, model.id) && filterModels(model, config.operator)) {
+          favorites.push({ operator: config.operator, model, config });
+        }
+      });
     });
-  });
+    return favorites;
+  }, [configuredOperators, isFavorite, matchesFilters, searchQuery]);
 
   return (
     <TooltipProvider>

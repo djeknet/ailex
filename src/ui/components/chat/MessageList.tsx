@@ -27,6 +27,7 @@ import { useSettingsStore } from '@shared/stores/settingsStore';
 import ContextTruncatedDialog from './ContextTruncatedDialog';
 import MessageItem, { type MessageBranch } from './MessageItem';
 import ToolsGrid from './ToolsGrid';
+import SitePromptsGrid from './SitePromptsGrid';
 import ToolExecutionDisplay from './ToolExecutionDisplay';
 import type { AIOperatorConfig } from '@shared/types/extension';
 
@@ -48,7 +49,8 @@ export default function MessageList() {
     contextTruncationInfo,
     clearContextTruncationInfo,
     generatingQuestionsForMessage,
-    generateSuggestedQuestions
+    generateSuggestedQuestions,
+    sendSitePrompt
   } = useChatStore();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [messageBranches, setMessageBranches] = useState<Record<string, MessageBranch[]>>({});
@@ -59,22 +61,27 @@ export default function MessageList() {
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
   const [showTruncationDialog, setShowTruncationDialog] = useState(false);
   const [currentUrl, setCurrentUrl] = useState<string | undefined>(undefined);
+  const [siteFavicon, setSiteFavicon] = useState<string | null>(null);
 
-  // Get current tab URL
+  // Get current tab URL and favicon
   useEffect(() => {
-    const getCurrentTabUrl = async () => {
+    const getCurrentTabInfo = async () => {
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab?.url) {
           setCurrentUrl(tab.url);
           console.log('[MessageList] Current URL:', tab.url);
         }
+        if (tab?.favIconUrl) {
+          setSiteFavicon(tab.favIconUrl);
+          console.log('[MessageList] Favicon:', tab.favIconUrl);
+        }
       } catch (error) {
-        console.error('[MessageList] Error getting current URL:', error);
+        console.error('[MessageList] Error getting current tab info:', error);
       }
     };
     
-    getCurrentTabUrl();
+    getCurrentTabInfo();
   }, []);
 
   // Cleanup comparison AbortController on unmount
@@ -824,7 +831,15 @@ export default function MessageList() {
             <p className="text-sm">{t('startConversation')}</p>
           </div>
           
-          <div className="w-full max-w-4xl">
+          <div className="w-full max-w-4xl space-y-6">
+            {/* Site Prompts Grid - контекстные подсказки для сайтов */}
+            <SitePromptsGrid
+              currentUrl={currentUrl}
+              favicon={siteFavicon}
+              onPromptSelect={sendSitePrompt}
+            />
+            
+            {/* Tools Grid - пользовательские инструменты */}
             <ToolsGrid 
               currentUrl={currentUrl}
               onToolSelect={async (tool) => {

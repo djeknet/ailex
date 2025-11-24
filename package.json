@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:dev": "vite build --mode development",
-    "build:prod": "vite build --mode production",
+    "build:dev": "node scripts/generate-site-prompts-i18n.js && vite build --mode development",
+    "build:prod": "node scripts/generate-site-prompts-i18n.js && vite build --mode production",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "i18n:types": "node scripts/generate-i18n-types.js",
+    "site-prompts:generate": "node scripts/generate-site-prompts-i18n.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

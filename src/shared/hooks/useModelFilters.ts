@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { AIOperator } from '@shared/types/ai';
 import { getModelInfo, getContextRange } from '@shared/constants';
 
@@ -63,7 +63,7 @@ export function useModelFilters() {
   };
 
   // Apply filters to a model
-  const matchesFilters = (model: any, operator: AIOperator): boolean => {
+  const matchesFilters = useCallback((model: any, operator: AIOperator): boolean => {
     // Get model info from database to have architecture details
     const modelInfo = getModelInfo(model.id, operator);
 
@@ -71,7 +71,7 @@ export function useModelFilters() {
     // Check context length
     const contextLength = modelInfo?.context_length || model.context_length || 0;
     if (filters.minContext !== null && contextLength > 0 && contextLength < filters.minContext) {
-      console.log('[useModelFilters] ❌ Context too small:', contextLength, '<', filters.minContext);
+      // console.log('[useModelFilters] ❌ Context too small:', contextLength, '<', filters.minContext);
       return false;
     }
 
@@ -84,7 +84,7 @@ export function useModelFilters() {
       );
       
       if (!hasAllInputs) {
-        console.log('[useModelFilters] ❌ Missing required input modalities');
+        // console.log('[useModelFilters] ❌ Missing required input modalities');
         return false;
       }
     }
@@ -98,20 +98,20 @@ export function useModelFilters() {
       );
       
       if (!hasAllOutputs) {
-        console.log('[useModelFilters] ❌ Missing required output modalities');
+        // console.log('[useModelFilters] ❌ Missing required output modalities');
         return false;
       }
     }
 
     // Check operator
     if (filters.operators.length > 0 && !filters.operators.includes(operator)) {
-      console.log('[useModelFilters] ❌ Operator not in filter list');
+      // console.log('[useModelFilters] ❌ Operator not in filter list');
       return false;
     }
 
-    console.log('[useModelFilters] ✅ Model matches all filters');
+    // console.log('[useModelFilters] ✅ Model matches all filters');
     return true;
-  };
+  }, [filters]);
 
   return {
     filters,
