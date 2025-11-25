@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { Label } from '@/ui/components/ui/label';
+import { Input } from '@/ui/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/components/ui/select';
 import { Switch } from '@/ui/components/ui/switch';
 import { Button } from '@/ui/components/ui/button';
@@ -15,7 +16,7 @@ import ImportDialog from './ImportDialog';
 
 export default function GeneralTab() {
   const { t } = useTranslation();
-  const { theme, language, historyMode, showAISuggestions, developerMode, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setDeveloperMode, exportSettings } = useSettingsStore();
+  const { theme, language, historyMode, showAISuggestions, developerMode, autoDeletionDays, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setDeveloperMode, setAutoDeletionDays, exportSettings } = useSettingsStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -149,6 +150,27 @@ export default function GeneralTab() {
           {historyMode === 'all' && t('historyModeAllDesc')}
           {historyMode === 'per-site' && t('historyModePerSiteDesc')}
           {historyMode === 'session' && t('historyModeSessionDesc')}
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="auto-deletion-days">{t('autoDeletionDays')}</Label>
+        <Input
+          id="auto-deletion-days"
+          type="number"
+          min="1"
+          max="999"
+          value={autoDeletionDays || 30}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = parseInt(e.target.value, 10);
+            if (value >= 1 && value <= 999) {
+              setAutoDeletionDays(value);
+            }
+          }}
+          className="w-full"
+        />
+        <p className="text-sm text-muted-foreground">
+          {t('autoDeletionDaysDescription')}
         </p>
       </div>
 

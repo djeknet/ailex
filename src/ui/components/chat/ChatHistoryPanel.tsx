@@ -77,6 +77,7 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [chatsWithData, setChatsWithData] = useState<ChatWithMessages[]>([]);
+  const [isLoadingChats, setIsLoadingChats] = useState(false);
 
   // Dialogs state
   const [renameDialog, setRenameDialog] = useState<{ id: string; type: 'chat' | 'folder'; currentName: string } | null>(null);
@@ -87,6 +88,8 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
 
   useEffect(() => {
     if (open) {
+      setIsLoadingChats(true);
+      setChatsWithData([]); // Очищаем данные при открытии
       loadFolders();
       loadAllChats();
     }
@@ -95,6 +98,8 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
   // Load chat data (tokens and operators)
   useEffect(() => {
     const loadChatData = async () => {
+      if (!open) return; // Не загружать если панель закрыта
+      
       const data: ChatWithMessages[] = [];
       for (const chat of chats) {
         try {
@@ -121,12 +126,17 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
         }
       }
       setChatsWithData(data);
+      setIsLoadingChats(false); // Завершаем загрузку после обработки всех чатов
     };
 
     if (chats.length > 0) {
       loadChatData();
+    } else if (open) {
+      // Если чатов нет, сразу завершаем загрузку
+      setChatsWithData([]);
+      setIsLoadingChats(false);
     }
-  }, [chats]);
+  }, [chats, open]);
 
   // Filter chats by search query
   const filteredChats = useMemo(() => {
@@ -256,7 +266,7 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="h-[80vh] flex flex-col p-0">
           <SheetHeader className="p-4 border-b">
-            <SheetTitle>{t('chatHistory')}</SheetTitle>
+            <SheetTitle>{t('chatHistory')} ({chatsWithData.length})</SheetTitle>
           </SheetHeader>
 
           {/* Search and actions */}
@@ -302,69 +312,102 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
           {/* Chats list */}
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-2">
-              {/* Folders */}
-              {folders.map(folder => (
-                <div key={folder.id}>
-                  <div
-                    className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent group"
-                  >
-                    <button
-                      onClick={() => toggleFolder(folder.id)}
-                      className="flex items-center gap-2 flex-1 min-w-0"
-                    >
-                      {expandedFolders.has(folder.id) ? (
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
+              {isLoadingChats ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                <>
+                  {/* Folders */}
+                  {folders.map(folder => (
+                    <div key={folder.id}>
+                      <div
+                        className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent group"
+                      >
+                        <button
+                          onClick={() => toggleFolder(folder.id)}
+                          className="flex items-center gap-2 flex-1 min-w-0"
+                        >
+                          {expandedFolders.has(folder.id) ? (
+                            <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                          )}
+                          <Folder className="h-4 w-4 flex-shrink-0" />
+                          <span className="font-semibold text-base truncate">{folder.name}</span>
+                        </button>
+
+                        {/* Count / Menu container - fixed width to prevent layout shift */}
+                        <div className="relative w-12 h-6 flex items-center justify-end flex-shrink-0">
+                          <span className="absolute right-0 text-xs text-muted-foreground whitespace-nowrap opacity-100 group-hover:opacity-0 transition-opacity">
+                            {chatsByFolder[folder.id]?.length || 0}
+                          </span>
+
+                          <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="absolute right-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Ellipsis className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRenameDialog({ id: folder.id, type: 'folder', currentName: folder.name });
+                                  setNewName(folder.name);
+                                }}
+                              >
+                                {t('rename')}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteDialog({ id: folder.id, type: 'folder' });
+                                }}
+                                className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                              >
+                                {t('delete')}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Chats in folder */}
+                      {expandedFolders.has(folder.id) && chatsByFolder[folder.id] && (
+                        <div className="ml-6 space-y-1">
+                          {chatsByFolder[folder.id].map(({ chat, totalTokens, operators }) => (
+                            <ChatItem
+                              key={chat.id}
+                              chat={chat}
+                              totalTokens={totalTokens}
+                              operators={operators}
+                              onChatClick={handleChatClick}
+                              onRename={(id, title) => {
+                                setRenameDialog({ id, type: 'chat', currentName: title });
+                                setNewName(title);
+                              }}
+                              onMove={(id) => setMoveDialog(id)}
+                              onDelete={(id) => setDeleteDialog({ id, type: 'chat' })}
+                              onSiteClick={openSite}
+                              formatDate={formatDate}
+                              formatTokens={formatTokens}
+                              t={t}
+                            />
+                          ))}
+                        </div>
                       )}
-                      <Folder className="h-4 w-4 flex-shrink-0" />
-                      <span className="font-semibold text-base truncate">{folder.name}</span>
-                    </button>
-
-                    {/* Count / Menu container - fixed width to prevent layout shift */}
-                    <div className="relative w-12 h-6 flex items-center justify-end flex-shrink-0">
-                      <span className="absolute right-0 text-xs text-muted-foreground whitespace-nowrap opacity-100 group-hover:opacity-0 transition-opacity">
-                        {chatsByFolder[folder.id]?.length || 0}
-                      </span>
-
-                      <DropdownMenu modal={false}>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="absolute right-0 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Ellipsis className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setRenameDialog({ id: folder.id, type: 'folder', currentName: folder.name });
-                              setNewName(folder.name);
-                            }}
-                          >
-                            {t('rename')}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteDialog({ id: folder.id, type: 'folder' });
-                            }}
-                            className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
-                          >
-                            {t('delete')}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
-                  </div>
+                  ))}
 
-                  {/* Chats in folder */}
-                  {expandedFolders.has(folder.id) && chatsByFolder[folder.id] && (
-                    <div className="ml-6 space-y-1">
-                      {chatsByFolder[folder.id].map(({ chat, totalTokens, operators }) => (
+                  {/* Chats without folder */}
+                  {chatsByFolder['none'] && chatsByFolder['none'].length > 0 && (
+                    <div className="space-y-1">
+                      {chatsByFolder['none'].map(({ chat, totalTokens, operators }) => (
                         <ChatItem
                           key={chat.id}
                           chat={chat}
@@ -385,38 +428,13 @@ export default function ChatHistoryPanel({ open, onOpenChange }: ChatHistoryPane
                       ))}
                     </div>
                   )}
-                </div>
-              ))}
 
-              {/* Chats without folder */}
-              {chatsByFolder['none'] && chatsByFolder['none'].length > 0 && (
-                <div className="space-y-1">
-                  {chatsByFolder['none'].map(({ chat, totalTokens, operators }) => (
-                    <ChatItem
-                      key={chat.id}
-                      chat={chat}
-                      totalTokens={totalTokens}
-                      operators={operators}
-                      onChatClick={handleChatClick}
-                      onRename={(id, title) => {
-                        setRenameDialog({ id, type: 'chat', currentName: title });
-                        setNewName(title);
-                      }}
-                      onMove={(id) => setMoveDialog(id)}
-                      onDelete={(id) => setDeleteDialog({ id, type: 'chat' })}
-                      onSiteClick={openSite}
-                      formatDate={formatDate}
-                      formatTokens={formatTokens}
-                      t={t}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {filteredChats.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  {searchQuery ? t('noChats') : t('noChats')}
-                </div>
+                  {filteredChats.length === 0 && (
+                    <div className="text-center text-muted-foreground py-8">
+                      {searchQuery ? t('noChats') : t('noChats')}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </ScrollArea>

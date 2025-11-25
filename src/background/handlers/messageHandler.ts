@@ -24,6 +24,7 @@ export type MessageType =
   | 'SET_STORAGE'
   | 'CACHE_MODELS'
   | 'GET_CACHED_MODELS'
+  | 'CLEAR_OPERATOR_CACHE'
   | 'CAPTURE_SCREENSHOT'
   | 'ADD_API_LOG'
   | 'GET_API_LOGS'
@@ -140,6 +141,10 @@ export async function handleMessage(
 
       case 'GET_CACHED_MODELS':
         return await storageService.getCachedModels(message.data.operator);
+
+      case 'CLEAR_OPERATOR_CACHE':
+        await storageService.removeLocalStorage([`models_${message.data.operator}`]);
+        return { success: true };
 
       case 'CAPTURE_SCREENSHOT': {
         // Get current active tab

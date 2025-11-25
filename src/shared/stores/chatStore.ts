@@ -8,6 +8,7 @@ import { PageContextType, HistoryMode } from '@shared/types/extension';
 import { AIServiceError, AIErrorCode, detectErrorType } from '@shared/types/errors';
 import { getTranslation } from '@shared/i18n/useTranslation';
 import { i18nService } from '@shared/i18n/i18nService';
+import { isSystemPage } from '@shared/utils/pageUtils';
 import { getAILanguageName } from '@shared/constants';
 import { getAllAvailableTools, toolsToDefinitions } from '@shared/services/toolsService';
 import { executeToolCall } from '@shared/services/toolExecutor';
@@ -81,6 +82,7 @@ interface ChatStore {
   updateChatTitle: (chatId: string, title: string) => Promise<void>;
   moveChatToFolder: (chatId: string, folderId?: string) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
+  deleteOldChats: (daysOld: number) => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -188,10 +190,8 @@ export const useChatStore = create<ChatStore>()(
       const pageIcon = tab?.favIconUrl || undefined;
 
       // Disable page context for system pages
-      const isSystemPage = currentUrl.startsWith('chrome://') || 
-                          currentUrl.startsWith('about:') || 
-                          currentUrl.startsWith('edge://');
-      const effectivePageContextEnabled = pageContextEnabled && !isSystemPage;
+      const isSystem = isSystemPage(currentUrl);
+      const effectivePageContextEnabled = pageContextEnabled && !isSystem;
 
       // Calculate hash of page context if provided
       let pageContextHash: string | undefined;
@@ -210,7 +210,7 @@ export const useChatStore = create<ChatStore>()(
         originalPageContextEnabled: pageContextEnabled,
         pageContextType,
         url: currentUrl,
-        isSystemPage,
+        isSystemPage: isSystem,
         hasAttachments: attachments.length > 0,
         attachmentTypes: attachments.map(a => a.type)
       });
@@ -258,10 +258,8 @@ export const useChatStore = create<ChatStore>()(
             if (isTextFile) {
               contentForDatabase += `\n\nAttached file (${attachment.name}):\n${attachment.data}`;
             }
-          } else if (attachment.type === 'dom') {
-            contentForDatabase += `\n\nSelected DOM element (${attachment.name}):\n${attachment.data}`;
           }
-          // Note: tab attachments are displayed as badges, no need to add text
+          // Note: DOM and tab attachments are displayed as badges, no need to add text
         }
       }
       
@@ -1664,6 +1662,32 @@ ${responseContext}`;
       }
     } catch (error) {
       console.error('Error deleting chat:', error);
+    }
+  },
+
+  deleteOldChats: async (daysOld) => {
+    try {
+      const now = Date.now();
+      const cutoffTime = now - (daysOld * 24 * 60 * 60 * 1000);
+      const chats = await chatAPI.getAllChats();
+      
+      // Find chats to delete: older than cutoff AND not in a folder
+      const chatsToDelete = chats.filter((chat: Chat) => 
+        chat.createdAt < cutoffTime && !chat.folderId
+      );
+      
+      console.log(`[chatStore] Deleting ${chatsToDelete.length} chats older than ${daysOld} days`);
+      
+      // Delete each old chat
+      for (const chat of chatsToDelete) {
+        await chatAPI.deleteChat(chat.id);
+      }
+      
+      // Reload chats list
+      const updatedChats = await chatAPI.getAllChats();
+      set({ chats: updatedChats });
+    } catch (error) {
+      console.error('Error deleting old chats:', error);
     }
   }
     }),

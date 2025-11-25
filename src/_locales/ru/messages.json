@@ -30,7 +30,7 @@
     "message": "Отправить"
   },
   "messageInputPlaceholder": {
-    "message": "Введите сообщение или выберите команду через /"
+    "message": "Введите сообщение или выберите команду через /, для ссылки на таб введите @"
   },
   "operators": {
     "message": "Операторы"
@@ -107,6 +107,15 @@
   "hide": {
     "message": "Скрыть"
   },
+  "removeOperator": {
+    "message": "Удалить оператора"
+  },
+  "removeOperatorConfirmTitle": {
+    "message": "Удалить подключение?"
+  },
+  "removeOperatorConfirmMessage": {
+    "message": "Вы правда хотите удалить API ключ и подключенные модели?"
+  },
   "lmstudioDescription": {
     "message": "LM Studio позволяет запускать локальные модели на вашем компьютере. Скачайте и запустите"
   },
@@ -139,6 +148,12 @@
   },
   "historyModeSessionDesc": {
     "message": "История удаляется после закрытия расширения"
+  },
+  "autoDeletionDays": {
+    "message": "Удалять чаты старше, дней"
+  },
+  "autoDeletionDaysDescription": {
+    "message": "Автоматически удалять чаты, которые старше указанного количества дней (кроме чатов в папках)"
   },
   "deleteHistory": {
     "message": "Удалить историю диалогов"
@@ -984,6 +999,9 @@
   },
   "selectElement": {
     "message": "Выбрать элемент"
+  },
+  "attachBrowserTab": {
+    "message": "Вкладка браузера"
   },
   "elementSelected": {
     "message": "Элемент выбран"
@@ -2874,5 +2892,329 @@
   },
   "sitePrompt_developer_mozilla_article_3": {
     "message": "Есть ли более современные способы решить эту задачу?"
+  },
+  "requiresPersonalInfo": {
+    "message": "требуется личная информация",
+    "description": ""
+  },
+  "imageResolution": {
+    "message": "Разрешение изображения",
+    "description": ""
+  },
+  "geminiImageResolutionDescription": {
+    "message": "Более высокое разрешение позволяет получать изображения лучшего качества, но требует больше времени для создания. 4K доступно только для Gemini 3 Pro.",
+    "description": ""
+  },
+  "youtubePlayerResponseNotFound": {
+    "message": "ytInitialPlayerResponse не найден на странице",
+    "description": ""
+  },
+  "youtubeSubtitlesNotFound": {
+    "message": "Субтитры для этого видео не найдены",
+    "description": ""
+  },
+  "youtubeSubtitlesBaseUrlNotFound": {
+    "message": "Базовый URL-адрес субтитров не найден",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_3": {
+    "message": "Найдите графические паттерны (голова-плечи, треугольники, флаги) и оцените вероятность исполнения.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_4": {
+    "message": "Определите ключевые уровни поддержки и сопротивления с ценами входа/выхода.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_5": {
+    "message": "Есть ли дивергенции между ценой и индикаторами (RSI, MACD)? Что это значит?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_6": {
+    "message": "Построение уровней Фибоначчи и указание целевых зон коррекции/расширения.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_7": {
+    "message": "Анализируйте объемы: подтверждают ли они текущее движение цены?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_8": {
+    "message": "Какие важные новости или события могут повлиять на этот актив в ближайшие дни?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_9": {
+    "message": "Найдите корреляции с другими активами (валютами, индексами, товарами).",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_10": {
+    "message": "Где разместить стоп-лосс и тейк-профит, исходя из текущей ситуации?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_11": {
+    "message": "Рассчитайте соотношение риск/вознаграждение для потенциальных точек входа.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_12": {
+    "message": "Сравните текущий таймфрейм с более высокими таймфреймами: совпадает ли направление тренда?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_13": {
+    "message": "Какие свечные модели на графике сигнализируют о развороте или продолжении?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_14": {
+    "message": "Сравните этот график с аналогичными ситуациями в прошлом: как вела себя цена после этого?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_15": {
+    "message": "Проанализируйте сезонность активов: есть ли характерные закономерности для этого времени года?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_0": {
+    "message": "Проверьте факты из этой темы: правда или фальшивка?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_1": {
+    "message": "Найдите первоисточник информации из этого поста.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_2": {
+    "message": "Является ли этот пост частью вирусной кампании по дезинформации?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_3": {
+    "message": "Проанализируйте настроение дискуссии в ответах.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_4": {
+    "message": "Обобщите основные аргументы в этой теме.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_5": {
+    "message": "Каков общий консенсус в комментариях: согласие или споры?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_6": {
+    "message": "Найти другие мнения экспертов по этой теме.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_7": {
+    "message": "Каков контекст этого поста? Что привело к этой дискуссии?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_8": {
+    "message": "Найдите противоположные точки зрения на эту тему.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_9": {
+    "message": "Является ли это трендом прямо сейчас? О чем идет разговор в целом?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_10": {
+    "message": "Кто является ключевыми фигурами в этой дискуссии?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_11": {
+    "message": "Если есть изображения: проверьте их с помощью обратного поиска изображений.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_12": {
+    "message": "Проанализируйте прилагаемые средства массовой информации: подлинные они или манипулируемые?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_13": {
+    "message": "Почему этот пост получил такое большое количество пользователей?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_14": {
+    "message": "Найти похожие вирусные посты по этой теме в прошлом.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_0": {
+    "message": "Напишите профессиональный ответ на это письмо, учитывая контекст.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_1": {
+    "message": "Составьте вежливый отказ на это предложение.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_2": {
+    "message": "Перефразируйте мой проект более дипломатично/формально.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_3": {
+    "message": "Напишите быстрый дружеский ответ с благодарностью.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_4": {
+    "message": "Кратко изложите суть письма и ключевые моменты, требующие ответа.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_5": {
+    "message": "Проверьте тон письма: дружелюбный, нейтральный или агрессивный?",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_6": {
+    "message": "Есть ли в письме скрытые угрозы, сроки или важные условия?",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_7": {
+    "message": "Проверьте письмо на наличие признаков фишинга или мошенничества.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_8": {
+    "message": "Исправьте грамматику и улучшите стиль моего черновика.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_9": {
+    "message": "Сделайте письмо короче, сохранив ключевые моменты (версия TL;DR).",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_10": {
+    "message": "Выделите все сроки, задачи и пункты действий.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_11": {
+    "message": "Создайте контрольный список задач на основе этого письма.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_12": {
+    "message": "Найдите документы, ссылки или компании, упомянутые в электронном письме.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_13": {
+    "message": "Подготовьте краткую информацию о компании/человеке, полученную по электронной почте.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_14": {
+    "message": "Напишите ответ на жалобу клиента с извинениями и решением.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_15": {
+    "message": "Составьте письмо-напоминание о невыполненном обещании (вежливо).",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_0": {
+    "message": "Напишите профессиональный ответ на это письмо, учитывая контекст.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_1": {
+    "message": "Составьте вежливый отказ на это предложение.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_2": {
+    "message": "Перефразируйте мой проект более дипломатично/формально.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_3": {
+    "message": "Напишите быстрый дружеский ответ с благодарностью.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_4": {
+    "message": "Кратко изложите суть письма и ключевые моменты, требующие ответа.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_5": {
+    "message": "Проверьте тон письма: дружелюбный, нейтральный или агрессивный?",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_6": {
+    "message": "Есть ли в письме скрытые угрозы, сроки или важные условия?",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_7": {
+    "message": "Проверьте письмо на наличие признаков фишинга или мошенничества.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_8": {
+    "message": "Исправьте грамматику и улучшите стиль моего черновика.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_9": {
+    "message": "Сделайте письмо короче, сохранив ключевые моменты (версия TL;DR).",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_10": {
+    "message": "Выделите все сроки, задачи и пункты действий.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_11": {
+    "message": "Создайте контрольный список задач на основе этого письма.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_12": {
+    "message": "Найдите документы, ссылки или компании, упомянутые в электронном письме.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_13": {
+    "message": "Подготовьте краткую информацию о компании/человеке, полученную по электронной почте.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_14": {
+    "message": "Напишите ответ на жалобу клиента с извинениями и решением.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_15": {
+    "message": "Составьте письмо-напоминание о невыполненном обещании (вежливо).",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_0": {
+    "message": "Проверьте факты из этой темы: правда или фальшивка?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_1": {
+    "message": "Найдите первоисточник информации из этого поста.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_2": {
+    "message": "Является ли этот пост частью вирусной кампании по дезинформации?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_3": {
+    "message": "Проанализируйте настроение дискуссии в ответах.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_4": {
+    "message": "Обобщите основные аргументы в этой теме.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_5": {
+    "message": "Каков общий консенсус в комментариях: согласие или споры?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_6": {
+    "message": "Найти другие мнения экспертов по этой теме.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_7": {
+    "message": "Каков контекст этого поста? Что привело к этой дискуссии?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_8": {
+    "message": "Найдите противоположные точки зрения на эту тему.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_9": {
+    "message": "Является ли это трендом прямо сейчас? О чем идет разговор в целом?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_10": {
+    "message": "Кто является ключевыми фигурами в этой дискуссии?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_11": {
+    "message": "Если есть изображения: проверьте их с помощью обратного поиска изображений.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_12": {
+    "message": "Проанализируйте прилагаемые средства массовой информации: подлинные они или манипулируемые?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_13": {
+    "message": "Почему этот пост получил такое большое количество пользователей?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_14": {
+    "message": "Найти похожие вирусные посты по этой теме в прошлом.",
+    "description": ""
   }
 }

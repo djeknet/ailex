@@ -47,6 +47,7 @@ import {
   Square,
   Send,
   Check,
+  AtSign,
 } from 'lucide-react';
 import InstructionSelector from './InstructionSelector';
 import ModelSelect from './ModelSelect';
@@ -1282,6 +1283,12 @@ export default function MessageInput() {
                         <DropdownMenuItem onClick={handleSelectElement}>
                           <MousePointer2 className="h-4 w-4" />
                           {t('selectElement')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          setText(prev => prev + (prev && !prev.endsWith(' ') ? ' ' : '') + '@');
+                        }}>
+                          <AtSign className="h-4 w-4" />
+                          {t('attachBrowserTab')}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>

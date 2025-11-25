@@ -37,7 +37,6 @@ function generateI18nKeys() {
   const sitePrompts = loadJSON(SITE_PROMPTS_PATH);
   
   console.log('🔄 Загрузка файлов локализации...');
-  const ruMessages = loadJSON(RU_MESSAGES_PATH);
   const enMessages = loadJSON(EN_MESSAGES_PATH);
   
   let addedCount = 0;
@@ -66,32 +65,15 @@ function generateI18nKeys() {
         // Добавляем textKey в промпт
         prompt.textKey = key;
         
-        // Добавляем в русскую локализацию
-        if (!ruMessages[key]) {
-          ruMessages[key] = {
-            message: prompt.text
-          };
-          addedCount++;
-        } else {
-          updatedCount++;
-        }
-        
         // Добавляем в английскую локализацию (пока используем русский текст как плейсхолдер)
         if (!enMessages[key]) {
           enMessages[key] = {
             message: prompt.text // TODO: нужен перевод на английский
           };
+          addedCount++;
         }
       });
     }
-  }
-  
-  // Добавляем ключ для заголовка секции
-  if (!ruMessages['sitePromptsSectionTitle']) {
-    ruMessages['sitePromptsSectionTitle'] = {
-      message: 'Возможно вас интересует:'
-    };
-    addedCount++;
   }
   
   if (!enMessages['sitePromptsSectionTitle']) {
@@ -106,16 +88,12 @@ function generateI18nKeys() {
   saveJSON(SITE_PROMPTS_PATH, sitePrompts);
   
   // Сохраняем файлы локализации
-  saveJSON(RU_MESSAGES_PATH, ruMessages);
   saveJSON(EN_MESSAGES_PATH, enMessages);
   
   console.log('✅ Готово!');
   console.log(`   • Добавлено новых ключей: ${addedCount}`);
   console.log(`   • Обновлено существующих: ${updatedCount}`);
   console.log(`   • Пропущено (уже есть): ${skippedCount}`);
-  console.log('');
-  console.log('⚠️  ВАЖНО: Английские переводы используют русский текст как плейсхолдер.');
-  console.log('   Необходимо вручную перевести все новые ключи в src/_locales/en/messages.json');
 }
 
 // Запуск

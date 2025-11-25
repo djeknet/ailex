@@ -5,7 +5,7 @@ import { Button } from '@/ui/components/ui/button';
 import { Slider } from '@/ui/components/ui/slider';
 import { ScrollArea } from '@/ui/components/ui/scroll-area';
 import { useTranslation } from '@shared/i18n/useTranslation';
-import { useModelFilters } from '@shared/hooks/useModelFilters';
+import { useModelFiltersStore } from '@shared/stores/modelFiltersStore';
 import { getContextRange } from '@shared/constants';
 import { getOperatorIcon, getOperatorName } from '@shared/services/aiService';
 import { cn } from '@shared/utils/cn';
@@ -25,7 +25,7 @@ export default function ModelFiltersDialog({
   onSelectModel
 }: ModelFiltersDialogProps) {
   const { t } = useTranslation();
-  const { filters, updateFilters, resetFilters, matchesFilters } = useModelFilters();
+  const { filters, updateFilters, resetFilters, matchesFilters } = useModelFiltersStore();
   const { min: minContext, max: maxContext } = getContextRange();
 
   // Format context length
@@ -47,26 +47,32 @@ export default function ModelFiltersDialog({
 
   // Toggle modality
   const toggleInputModality = (modality: string) => {
+    console.log('[ModelFiltersDialog] 🔄 Toggle input modality:', modality);
     const current = filters.inputModalities;
     const updated = current.includes(modality)
       ? current.filter(m => m !== modality)
       : [...current, modality];
+    console.log('[ModelFiltersDialog] 📋 Updated input modalities:', updated);
     updateFilters({ inputModalities: updated });
   };
 
   const toggleOutputModality = (modality: string) => {
+    console.log('[ModelFiltersDialog] 🔄 Toggle output modality:', modality);
     const current = filters.outputModalities;
     const updated = current.includes(modality)
       ? current.filter(m => m !== modality)
       : [...current, modality];
+    console.log('[ModelFiltersDialog] 📋 Updated output modalities:', updated);
     updateFilters({ outputModalities: updated });
   };
 
   const toggleOperator = (operator: AIOperator) => {
+    console.log('[ModelFiltersDialog] 🔄 Toggle operator:', operator);
     const current = filters.operators;
     const updated = current.includes(operator)
       ? current.filter(op => op !== operator)
       : [...current, operator];
+    console.log('[ModelFiltersDialog] 📋 Updated operators:', updated);
     updateFilters({ operators: updated });
   };
 
@@ -198,7 +204,10 @@ export default function ModelFiltersDialog({
             <Button
               variant="ghost"
               size="sm"
-              onClick={resetFilters}
+              onClick={() => {
+                console.log('[ModelFiltersDialog] 🔄 RESET button clicked');
+                resetFilters();
+              }}
               className="h-9"
             >
               <RotateCcw className="h-4 w-4 mr-2" />

@@ -10,15 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/ui/components/ui/tooltip';
-import { FileText, Mail, Edit, ClipboardList, LucideIcon, HelpCircle } from 'lucide-react';
-
-const toolIconMap: Record<string, { icon: LucideIcon; color: string }> = {
-  'summarize': { icon: FileText, color: 'text-blue-500' },
-  'collect-contacts': { icon: Mail, color: 'text-green-500' },
-  'fill-form': { icon: Edit, color: 'text-orange-500' },
-  'get-form-fields': { icon: ClipboardList, color: 'text-purple-500' },
-  'fill-form-fields': { icon: Edit, color: 'text-amber-500' },
-};
+import { HelpCircle } from 'lucide-react';
 
 interface ToolsGridProps {
   onToolSelect: (tool: Tool) => void;
@@ -74,8 +66,6 @@ export default function ToolsGrid({ onToolSelect, currentUrl }: ToolsGridProps) 
     <div className="flex flex-wrap gap-2 p-4">
       {tools.map(tool => {
         const isDisabled = tool.requiresPersonalInfo && !personalInfo;
-        const iconConfig = toolIconMap[tool.id] || { icon: FileText, color: 'text-gray-500' };
-        const IconComponent = iconConfig.icon;
         
         // Используем локализованные значения, если есть ключи
         const toolName = tool.nameKey ? t(tool.nameKey) : tool.name;
@@ -92,7 +82,7 @@ export default function ToolsGrid({ onToolSelect, currentUrl }: ToolsGridProps) 
                     onClick={() => !isDisabled && onToolSelect(tool)}
                     disabled={isDisabled}
                   >
-                    <IconComponent className={`h-4 w-4 ${iconConfig.color}`} />
+                    <span className="text-base">{tool.icon || '🔧'}</span>
                     <span className="text-sm font-medium">{toolName}</span>
                   </Button>
                 </TooltipTrigger>

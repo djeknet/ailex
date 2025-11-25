@@ -40,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/ui/select';
-import { Plus, Edit, Trash2, Save, X, Wrench, BookOpen, MousePointer2, Lightbulb, Download, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, BookOpen, MousePointer2, Lightbulb, Download } from 'lucide-react';
 import { Alert, AlertDescription } from '@/ui/components/ui/alert';
 import DOMFunctionsModal from '@/ui/components/tools/DOMFunctionsModal';
 import AvailableToolsModal from '@/ui/components/tools/AvailableToolsModal';
@@ -390,8 +390,8 @@ export default function Tools() {
               <Card key={tool.id} className={`w-auto inline-flex ${!tool.enabled ? 'opacity-60' : ''}`}>
                 <CardHeader className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="text-gray-600">
-                      <Wrench className="h-5 w-5" />
+                    <div className="text-2xl">
+                      {tool.icon || '🔧'}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">

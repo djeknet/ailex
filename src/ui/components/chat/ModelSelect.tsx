@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Check, Star, Settings, Settings2 } from 'lucide-react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useChatStore } from '@shared/stores/chatStore';
+import { useModelFiltersStore } from '@shared/stores/modelFiltersStore';
 import { useFavoriteModels } from '@shared/hooks/useFavoriteModels';
-import { useModelFilters } from '@shared/hooks/useModelFilters';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { cn } from '@shared/utils/cn';
 import { getModelInfo } from '@shared/constants';
@@ -37,7 +37,7 @@ export default function ModelSelect() {
   const { operators } = useSettingsStore();
   const { selectedOperator, setSelectedOperator } = useChatStore();
   const { isFavorite, toggleFavorite } = useFavoriteModels();
-  const { matchesFilters, hasActiveFilters } = useModelFilters();
+  const { matchesFilters, hasActiveFilters } = useModelFiltersStore();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
@@ -79,14 +79,23 @@ export default function ModelSelect() {
   };
 
   // Custom filter function - search by word start + advanced filters
-  const filterModels = (model: any, operator: string) => {
+  const filterModels = useCallback((model: any, operator: string) => {
+    console.log(`[ModelSelect] 🔍 filterModels called for ${model.name} (${operator})`);
+    console.log('[ModelSelect] 📋 matchesFilters function:', matchesFilters);
+    
     // Apply advanced filters first
-    if (!matchesFilters(model, operator as AIOperator)) {
+    const matchesAdvanced = matchesFilters(model, operator as AIOperator);
+    console.log(`[ModelSelect] ${matchesAdvanced ? '✅' : '❌'} Advanced filter result for ${model.name}:`, matchesAdvanced);
+    
+    if (!matchesAdvanced) {
       return false;
     }
     
     // Then apply search query
-    if (!searchQuery) return true;
+    if (!searchQuery) {
+      console.log(`[ModelSelect] ✅ ${model.name}: No search query, passes`);
+      return true;
+    }
     
     const query = searchQuery.toLowerCase();
     const modelName = model.name.toLowerCase();
@@ -99,15 +108,19 @@ export default function ModelSelect() {
     const idWords = modelId.split(/[\s-]+/);
     
     // Check if any query word matches the start of any model word
-    return queryWords.every((queryWord: string) => 
+    const matchesSearch = queryWords.every((queryWord: string) => 
       modelWords.some((modelWord: string) => modelWord.startsWith(queryWord)) ||
       idWords.some((idWord: string) => idWord.startsWith(queryWord)) ||
       operatorName.includes(queryWord)
     );
-  };
+    
+    console.log(`[ModelSelect] ${matchesSearch ? '✅' : '❌'} Search filter result for ${model.name}:`, matchesSearch);
+    return matchesSearch;
+  }, [matchesFilters, searchQuery]);
 
   // Build favorites group - memoized to prevent recalculation on every render
   const favoriteModels = useMemo(() => {
+    console.log('[ModelSelect] 🔄 Recalculating favoriteModels with filterModels:', filterModels);
     const favorites: Array<{ operator: AIOperator; model: any; config: AIOperatorConfig }> = [];
     configuredOperators.forEach(config => {
       config.models?.forEach(model => {
@@ -116,8 +129,9 @@ export default function ModelSelect() {
         }
       });
     });
+    console.log('[ModelSelect] ✨ favoriteModels result:', favorites.length, 'models');
     return favorites;
-  }, [configuredOperators, isFavorite, matchesFilters, searchQuery]);
+  }, [configuredOperators, isFavorite, filterModels]);
 
   return (
     <TooltipProvider>

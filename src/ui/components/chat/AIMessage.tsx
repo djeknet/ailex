@@ -79,6 +79,8 @@ interface AIMessageProps {
   operators?: AIOperatorConfig[];
   isLoading?: boolean;
   generatingQuestionsForMessage?: string | null;
+  currentUrl?: string;
+  favicon?: string | null;
 }
 
 export default function AIMessage({
@@ -94,7 +96,9 @@ export default function AIMessage({
   onBranchChange,
   onQuestionClick,
   isLoading = false,
-  generatingQuestionsForMessage
+  generatingQuestionsForMessage,
+  currentUrl,
+  favicon
 }: AIMessageProps) {
   const { t } = useTranslation();
   const { citationMode } = useWebSearchStore();
@@ -511,6 +515,8 @@ export default function AIMessage({
               onQuestionClick={(question) => onQuestionClick && onQuestionClick(question, currentMessage.operator, currentMessage.model)}
               isLoading={isLoading}
               isGenerating={generatingQuestionsForMessage === currentMessage.id}
+              currentUrl={currentUrl}
+              favicon={favicon}
             />
           );
         })()}
@@ -546,6 +552,8 @@ export default function AIMessage({
         onQuestionClick={(question) => onQuestionClick && onQuestionClick(question, message.operator, message.model)}
         isLoading={isLoading}
         isGenerating={generatingQuestionsForMessage === message.id}
+        currentUrl={currentUrl}
+        favicon={favicon}
       />
     </>
   );

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChatMessage, MessageAttachment } from '@shared/types/database';
 import { useTranslation } from '@shared/i18n/useTranslation';
+import { useToolsStore } from '@shared/stores/toolsStore';
 import { Copy, Check, RefreshCcw } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
 import {
@@ -16,8 +17,8 @@ import QuotedMessage from './QuotedMessage';
 import ImageViewerDialog from './ImageViewerDialog';
 import AttachmentBadge from './AttachmentBadge';
 import TabMentionBadge from './TabMentionBadge';
+import ToolCommandBadge from './ToolCommandBadge';
 import type { MessageBranch } from './MessageItem';
-import type { TabReference } from '@shared/types/extension';
 
 interface UserMessageProps {
   message: ChatMessage;
@@ -46,11 +47,60 @@ export default function UserMessage({
 }: UserMessageProps) {
   const { t } = useTranslation();
   const [viewerImage, setViewerImage] = useState<{base64: string; name: string; mimeType?: string} | null>(null);
+  const { getFilteredTools, loadTools } = useToolsStore();
+
+  useEffect(() => {
+    loadTools();
+  }, [loadTools]);
 
   const handleCopyClick = () => {
     if (onCopy) {
       onCopy(message.text, message.id, true);
     }
+  };
+  
+  // Parse text and replace commands with tool badges
+  const parseTextWithCommands = (text: string) => {
+    const tools = getFilteredTools();
+    const commandRegex = /\/[\w-]+/g;
+    const parts: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = commandRegex.exec(text)) !== null) {
+      const command = match[0];
+      const tool = tools.find(t => t.command === command);
+      
+      // Add text before command
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      
+      // Add tool badge or original command
+      if (tool) {
+        const toolName = tool.nameKey ? t(tool.nameKey) : tool.name;
+        const toolDescription = tool.descriptionKey ? t(tool.descriptionKey) : tool.description;
+        parts.push(
+          <ToolCommandBadge 
+            key={match.index}
+            icon={tool.icon}
+            name={toolName}
+            description={toolDescription}
+          />
+        );
+      } else {
+        parts.push(command);
+      }
+      
+      lastIndex = match.index + command.length;
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? parts : [text];
   };
   
   // Parse attachments from new format
@@ -223,7 +273,7 @@ export default function UserMessage({
               )}
               
               {/* Display text with inline file/dom/tab badges */}
-              <div className="flex flex-wrap items-center gap-1 max-w-full">
+              <div className="inline-block">
                 {/* Display file/dom badges inline */}
                 {fileAttachments.map((file, idx) => (
                   <AttachmentBadge
@@ -257,7 +307,13 @@ export default function UserMessage({
                     />
                   );
                 })}
-                <Response>{message.text}</Response>
+                {parseTextWithCommands(message.text).map((part, idx) => 
+                  typeof part === 'string' ? (
+                    <Response key={idx}>{part}</Response>
+                  ) : (
+                    part
+                  )
+                )}
               </div>
             </div>
           )}

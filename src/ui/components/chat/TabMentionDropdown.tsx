@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { TabReference } from '@shared/types/extension';
 import { cn } from '@shared/utils/cn';
+import { isSystemPage } from '@shared/utils/pageUtils';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { Check } from 'lucide-react';
 import { Checkbox } from '@/ui/components/ui/checkbox';
@@ -15,14 +16,6 @@ interface TabMentionDropdownProps {
 }
 
 const MAX_TABS_DEFAULT = 5;
-
-// Helper to check if page is system page
-const isSystemPage = (url: string) => 
-  url.startsWith('chrome://') || 
-  url.startsWith('chrome-extension://') || 
-  url.startsWith('edge://') || 
-  url.startsWith('about:') ||
-  url.startsWith('file://');
 
 // Helper to truncate title
 const truncateTitle = (title: string, maxLength: number = 40): string => {

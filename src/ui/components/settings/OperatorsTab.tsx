@@ -9,6 +9,17 @@ import { testConnection, listModels, getOperatorName } from '@shared/services/ai
 import { storageAPI } from '@shared/utils/messaging';
 import { ModelCombobox } from './ModelCombobox';
 import { AI_OPERATOR_LINKS, EXTERNAL_URLS } from '@shared/constants';
+import { RefreshCw, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/components/ui/alert-dialog';
 
 const operators: AIOperator[] = ['openai', 'anthropic', 'openrouter', 'grok', 'gemini', 'lmstudio'];
 
@@ -31,6 +42,7 @@ export default function OperatorsTab() {
   const [testing, setTesting] = useState<Partial<Record<AIOperator, boolean>>>({});
   const [testResults, setTestResults] = useState<Partial<Record<AIOperator, boolean | null>>>({});
   const [showEndpoint, setShowEndpoint] = useState<Partial<Record<AIOperator, boolean>>>({});
+  const [operatorToRemove, setOperatorToRemove] = useState<AIOperator | null>(null);
 
   // Update configs when savedOperators changes
   useEffect(() => {
@@ -137,6 +149,38 @@ export default function OperatorsTab() {
     await updateOperators(updatedOperators);
   };
 
+  const handleRemoveOperator = async (operator: AIOperator) => {
+    console.log('[OperatorsTab] Removing operator:', operator);
+    
+    // Clear from local state
+    const clearedConfig: AIOperatorConfig = {
+      operator,
+      apiKey: '',
+      endpoint: '',
+      selectedModel: '',
+      models: []
+    };
+    
+    setConfigs(prev => ({ ...prev, [operator]: clearedConfig }));
+    setTestResults(prev => ({ ...prev, [operator]: null }));
+    
+    // Remove from settings store
+    const updatedOperators = savedOperators.filter(o => o.operator !== operator);
+    await updateOperators(updatedOperators);
+    
+    // Clear cached models
+    await storageAPI.clearOperatorCache(operator);
+    
+    // Close dialog
+    setOperatorToRemove(null);
+    
+    console.log('[OperatorsTab] Operator removed successfully');
+  };
+
+  const isOperatorConnected = (operator: AIOperator) => {
+    return configs[operator].models && configs[operator].models!.length > 0;
+  };
+
   return (
     <div className="space-y-6">
       {operators.map(operator => (
@@ -180,8 +224,24 @@ export default function OperatorsTab() {
                   testing[operator]
                 }
               >
-                {testing[operator] ? '...' : t('testConnection')}
+                {testing[operator] ? (
+                  '...'
+                ) : isOperatorConnected(operator) ? (
+                  <RefreshCw className="h-4 w-4" />
+                ) : (
+                  t('testConnection')
+                )}
               </Button>
+              {isOperatorConnected(operator) && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => setOperatorToRemove(operator)}
+                  title={t('removeOperator')}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             {testResults[operator] === true && (
               <p className="text-sm text-green-600">{t('connectionSuccess')}</p>
@@ -280,6 +340,27 @@ export default function OperatorsTab() {
           )}
         </div>
       ))}
+
+      {/* Confirm deletion dialog */}
+      <AlertDialog open={operatorToRemove !== null} onOpenChange={() => setOperatorToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('removeOperatorConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('removeOperatorConfirmMessage')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => operatorToRemove && handleRemoveOperator(operatorToRemove)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t('confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -16,6 +16,7 @@ export interface ExportedSettings {
     historyMode: ExtensionSettings['historyMode'];
     showAISuggestions: boolean;
     developerMode?: boolean;
+    autoDeletionDays?: number;
   };
   personalInfo?: ExtensionSettings['personalInfo'];
   instructions: {
@@ -41,6 +42,7 @@ interface SettingsStore extends ExtensionSettings {
   setHistoryMode: (mode: ExtensionSettings['historyMode']) => void;
   setShowAISuggestions: (enabled: boolean) => void;
   setDeveloperMode: (enabled: boolean) => void;
+  setAutoDeletionDays: (days: number) => void;
   updateOperators: (operators: ExtensionSettings['operators']) => Promise<void>;
   updatePersonalInfo: (info: ExtensionSettings['personalInfo']) => void;
   updateGeneralInstruction: (instruction: string) => void;
@@ -68,6 +70,7 @@ export const useSettingsStore = create<SettingsStore>()(
       maxFileSize: 10, // 10MB by default
       maxImageSize: 5, // 5MB by default
       developerMode: false, // Developer mode disabled by default
+      autoDeletionDays: 30, // Auto-delete chats older than 30 days by default
 
       setActiveView: (view) => set({ activeView: view }),
 
@@ -99,6 +102,11 @@ export const useSettingsStore = create<SettingsStore>()(
       setDeveloperMode: (developerMode) => {
         set({ developerMode });
         chrome.storage.sync.set({ developerMode });
+      },
+
+      setAutoDeletionDays: (autoDeletionDays) => {
+        set({ autoDeletionDays });
+        chrome.storage.sync.set({ autoDeletionDays });
       },
 
       updateOperators: async (operators) => {
@@ -183,7 +191,7 @@ export const useSettingsStore = create<SettingsStore>()(
         console.log('[settingsStore] initializeSettings called');
         return new Promise((resolve) => {
           chrome.storage.sync.get(
-            ['theme', 'language', 'historyMode', 'operators', 'personalInfo', 'generalInstruction', 'instructions', 'showAISuggestions', 'developerMode'],
+            ['theme', 'language', 'historyMode', 'operators', 'personalInfo', 'generalInstruction', 'instructions', 'showAISuggestions', 'developerMode', 'autoDeletionDays'],
             async (result) => {
               console.log('[settingsStore] Loaded from sync storage:', {
                 theme: result.theme,
@@ -255,7 +263,8 @@ export const useSettingsStore = create<SettingsStore>()(
                 generalInstruction: result.generalInstruction || '',
                 instructions: result.instructions || [],
                 showAISuggestions: result.showAISuggestions !== undefined ? result.showAISuggestions : true,
-                developerMode: result.developerMode || false
+                developerMode: result.developerMode || false,
+                autoDeletionDays: result.autoDeletionDays || 30
               });
               resolve();
             }
@@ -286,7 +295,8 @@ export const useSettingsStore = create<SettingsStore>()(
             language: state.language,
             historyMode: state.historyMode,
             showAISuggestions: state.showAISuggestions,
-            developerMode: state.developerMode
+            developerMode: state.developerMode,
+            autoDeletionDays: state.autoDeletionDays
           },
           personalInfo: state.personalInfo,
           instructions: {
@@ -365,13 +375,14 @@ export const useSettingsStore = create<SettingsStore>()(
 
         // Import general settings
         if (options.generalSettings && data.generalSettings) {
-          const { theme, language, historyMode, showAISuggestions, developerMode } = data.generalSettings;
+          const { theme, language, historyMode, showAISuggestions, developerMode, autoDeletionDays } = data.generalSettings;
           
           if (theme) state.setTheme(theme);
           if (language) await state.setLanguage(language);
           if (historyMode) state.setHistoryMode(historyMode);
           if (showAISuggestions !== undefined) state.setShowAISuggestions(showAISuggestions);
           if (developerMode !== undefined) state.setDeveloperMode(developerMode);
+          if (autoDeletionDays !== undefined) state.setAutoDeletionDays(autoDeletionDays);
         }
 
         // Import personal info

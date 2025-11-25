@@ -920,6 +920,8 @@ export default function MessageList() {
               isLoading={isLoading}
               generatingQuestionsForMessage={generatingQuestionsForMessage}
               isLastUserMessage={isLastUserMessage}
+              currentUrl={currentUrl}
+              favicon={siteFavicon}
             />
             );
           })

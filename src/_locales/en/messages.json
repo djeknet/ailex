@@ -30,7 +30,7 @@
     "message": "Send"
   },
   "messageInputPlaceholder": {
-    "message": "Type your message or select a command via /"
+    "message": "Type your message or select a command via /, for linking to tabs type @"
   },
   "operators": {
     "message": "Operators"
@@ -139,6 +139,12 @@
   },
   "historyModeSessionDesc": {
     "message": "History is deleted after closing the extension"
+  },
+  "autoDeletionDays": {
+    "message": "Delete chats older than, days"
+  },
+  "autoDeletionDaysDescription": {
+    "message": "Automatically delete chats older than the specified number of days (except chats in folders)"
   },
   "deleteHistory": {
     "message": "Delete chat history"
@@ -865,6 +871,9 @@
   },
   "selectElement": {
     "message": "Select element"
+  },
+  "attachBrowserTab": {
+    "message": "Browser tab"
   },
   "elementSelected": {
     "message": "Element selected"
@@ -2773,5 +2782,230 @@
   },
   "sitePrompt_developer_mozilla_article_3": {
     "message": "Are there more modern ways to solve this problem?"
+  },
+  "sitePrompt_tradingview_chart_3": {
+    "message": "Find chart patterns (head-shoulders, triangles, flags) and assess probability of execution."
+  },
+  "sitePrompt_tradingview_chart_4": {
+    "message": "Identify key support and resistance levels with entry/exit prices."
+  },
+  "sitePrompt_tradingview_chart_5": {
+    "message": "Are there divergences between price and indicators (RSI, MACD)? What does it mean?"
+  },
+  "sitePrompt_tradingview_chart_6": {
+    "message": "Build Fibonacci levels and indicate target correction/extension zones."
+  },
+  "sitePrompt_tradingview_chart_7": {
+    "message": "Analyze volumes: do they confirm the current price movement?"
+  },
+  "sitePrompt_tradingview_chart_8": {
+    "message": "What important news or events could affect this asset in the coming days?"
+  },
+  "sitePrompt_tradingview_chart_9": {
+    "message": "Find correlations with other assets (currencies, indices, commodities)."
+  },
+  "sitePrompt_tradingview_chart_10": {
+    "message": "Where to place stop-loss and take-profit based on the current situation?"
+  },
+  "sitePrompt_tradingview_chart_11": {
+    "message": "Calculate risk/reward ratio for potential entry points."
+  },
+  "sitePrompt_tradingview_chart_12": {
+    "message": "Compare current timeframe with higher timeframes: does the trend direction match?"
+  },
+  "sitePrompt_tradingview_chart_13": {
+    "message": "What candlestick patterns on the chart signal reversal or continuation?"
+  },
+  "sitePrompt_tradingview_chart_14": {
+    "message": "Compare this chart with historical similar situations: how did the price behave afterwards?"
+  },
+  "sitePrompt_tradingview_chart_15": {
+    "message": "Analyze asset seasonality: are there characteristic patterns for this time of year?"
+  },
+  "sitePrompt_threads_post_0": {
+    "message": "Check the facts from this thread: true or fake?"
+  },
+  "sitePrompt_threads_post_1": {
+    "message": "Find the original source of information from this post."
+  },
+  "sitePrompt_threads_post_2": {
+    "message": "Is this post part of a viral misinformation campaign?"
+  },
+  "sitePrompt_threads_post_3": {
+    "message": "Analyze the sentiment of the discussion in replies."
+  },
+  "sitePrompt_threads_post_4": {
+    "message": "Summarize the main arguments in this thread."
+  },
+  "sitePrompt_threads_post_5": {
+    "message": "What's the general consensus in the comments: agreement or debate?"
+  },
+  "sitePrompt_threads_post_6": {
+    "message": "Find other expert opinions on this topic."
+  },
+  "sitePrompt_threads_post_7": {
+    "message": "What's the context behind this post? What led to this discussion?"
+  },
+  "sitePrompt_threads_post_8": {
+    "message": "Find opposing viewpoints on this topic."
+  },
+  "sitePrompt_threads_post_9": {
+    "message": "Is this trending right now? What's the broader conversation?"
+  },
+  "sitePrompt_threads_post_10": {
+    "message": "Who are the key voices in this discussion?"
+  },
+  "sitePrompt_threads_post_11": {
+    "message": "If there are images: verify them through reverse image search."
+  },
+  "sitePrompt_threads_post_12": {
+    "message": "Analyze the attached media: is it authentic or manipulated?"
+  },
+  "sitePrompt_threads_post_13": {
+    "message": "Why is this post getting so much engagement?"
+  },
+  "sitePrompt_threads_post_14": {
+    "message": "Find similar viral posts on this topic from the past."
+  },
+  "sitePrompt_mail_google_email_0": {
+    "message": "Write a professional reply to this email considering the context."
+  },
+  "sitePrompt_mail_google_email_1": {
+    "message": "Compose a polite decline to this offer."
+  },
+  "sitePrompt_mail_google_email_2": {
+    "message": "Rephrase my draft more diplomatically/formally."
+  },
+  "sitePrompt_mail_google_email_3": {
+    "message": "Write a quick friendly response with gratitude."
+  },
+  "sitePrompt_mail_google_email_4": {
+    "message": "Briefly summarize the essence of the email and key points requiring response."
+  },
+  "sitePrompt_mail_google_email_5": {
+    "message": "Check the email tone: friendly, neutral, or aggressive?"
+  },
+  "sitePrompt_mail_google_email_6": {
+    "message": "Are there any hidden threats, deadlines, or important conditions in the email?"
+  },
+  "sitePrompt_mail_google_email_7": {
+    "message": "Check the email for signs of phishing or fraud."
+  },
+  "sitePrompt_mail_google_email_8": {
+    "message": "Fix grammar and improve the style of my draft."
+  },
+  "sitePrompt_mail_google_email_9": {
+    "message": "Make the email shorter while keeping key points (TL;DR version)."
+  },
+  "sitePrompt_mail_google_email_10": {
+    "message": "Highlight all deadlines, tasks, and action items."
+  },
+  "sitePrompt_mail_google_email_11": {
+    "message": "Create a checklist of tasks from this email."
+  },
+  "sitePrompt_mail_google_email_12": {
+    "message": "Find documents, links, or companies mentioned in the email."
+  },
+  "sitePrompt_mail_google_email_13": {
+    "message": "Prepare a brief background on the company/person from the email."
+  },
+  "sitePrompt_mail_google_email_14": {
+    "message": "Write a response to a customer complaint with apology and solution."
+  },
+  "sitePrompt_mail_google_email_15": {
+    "message": "Compose a reminder email about an unfulfilled promise (politely)."
+  },
+  "sitePrompt_outlook_live_email_0": {
+    "message": "Write a professional reply to this email considering the context."
+  },
+  "sitePrompt_outlook_live_email_1": {
+    "message": "Compose a polite decline to this offer."
+  },
+  "sitePrompt_outlook_live_email_2": {
+    "message": "Rephrase my draft more diplomatically/formally."
+  },
+  "sitePrompt_outlook_live_email_3": {
+    "message": "Write a quick friendly response with gratitude."
+  },
+  "sitePrompt_outlook_live_email_4": {
+    "message": "Briefly summarize the essence of the email and key points requiring response."
+  },
+  "sitePrompt_outlook_live_email_5": {
+    "message": "Check the email tone: friendly, neutral, or aggressive?"
+  },
+  "sitePrompt_outlook_live_email_6": {
+    "message": "Are there any hidden threats, deadlines, or important conditions in the email?"
+  },
+  "sitePrompt_outlook_live_email_7": {
+    "message": "Check the email for signs of phishing or fraud."
+  },
+  "sitePrompt_outlook_live_email_8": {
+    "message": "Fix grammar and improve the style of my draft."
+  },
+  "sitePrompt_outlook_live_email_9": {
+    "message": "Make the email shorter while keeping key points (TL;DR version)."
+  },
+  "sitePrompt_outlook_live_email_10": {
+    "message": "Highlight all deadlines, tasks, and action items."
+  },
+  "sitePrompt_outlook_live_email_11": {
+    "message": "Create a checklist of tasks from this email."
+  },
+  "sitePrompt_outlook_live_email_12": {
+    "message": "Find documents, links, or companies mentioned in the email."
+  },
+  "sitePrompt_outlook_live_email_13": {
+    "message": "Prepare a brief background on the company/person from the email."
+  },
+  "sitePrompt_outlook_live_email_14": {
+    "message": "Write a response to a customer complaint with apology and solution."
+  },
+  "sitePrompt_outlook_live_email_15": {
+    "message": "Compose a reminder email about an unfulfilled promise (politely)."
+  },
+  "sitePrompt_www_threads_post_0": {
+    "message": "Check the facts from this thread: true or fake?"
+  },
+  "sitePrompt_www_threads_post_1": {
+    "message": "Find the original source of information from this post."
+  },
+  "sitePrompt_www_threads_post_2": {
+    "message": "Is this post part of a viral misinformation campaign?"
+  },
+  "sitePrompt_www_threads_post_3": {
+    "message": "Analyze the sentiment of the discussion in replies."
+  },
+  "sitePrompt_www_threads_post_4": {
+    "message": "Summarize the main arguments in this thread."
+  },
+  "sitePrompt_www_threads_post_5": {
+    "message": "What's the general consensus in the comments: agreement or debate?"
+  },
+  "sitePrompt_www_threads_post_6": {
+    "message": "Find other expert opinions on this topic."
+  },
+  "sitePrompt_www_threads_post_7": {
+    "message": "What's the context behind this post? What led to this discussion?"
+  },
+  "sitePrompt_www_threads_post_8": {
+    "message": "Find opposing viewpoints on this topic."
+  },
+  "sitePrompt_www_threads_post_9": {
+    "message": "Is this trending right now? What's the broader conversation?"
+  },
+  "sitePrompt_www_threads_post_10": {
+    "message": "Who are the key voices in this discussion?"
+  },
+  "sitePrompt_www_threads_post_11": {
+    "message": "If there are images: verify them through reverse image search."
+  },
+  "sitePrompt_www_threads_post_12": {
+    "message": "Analyze the attached media: is it authentic or manipulated?"
+  },
+  "sitePrompt_www_threads_post_13": {
+    "message": "Why is this post getting so much engagement?"
+  },
+  "sitePrompt_www_threads_post_14": {
+    "message": "Find similar viral posts on this topic from the past."
   }
 }

@@ -27,6 +27,7 @@ export interface ExtensionSettings {
   maxFileSize?: number; // Maximum file size in MB (default: 10)
   maxImageSize?: number; // Maximum image size in MB (default: 5)
   developerMode?: boolean; // Enable developer mode with API logs panel
+  autoDeletionDays?: number; // Auto-delete chats older than N days (default: 30)
 }
 
 export interface PersonalInfo {

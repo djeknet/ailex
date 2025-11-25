@@ -1040,6 +1040,135 @@
       }
     }
   },
+  "www.threads.com": {
+    "category": "social",
+    "pageTypes": {
+      "post": {
+        "selectors": [
+          "article[role='article']",
+          "div[role='button']",
+          "[data-pressable-container='true']",
+          "meta[property='og:title']",
+          "h1"
+        ],
+        "prompts": [
+          {
+            "text": "Check the facts from this thread: true or fake?",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_0"
+          },
+          {
+            "text": "Find the original source of information from this post.",
+            "capabilities": [
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_1"
+          },
+          {
+            "text": "Is this post part of a viral misinformation campaign?",
+            "capabilities": [
+              "search",
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_2"
+          },
+          {
+            "text": "Analyze the sentiment of the discussion in replies.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_3"
+          },
+          {
+            "text": "Summarize the main arguments in this thread.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_4"
+          },
+          {
+            "text": "What's the general consensus in the comments: agreement or debate?",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_5"
+          },
+          {
+            "text": "Find other expert opinions on this topic.",
+            "capabilities": [
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_6"
+          },
+          {
+            "text": "What's the context behind this post? What led to this discussion?",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_7"
+          },
+          {
+            "text": "Find opposing viewpoints on this topic.",
+            "capabilities": [
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_8"
+          },
+          {
+            "text": "Is this trending right now? What's the broader conversation?",
+            "capabilities": [
+              "search",
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_9"
+          },
+          {
+            "text": "Who are the key voices in this discussion?",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_10"
+          },
+          {
+            "text": "If there are images: verify them through reverse image search.",
+            "capabilities": [
+              "vision",
+              "search",
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_11"
+          },
+          {
+            "text": "Analyze the attached media: is it authentic or manipulated?",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_12"
+          },
+          {
+            "text": "Why is this post getting so much engagement?",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_www_threads_post_13"
+          },
+          {
+            "text": "Find similar viral posts on this topic from the past.",
+            "capabilities": [
+              "search"
+            ],
+            "textKey": "sitePrompt_www_threads_post_14"
+          }
+        ]
+      }
+    }
+  },
   "wildberries.ru": {
     "category": "ecommerce",
     "pageTypes": {
@@ -1227,11 +1356,13 @@
       "chart": {
         "selectors": [
           "title",
-          "meta[property='og:title']"
+          "meta[property='og:title']",
+          "#header-toolbar-symbol-search",
+          ".chart-container"
         ],
         "prompts": [
           {
-            "text": "Проанализируй график: какой тренд и ключевые уровни?",
+            "text": "Analyze the chart: what's the trend and key levels?",
             "capabilities": [
               "vision",
               "context"
@@ -1239,7 +1370,7 @@
             "textKey": "sitePrompt_tradingview_chart_0"
           },
           {
-            "text": "Найди мнения трейдеров об этом активе.",
+            "text": "Find traders' opinions about this asset.",
             "capabilities": [
               "context",
               "search"
@@ -1247,12 +1378,378 @@
             "textKey": "sitePrompt_tradingview_chart_1"
           },
           {
-            "text": "Какие технические индикаторы сигналят сейчас?",
+            "text": "What technical indicators are signaling now?",
             "capabilities": [
               "vision",
               "context"
             ],
             "textKey": "sitePrompt_tradingview_chart_2"
+          },
+          {
+            "text": "Find chart patterns (head-shoulders, triangles, flags) and assess probability of execution.",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_3"
+          },
+          {
+            "text": "Identify key support and resistance levels with entry/exit prices.",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_4"
+          },
+          {
+            "text": "Are there divergences between price and indicators (RSI, MACD)? What does it mean?",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_5"
+          },
+          {
+            "text": "Build Fibonacci levels and indicate target correction/extension zones.",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_6"
+          },
+          {
+            "text": "Analyze volumes: do they confirm the current price movement?",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_7"
+          },
+          {
+            "text": "What important news or events could affect this asset in the coming days?",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_8"
+          },
+          {
+            "text": "Find correlations with other assets (currencies, indices, commodities).",
+            "capabilities": [
+              "search",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_9"
+          },
+          {
+            "text": "Where to place stop-loss and take-profit based on the current situation?",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_10"
+          },
+          {
+            "text": "Calculate risk/reward ratio for potential entry points.",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_11"
+          },
+          {
+            "text": "Compare current timeframe with higher timeframes: does the trend direction match?",
+            "capabilities": [
+              "vision",
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_12"
+          },
+          {
+            "text": "What candlestick patterns on the chart signal reversal or continuation?",
+            "capabilities": [
+              "vision",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_13"
+          },
+          {
+            "text": "Compare this chart with historical similar situations: how did the price behave afterwards?",
+            "capabilities": [
+              "vision",
+              "search",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_14"
+          },
+          {
+            "text": "Analyze asset seasonality: are there characteristic patterns for this time of year?",
+            "capabilities": [
+              "search",
+              "context"
+            ],
+            "textKey": "sitePrompt_tradingview_chart_15"
+          }
+        ]
+      }
+    }
+  },
+  "mail.google.com": {
+    "category": "productivity",
+    "pageTypes": {
+      "email": {
+        "selectors": [
+          "div[role='main']",
+          ".h7",
+          "[data-message-id]",
+          ".a3s.aiL",
+          "h2.hP"
+        ],
+        "prompts": [
+          {
+            "text": "Write a professional reply to this email considering the context.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_0"
+          },
+          {
+            "text": "Compose a polite decline to this offer.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_1"
+          },
+          {
+            "text": "Rephrase my draft more diplomatically/formally.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_2"
+          },
+          {
+            "text": "Write a quick friendly response with gratitude.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_3"
+          },
+          {
+            "text": "Briefly summarize the essence of the email and key points requiring response.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_4"
+          },
+          {
+            "text": "Check the email tone: friendly, neutral, or aggressive?",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_5"
+          },
+          {
+            "text": "Are there any hidden threats, deadlines, or important conditions in the email?",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_6"
+          },
+          {
+            "text": "Check the email for signs of phishing or fraud.",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_mail_google_email_7"
+          },
+          {
+            "text": "Fix grammar and improve the style of my draft.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_8"
+          },
+          {
+            "text": "Make the email shorter while keeping key points (TL;DR version).",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_9"
+          },
+          {
+            "text": "Highlight all deadlines, tasks, and action items.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_10"
+          },
+          {
+            "text": "Create a checklist of tasks from this email.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_11"
+          },
+          {
+            "text": "Find documents, links, or companies mentioned in the email.",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_mail_google_email_12"
+          },
+          {
+            "text": "Prepare a brief background on the company/person from the email.",
+            "capabilities": [
+              "search"
+            ],
+            "textKey": "sitePrompt_mail_google_email_13"
+          },
+          {
+            "text": "Write a response to a customer complaint with apology and solution.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_14"
+          },
+          {
+            "text": "Compose a reminder email about an unfulfilled promise (politely).",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_mail_google_email_15"
+          }
+        ]
+      }
+    }
+  },
+  "outlook.live.com": {
+    "category": "productivity",
+    "pageTypes": {
+      "email": {
+        "selectors": [
+          "[role='main']",
+          "[role='heading']",
+          ".ReadingPaneContents",
+          "[aria-label='Message body']",
+          "div[class*='MessageBody']"
+        ],
+        "prompts": [
+          {
+            "text": "Write a professional reply to this email considering the context.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_0"
+          },
+          {
+            "text": "Compose a polite decline to this offer.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_1"
+          },
+          {
+            "text": "Rephrase my draft more diplomatically/formally.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_2"
+          },
+          {
+            "text": "Write a quick friendly response with gratitude.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_3"
+          },
+          {
+            "text": "Briefly summarize the essence of the email and key points requiring response.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_4"
+          },
+          {
+            "text": "Check the email tone: friendly, neutral, or aggressive?",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_5"
+          },
+          {
+            "text": "Are there any hidden threats, deadlines, or important conditions in the email?",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_6"
+          },
+          {
+            "text": "Check the email for signs of phishing or fraud.",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_7"
+          },
+          {
+            "text": "Fix grammar and improve the style of my draft.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_8"
+          },
+          {
+            "text": "Make the email shorter while keeping key points (TL;DR version).",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_9"
+          },
+          {
+            "text": "Highlight all deadlines, tasks, and action items.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_10"
+          },
+          {
+            "text": "Create a checklist of tasks from this email.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_11"
+          },
+          {
+            "text": "Find documents, links, or companies mentioned in the email.",
+            "capabilities": [
+              "context",
+              "search"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_12"
+          },
+          {
+            "text": "Prepare a brief background on the company/person from the email.",
+            "capabilities": [
+              "search"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_13"
+          },
+          {
+            "text": "Write a response to a customer complaint with apology and solution.",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_14"
+          },
+          {
+            "text": "Compose a reminder email about an unfulfilled promise (politely).",
+            "capabilities": [
+              "context"
+            ],
+            "textKey": "sitePrompt_outlook_live_email_15"
           }
         ]
       }

@@ -57,6 +57,8 @@ export const storageAPI = {
   cacheModels: (operator: string, models: any[]) => 
     sendMessage('CACHE_MODELS', { operator, models }),
   getCachedModels: (operator: string) => 
-    sendMessage('GET_CACHED_MODELS', { operator })
+    sendMessage('GET_CACHED_MODELS', { operator }),
+  clearOperatorCache: (operator: string) => 
+    sendMessage('CLEAR_OPERATOR_CACHE', { operator })
 };
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { useSitePromptsStore } from '@shared/stores/sitePromptsStore';
+import { isSystemPage } from '@shared/utils/pageUtils';
 import { SitePrompt } from '@shared/types/sitePrompts';
 import { Button } from '@/ui/components/ui/button';
 import { 
@@ -53,14 +54,15 @@ export default function SitePromptsGrid({ onPromptSelect, currentUrl, favicon }:
     );
   }
 
-  if (!currentSitePrompts || currentSitePrompts.length === 0) {
+  // Don't show prompts on system pages or if there are no prompts
+  if (!currentUrl || isSystemPage(currentUrl) || !currentSitePrompts || currentSitePrompts.length === 0) {
     return null;
   }
 
   return (
     <div className="w-full">
       {/* Заголовок */}
-      <h3 className="text-sm font-medium text-foreground/70 mb-3 px-1">
+      <h3 className="text-sm font-medium text-foreground/70 mb-3 px-1" style={{ paddingLeft: '16px' }}>
         {t('sitePromptsSectionTitle') || 'You might be interested in:'}
       </h3>
 

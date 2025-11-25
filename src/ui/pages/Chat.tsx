@@ -16,7 +16,7 @@ interface PendingContextCommand {
 
 export default function Chat() {
   const { t } = useTranslation();
-  const { operators, setActiveView, historyMode } = useSettingsStore();
+  const { operators, setActiveView, historyMode, autoDeletionDays } = useSettingsStore();
   const chatStore = useChatStore();
   const [initialized, setInitialized] = useState(false);
   const [currentSite, setCurrentSite] = useState<string>('');
@@ -288,6 +288,11 @@ export default function Chat() {
 
   const initializeChat = async () => {
     try {
+      // Delete old chats based on settings
+      if (autoDeletionDays && autoDeletionDays > 0) {
+        await chatStore.deleteOldChats(autoDeletionDays);
+      }
+
       // Get current tab
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       const site = tab.url ? new URL(tab.url).hostname : 'unknown';

@@ -41,6 +41,8 @@ interface MessageItemProps {
   isLoading?: boolean;
   generatingQuestionsForMessage?: string | null;
   isLastUserMessage?: boolean;
+  currentUrl?: string;
+  favicon?: string | null;
 }
 
 export default function MessageItem({
@@ -62,7 +64,9 @@ export default function MessageItem({
   operators = [],
   isLoading = false,
   generatingQuestionsForMessage,
-  isLastUserMessage = false
+  isLastUserMessage = false,
+  currentUrl,
+  favicon
 }: MessageItemProps) {
   const branches = messageBranches[message.id] || [];
   const hasBranches = branches.length > 0;
@@ -100,6 +104,8 @@ export default function MessageItem({
       operators={operators}
       isLoading={isLoading}
       generatingQuestionsForMessage={generatingQuestionsForMessage}
+      currentUrl={currentUrl}
+      favicon={favicon}
     />
   );
 }
