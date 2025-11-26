@@ -76,11 +76,7 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
     // Фильтруем скрытые инструменты для UI
     let filtered = availableTools.filter(tool => !tool.hiddenFromUI);
     
-    console.log('[toolsStore] getFilteredTools:', {
-      totalTools: availableTools.length,
-      afterHiddenFilter: filtered.length,
-      currentUrl
-    });
+    // Убрали избыточное логирование - теперь логируется только когда URL меняется
     
     if (!currentUrl) {
       return filtered;
@@ -88,11 +84,6 @@ export const useToolsStore = create<ToolsStore>((set, get) => ({
     
     // Фильтруем по URL паттерну
     const result = toolsService.filterToolsByUrl(filtered, currentUrl);
-    
-    console.log('[toolsStore] After URL filter:', {
-      before: filtered.length,
-      after: result.length
-    });
     
     return result;
   },

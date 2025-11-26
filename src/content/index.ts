@@ -8,25 +8,37 @@ import * as domFunctions from './domFunctions';
 import { showFieldLoader, hideFieldLoader, getSavedActiveElement, clearSavedActiveElement } from './fieldLoader';
 import { showToast } from './toast';
 import { showCustomInstructionPrompt, hideCustomInstructionPrompt, getTargetElement } from './customInstructionPrompt';
-// import { initSiteWidget } from './siteWidget'; // Temporarily disabled
+import { initSiteWidget } from './siteWidget';
 
 // Content script entry point
 
 console.log('AiLex content script loaded');
 
-// TODO: Temporarily disabled - Site widget feature
-// Will be re-enabled when extension supports standalone page for opening prompts
-/*
-// Initialize site widget after page load
+// Initialize site widget after page load (if enabled in settings)
+const initializeWidget = async () => {
+  try {
+    const result = await chrome.storage.sync.get(['showSiteWidget']);
+    const showSiteWidget = result.showSiteWidget !== undefined ? result.showSiteWidget : true;
+    
+    if (showSiteWidget) {
+      console.log('[content] Initializing site widget...');
+      setTimeout(() => initSiteWidget(), 1000);
+    } else {
+      console.log('[content] Site widget disabled in settings');
+    }
+  } catch (error) {
+    console.error('[content] Error checking widget settings:', error);
+  }
+};
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => initSiteWidget(), 1000);
+    initializeWidget();
   });
 } else {
   // DOM already loaded
-  setTimeout(() => initSiteWidget(), 1000);
+  initializeWidget();
 }
-*/
 
 // Слушаем сообщения от background/popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -199,6 +211,30 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           sendResponse({ success: true });
           break;
 
+
+          case 'CAPTURE_SCREENSHOT':
+          // Делаем скриншот всей видимой части страницы
+          try {
+            console.log('[content] Capturing screenshot...');
+            const screenshot = await chrome.runtime.sendMessage({
+              type: 'CAPTURE_SCREENSHOT',
+              data: { tabId: message.data.tabId } // Передаем tabId в background
+            });
+            
+            if (screenshot?.success) {
+              console.log('[content] Screenshot captured successfully');
+              sendResponse({ success: true, data: screenshot.data });
+            } else {
+              console.error('[content] Screenshot capture failed:', screenshot?.error);
+              sendResponse({ success: false, error: screenshot?.error || 'Failed to capture screenshot' });
+            }
+          } catch (error) {
+            console.error('[content] Error capturing screenshot:', error);
+            sendResponse({ success: false, error: error instanceof Error ? error.message : 'Unknown error' });
+          }
+          return true; // Асинхронный ответ
+          break;
+
         case 'GET_ELEMENT_CONTENT':
           const element = getElementByXPath(message.data.xpath);
           if (element) {
@@ -266,6 +302,58 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
           } catch (error) {
             console.error('[content] Error detecting page type:', error);
             sendResponse({ success: false, error: 'Failed to detect page type' });
+          }
+          break;
+
+        case 'GET_PDF_DATA':
+          try {
+            const pdfUrl = message.data?.url;
+            
+            if (!pdfUrl) {
+              sendResponse({ success: false, error: 'No PDF URL provided' });
+              break;
+            }
+            
+            console.log('[content] Fetching PDF from:', pdfUrl);
+            
+            // Fetch PDF as blob
+            const response = await fetch(pdfUrl);
+            
+            if (!response.ok) {
+              throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+            }
+            
+            const blob = await response.blob();
+            
+            // Convert blob to base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64data = reader.result as string;
+              // Remove data URL prefix
+              const base64 = base64data.split(',')[1] || base64data;
+              
+              console.log('[content] PDF fetched successfully, size:', blob.size, 'bytes');
+              sendResponse({ 
+                success: true, 
+                data: base64, 
+                mimeType: 'application/pdf',
+                size: blob.size
+              });
+            };
+            reader.onerror = () => {
+              console.error('[content] Error reading PDF blob');
+              sendResponse({ success: false, error: 'Failed to read PDF data' });
+            };
+            reader.readAsDataURL(blob);
+            
+            // Return true to indicate async response
+            return true;
+          } catch (error) {
+            console.error('[content] Error fetching PDF:', error);
+            sendResponse({ 
+              success: false, 
+              error: error instanceof Error ? error.message : 'Failed to fetch PDF' 
+            });
           }
           break;
 

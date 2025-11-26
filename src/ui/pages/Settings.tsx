@@ -1,20 +1,31 @@
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/components/ui/tabs';
-import { Bot, SlidersHorizontal, UserCircle, ScrollText } from 'lucide-react';
+import { Button } from '@/ui/components/ui/button';
+import { Bot, SlidersHorizontal, UserCircle, ScrollText, ArrowLeft } from 'lucide-react';
 import OperatorsTab from '../components/settings/OperatorsTab';
 import GeneralTab from '../components/settings/GeneralTab';
 import PersonalInfoTab from '../components/settings/PersonalInfoTab';
 import InstructionsTab from '../components/settings/InstructionsTab';
 
-export default function Settings() {
+interface SettingsProps {
+  onBack?: () => void;
+}
+
+export default function Settings({ onBack }: SettingsProps = {}) {
   const { t } = useTranslation();
   const { activeSettingsTab, setActiveSettingsTab } = useSettingsStore();
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
+      <div className="p-4 border-b flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('settings')}</h1>
+        {onBack && (
+          <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t('back')}
+          </Button>
+        )}
       </div>
       
       <div className="flex-1 overflow-auto p-4">

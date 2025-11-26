@@ -132,16 +132,22 @@ export class LMStudioProvider implements AIProvider {
         const toolCalls: ToolCall[] = [];
         let currentToolCallIndex = -1;
         let currentToolCall: any = {};
+        let buffer = ''; // Буфер для неполных строк
 
         try {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n').filter(line => line.trim() !== '');
+            const chunk = decoder.decode(value, { stream: true }); // Добавлен stream: true
+            buffer += chunk; // Добавляем к буферу
+            const lines = buffer.split('\n');
+            
+            // Последняя строка может быть неполной, оставляем в буфере
+            buffer = lines.pop() || '';
 
             for (const line of lines) {
+              if (line.trim() === '') continue;
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
                 if (data === '[DONE]') continue;

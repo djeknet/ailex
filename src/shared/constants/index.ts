@@ -42,7 +42,6 @@ const OPERATOR_PREFIX_MAP: Record<string, string> = {
 // Helper to get detailed model information
 export function getModelInfo(modelName: string, operator?: string): ModelData | null {
   if (!modelName) {
-    console.log('[getModelInfo] No model name provided');
     return null;
   }
   
@@ -60,31 +59,15 @@ export function getModelInfo(modelName: string, operator?: string): ModelData | 
     return modelInfoCache.get(cacheKey) || null;
   }
   
-  console.log('[getModelInfo] Searching for model:', {
-    originalModelName: modelName,
-    operator,
-    mappedPrefix: operator ? OPERATOR_PREFIX_MAP[operator] : undefined,
-    searchId,
-    databaseSize: MODELS_DATABASE.length
-  });
   
   // Try exact match
   let modelData = MODELS_DATABASE.find(m => m.id === searchId);
   
   if (modelData) {
-    console.log('[getModelInfo] ✅ Found exact match:', {
-      searchId,
-      foundId: modelData.id,
-      name: modelData.name,
-      contextLength: modelData.context_length,
-      hasArchitecture: !!modelData.architecture,
-      hasPricing: !!modelData.pricing
-    });
     modelInfoCache.set(cacheKey, modelData);
     return modelData;
   }
   
-  console.log('[getModelInfo] ❌ No exact match, trying partial match...');
   
   // Try partial match if not found
   const modelNameOnly = modelName.split('/').pop() || modelName;
@@ -96,13 +79,6 @@ export function getModelInfo(modelName: string, operator?: string): ModelData | 
   });
   
   if (modelData) {
-    console.log('[getModelInfo] ✅ Found partial match (exact name):', {
-      searchId,
-      modelNameOnly,
-      foundId: modelData.id,
-      name: modelData.name,
-      contextLength: modelData.context_length
-    });
     modelInfoCache.set(cacheKey, modelData);
     return modelData;
   }
@@ -134,13 +110,6 @@ export function getModelInfo(modelName: string, operator?: string): ModelData | 
   });
   
   if (modelData) {
-    console.log('[getModelInfo] ✅ Found fuzzy match:', {
-      searchId,
-      modelNameOnly,
-      foundId: modelData.id,
-      name: modelData.name,
-      contextLength: modelData.context_length
-    });
     modelInfoCache.set(cacheKey, modelData);
     return modelData;
   }

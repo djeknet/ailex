@@ -1,4 +1,4 @@
-export type AIOperator = 'openai' | 'anthropic' | 'openrouter' | 'grok' | 'gemini' | 'lmstudio';
+export type AIOperator = 'openai' | 'anthropic' | 'openrouter' | 'grok' | 'gemini' | 'lmstudio' | 'deepseek';
 
 export interface AIModel {
   id: string;
@@ -63,6 +63,7 @@ export interface AIResponse {
   finish_reason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
   images?: GeneratedImage[]; // Сгенерированные изображения
   response_id?: string; // ID ответа от OpenAI Responses API для редактирования
+  reasoning_content?: string; // Цепочка рассуждений (DeepSeek reasoner)
 }
 
 // Image Generation Types

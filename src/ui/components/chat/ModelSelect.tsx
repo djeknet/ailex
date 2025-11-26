@@ -80,12 +80,9 @@ export default function ModelSelect() {
 
   // Custom filter function - search by word start + advanced filters
   const filterModels = useCallback((model: any, operator: string) => {
-    console.log(`[ModelSelect] 🔍 filterModels called for ${model.name} (${operator})`);
-    console.log('[ModelSelect] 📋 matchesFilters function:', matchesFilters);
     
     // Apply advanced filters first
     const matchesAdvanced = matchesFilters(model, operator as AIOperator);
-    console.log(`[ModelSelect] ${matchesAdvanced ? '✅' : '❌'} Advanced filter result for ${model.name}:`, matchesAdvanced);
     
     if (!matchesAdvanced) {
       return false;
@@ -93,7 +90,6 @@ export default function ModelSelect() {
     
     // Then apply search query
     if (!searchQuery) {
-      console.log(`[ModelSelect] ✅ ${model.name}: No search query, passes`);
       return true;
     }
     
@@ -114,13 +110,11 @@ export default function ModelSelect() {
       operatorName.includes(queryWord)
     );
     
-    console.log(`[ModelSelect] ${matchesSearch ? '✅' : '❌'} Search filter result for ${model.name}:`, matchesSearch);
     return matchesSearch;
   }, [matchesFilters, searchQuery]);
 
   // Build favorites group - memoized to prevent recalculation on every render
   const favoriteModels = useMemo(() => {
-    console.log('[ModelSelect] 🔄 Recalculating favoriteModels with filterModels:', filterModels);
     const favorites: Array<{ operator: AIOperator; model: any; config: AIOperatorConfig }> = [];
     configuredOperators.forEach(config => {
       config.models?.forEach(model => {
@@ -129,7 +123,6 @@ export default function ModelSelect() {
         }
       });
     });
-    console.log('[ModelSelect] ✨ favoriteModels result:', favorites.length, 'models');
     return favorites;
   }, [configuredOperators, isFavorite, filterModels]);
 

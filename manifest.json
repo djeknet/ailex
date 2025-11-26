@@ -31,6 +31,7 @@
         "src/ui/webcam/webcam.js",
         "src/ui/microphone/index.html",
         "src/ui/microphone/microphone.js",
+        "src/ui/fullscreen/index.html",
         "src/content/siteWidget.css",
         "icons/icon-48.png"
       ],
@@ -55,7 +56,8 @@
     "sidePanel",
     "unlimitedStorage",
     "scripting",
-    "contextMenus"
+    "contextMenus",
+    "webRequest"
   ],
   "host_permissions": [
     "<all_urls>"

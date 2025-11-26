@@ -9,7 +9,8 @@
   pointer-events: all;
 }
 
-#ailex-site-widget:hover {
+#ailex-site-widget:hover,
+#ailex-site-widget.active {
   right: 0;
 }
 
@@ -36,6 +37,45 @@
   width: 32px;
   height: 32px;
   object-fit: contain;
+}
+
+/* Close button under widget */
+#ailex-widget-close-btn {
+  position: fixed;
+  right: -25px;
+  top: calc(70% + 40px); /* 48px высота виджета + 5px отступ */
+  transform: translateY(-50%);
+  z-index: 2147483647;
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  border-radius: 50%; /* Круглая кнопка */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  padding: 0;
+}
+
+#ailex-widget-close-btn.visible {
+  right: 0;
+  opacity: 1;
+  pointer-events: all;
+}
+
+#ailex-widget-close-btn:hover {
+  opacity: 0.7;
+}
+
+#ailex-widget-close-btn svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 #ailex-prompts-panel {

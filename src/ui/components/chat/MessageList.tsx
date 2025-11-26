@@ -31,7 +31,11 @@ import SitePromptsGrid from './SitePromptsGrid';
 import ToolExecutionDisplay from './ToolExecutionDisplay';
 import type { AIOperatorConfig } from '@shared/types/extension';
 
-export default function MessageList() {
+interface MessageListProps {
+  isFullscreen?: boolean;
+}
+
+export default function MessageList({ isFullscreen = false }: MessageListProps) {
   const { t } = useTranslation();
   const { operators } = useSettingsStore();
   const { 
@@ -833,15 +837,18 @@ export default function MessageList() {
           
           <div className="w-full max-w-4xl space-y-6">
             {/* Site Prompts Grid - контекстные подсказки для сайтов */}
-            <SitePromptsGrid
-              currentUrl={currentUrl}
-              favicon={siteFavicon}
-              onPromptSelect={sendSitePrompt}
-            />
+            {!isFullscreen && (
+              <SitePromptsGrid
+                currentUrl={currentUrl}
+                favicon={siteFavicon}
+                onPromptSelect={sendSitePrompt}
+              />
+            )}
             
             {/* Tools Grid - пользовательские инструменты */}
             <ToolsGrid 
               currentUrl={currentUrl}
+              isFullscreen={isFullscreen}
               onToolSelect={async (tool) => {
                 // Если инструмент требует контекст страницы, автоматически включаем его
                 let pageContext: string | undefined;

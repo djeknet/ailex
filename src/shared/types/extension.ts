@@ -24,6 +24,7 @@ export interface ExtensionSettings {
   generalInstruction?: string;
   instructions: Instruction[];
   showAISuggestions: boolean; // Show AI-generated follow-up questions in responses
+  showSiteWidget: boolean; // Show site widget with context-aware prompts
   maxFileSize?: number; // Maximum file size in MB (default: 10)
   maxImageSize?: number; // Maximum image size in MB (default: 5)
   developerMode?: boolean; // Enable developer mode with API logs panel

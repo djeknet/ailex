@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { ChatMessage, MessageAttachment } from '@shared/types/database';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { useToolsStore } from '@shared/stores/toolsStore';
-import { Copy, Check, RefreshCcw } from 'lucide-react';
+import { useChatStore } from '@shared/stores/chatStore';
+import { Copy, Check, RefreshCcw, Pencil } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
 import {
   Tooltip,
@@ -48,6 +49,7 @@ export default function UserMessage({
   const { t } = useTranslation();
   const [viewerImage, setViewerImage] = useState<{base64: string; name: string; mimeType?: string} | null>(null);
   const { getFilteredTools, loadTools } = useToolsStore();
+  const { setEditingMessage } = useChatStore();
 
   useEffect(() => {
     loadTools();
@@ -57,6 +59,16 @@ export default function UserMessage({
     if (onCopy) {
       onCopy(message.text, message.id, true);
     }
+  };
+
+  const handleEditClick = () => {
+    // Подготовить данные для редактирования
+    const editData = {
+      text: message.text,
+      attachments: getAttachments()
+    };
+    
+    setEditingMessage(editData);
   };
   
   // Parse text and replace commands with tool badges
@@ -173,55 +185,12 @@ export default function UserMessage({
         />
       )}
 
-      {/* User message with hover copy button */}
+      {/* User message */}
       <div 
-        className="relative flex items-start gap-2 group"
+        className="relative group"
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        {/* Action buttons - appear on hover to the left */}
-        <div className="flex items-center gap-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`h-8 w-8 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-                  onClick={handleCopyClick}
-                >
-                  {isCopied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('copy')}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          {/* Retry button - only for last user message without response */}
-          {isLastUserMessage && onRetry && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={`h-8 w-8 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-                    onClick={() => onRetry(message.id)}
-                  >
-                    <RefreshCcw className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t('retryRequest')}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
-
-        {/* User message */}
         <div className="flex flex-col gap-2">
           {/* Action label and quoted message */}
           {message.actionLabel && (message.replyTo || message.quotedText) && (
@@ -316,6 +285,63 @@ export default function UserMessage({
                 )}
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Кнопки под сообщением справа */}
+        <div className="flex items-center justify-end gap-1 mt-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-7 w-7 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                  onClick={handleCopyClick}
+                >
+                  {isCopied ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('copy')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-7 w-7 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                  onClick={handleEditClick}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('edit')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {isLastUserMessage && onRetry && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-7 w-7 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                    onClick={() => onRetry(message.id)}
+                  >
+                    <RefreshCcw className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('retryRequest')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>

@@ -15,9 +15,10 @@ import { HelpCircle } from 'lucide-react';
 interface ToolsGridProps {
   onToolSelect: (tool: Tool) => void;
   currentUrl?: string;
+  isFullscreen?: boolean;
 }
 
-export default function ToolsGrid({ onToolSelect, currentUrl }: ToolsGridProps) {
+export default function ToolsGrid({ onToolSelect, currentUrl, isFullscreen = false }: ToolsGridProps) {
   const { t } = useTranslation();
   const { getFilteredTools, loadTools, setCurrentUrl, isLoading } = useToolsStore();
   const { personalInfo } = useSettingsStore();
@@ -31,7 +32,7 @@ export default function ToolsGrid({ onToolSelect, currentUrl }: ToolsGridProps) 
   const allTools = getFilteredTools();
   
   // Дополнительная фильтрация по URL прямо здесь
-  const tools = currentUrl 
+  let tools = currentUrl 
     ? allTools.filter(tool => {
         if (!tool.urlPattern) return true;
         const matches = currentUrl.startsWith(tool.urlPattern);
@@ -44,6 +45,11 @@ export default function ToolsGrid({ onToolSelect, currentUrl }: ToolsGridProps) 
         return matches;
       })
     : allTools;
+  
+  // В fullscreen режиме показываем только пользовательские инструменты
+  if (isFullscreen) {
+    tools = tools.filter(tool => !tool.isBuiltIn);
+  }
   
   if (isLoading) {
     return (

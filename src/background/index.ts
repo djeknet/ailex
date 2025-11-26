@@ -8,6 +8,31 @@ import { PersonalInfo } from '@shared/types/extension';
 
 console.log('AiLex background service worker initialized');
 
+// ============================================================================
+// YouTube Transcript URL Interception
+// ============================================================================
+
+// Экспортируем в globalThis для доступа из messageHandler
+(globalThis as any).lastWorkingSubtitleUrl = null;
+
+// Перехватываем XHR запросы к timedtext API для получения рабочего URL
+chrome.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    // Ищем запросы с актуальными параметрами плеера
+    if (
+      details.url.includes('timedtext') &&
+      details.url.includes('cplayer=') &&
+      details.type === 'xmlhttprequest'
+    ) {
+      (globalThis as any).lastWorkingSubtitleUrl = details.url;
+      console.log('[Background] Captured working subtitle URL:', details.url);
+    }
+  },
+  { urls: ['*://*.youtube.com/api/timedtext*'] }
+);
+
+console.log('[Background] YouTube transcript URL interceptor initialized');
+
 // Открытие sidepanel при клике на иконку расширения
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
@@ -281,6 +306,20 @@ async function createContextMenu(language: string) {
         });
       });
     }
+
+    // Добавляем пункт для открытия полноэкранного режима (доступен всегда)
+    chrome.contextMenus.create({
+      id: 'open_fullscreen',
+      title: getTranslation('openFullscreen'),
+      contexts: ['page', 'selection', 'editable']
+    });
+
+    // Добавляем пункт для иконки расширения в тулбаре
+    chrome.contextMenus.create({
+      id: 'open_fullscreen_action',
+      title: getTranslation('openFullscreen'),
+      contexts: ['action']
+    });
 
     console.log('[Background] Context menu created successfully');
   });

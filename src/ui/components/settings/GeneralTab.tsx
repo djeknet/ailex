@@ -16,7 +16,7 @@ import ImportDialog from './ImportDialog';
 
 export default function GeneralTab() {
   const { t } = useTranslation();
-  const { theme, language, historyMode, showAISuggestions, developerMode, autoDeletionDays, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setDeveloperMode, setAutoDeletionDays, exportSettings } = useSettingsStore();
+  const { theme, language, historyMode, showAISuggestions, showSiteWidget, developerMode, autoDeletionDays, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setShowSiteWidget, setDeveloperMode, setAutoDeletionDays, exportSettings } = useSettingsStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -185,6 +185,20 @@ export default function GeneralTab() {
         </div>
         <p className="text-sm text-muted-foreground">
           {t('aiSuggestionsDescription')}
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="site-widget">{t('siteWidget')}</Label>
+          <Switch 
+            id="site-widget"
+            checked={showSiteWidget !== undefined ? showSiteWidget : true}
+            onCheckedChange={setShowSiteWidget}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {t('siteWidgetDescription')}
         </p>
       </div>
 

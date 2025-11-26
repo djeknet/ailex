@@ -652,23 +652,31 @@ function ChatItem({
 
         {/* Badges */}
         <div className="flex items-center gap-1 flex-wrap">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge
-                  variant="outline"
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSiteClick(chat.site);
-                  }}
-                >
-                  {chat.site}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>{t('openSite')}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* Показывать badge с сайтом только для реальных URL */}
+          {chat.site && 
+           chat.site !== 'unknown' && 
+           chat.site !== 'fullscreen' && 
+           !chat.site.startsWith('chrome') && 
+           !chat.site.startsWith('about') &&
+           !chat.site.startsWith('file') && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSiteClick(chat.site);
+                    }}
+                  >
+                    {chat.site}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>{t('openSite')}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
           {operators.length > 0 && (
             <TooltipProvider>

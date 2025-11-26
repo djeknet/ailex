@@ -154,6 +154,18 @@ function createWidget(prompts: SitePrompt[], favicon: string | null): HTMLElemen
     </div>
   `;
 
+  // Close button
+  const closeBtn = document.createElement('button');
+  closeBtn.id = 'ailex-widget-close-btn';
+  closeBtn.className = 'ailex-widget-close-btn';
+  closeBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="15" y1="9" x2="9" y2="15"></line>
+      <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+  `;
+
   // Prompts panel
   const panel = document.createElement('div');
   panel.className = 'ailex-prompts-panel';
@@ -194,6 +206,7 @@ function createWidget(prompts: SitePrompt[], favicon: string | null): HTMLElemen
   });
 
   document.body.appendChild(container);
+  document.body.appendChild(closeBtn);
   document.body.appendChild(panel);
 
   return container;
@@ -242,14 +255,49 @@ export async function initSiteWidget() {
 
 // Setup event listeners
 function setupEventListeners(prompts: SitePrompt[]) {
+  const widget = document.getElementById('ailex-site-widget');
   const toggle = document.getElementById('ailex-widget-toggle');
   const panel = document.getElementById('ailex-prompts-panel');
   const closeBtn = document.getElementById('ailex-panel-close');
   const list = document.getElementById('ailex-prompts-list');
+  const widgetCloseBtn = document.getElementById('ailex-widget-close-btn');
 
-  if (!toggle || !panel || !closeBtn || !list) {
+  if (!widget || !toggle || !panel || !closeBtn || !list || !widgetCloseBtn) {
     return;
   }
+
+  let hideTimeout: number | null = null;
+
+  // Show widget and close button on hover
+  const showWidget = () => {
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      hideTimeout = null;
+    }
+    widget.classList.add('active');
+    widgetCloseBtn.classList.add('visible');
+  };
+
+  // Hide widget with delay
+  const hideWidget = () => {
+    hideTimeout = window.setTimeout(() => {
+      widget.classList.remove('active');
+      widgetCloseBtn.classList.remove('visible');
+      panel.classList.remove('active');
+    }, 500); // 500ms задержка
+  };
+
+  // Widget hover events
+  widget.addEventListener('mouseenter', showWidget);
+  widget.addEventListener('mouseleave', hideWidget);
+
+  // Close button hover events
+  widgetCloseBtn.addEventListener('mouseenter', showWidget);
+  widgetCloseBtn.addEventListener('mouseleave', hideWidget);
+
+  // Panel hover events
+  panel.addEventListener('mouseenter', showWidget);
+  panel.addEventListener('mouseleave', hideWidget);
 
   // Toggle panel
   toggle.addEventListener('click', (e) => {
@@ -257,10 +305,28 @@ function setupEventListeners(prompts: SitePrompt[]) {
     panel.classList.toggle('active');
   });
 
-  // Close panel
+  // Close panel button
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     panel.classList.remove('active');
+  });
+
+  // Close widget permanently
+  widgetCloseBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    console.log('[siteWidget] Closing widget permanently...');
+    
+    try {
+      // Disable widget in settings
+      await chrome.storage.sync.set({ showSiteWidget: false });
+      console.log('[siteWidget] Widget disabled in settings');
+      
+      // Remove widget from DOM
+      removeSiteWidget();
+      widgetCloseBtn.remove();
+    } catch (error) {
+      console.error('[siteWidget] Error disabling widget:', error);
+    }
   });
 
   // Close on outside click
@@ -288,35 +354,45 @@ function setupEventListeners(prompts: SitePrompt[]) {
     // Close panel
     panel.classList.remove('active');
 
-    // TODO: Temporary disabled - will be enabled when extension supports standalone page
-    // Currently Chrome doesn't allow opening sidepanel programmatically without user gesture
-    // Future implementation: open extension in new tab instead of sidepanel
-    console.log('[siteWidget] Prompt click handled. Feature temporarily disabled - will redirect to extension page in future.');
-    
-    /* 
-    // DISABLED CODE - for future implementation when extension has standalone page:
-    
-    // Send prompt to extension
+    // Open fullscreen with prompt data
     try {
-      console.log('[siteWidget] Sending message to background...');
-      const response = await chrome.runtime.sendMessage({
-        type: 'OPEN_SIDEPANEL_WITH_PROMPT',
-        data: { 
+      console.log('[siteWidget] Opening fullscreen with prompt...');
+      
+      // Get current tab ID through background
+      const tabIdResponse = await chrome.runtime.sendMessage({
+        type: 'GET_CURRENT_TAB_ID'
+      });
+      
+      const sourceTabId = tabIdResponse?.tabId;
+      
+      if (!sourceTabId) {
+        console.error('[siteWidget] Could not get current tab ID');
+        return;
+      }
+      
+      console.log('[siteWidget] Current tab ID:', sourceTabId);
+      
+      // Save prompt data to storage with source tab ID
+      await chrome.storage.local.set({
+        pendingSitePrompt: {
           prompt,
-          url: window.location.href
+          currentUrl: window.location.href,
+          sourceTabId, // ID вкладки откуда был клик
+          timestamp: Date.now()
         }
       });
-      console.log('[siteWidget] Response from background:', response);
       
-      if (!response?.success) {
-        console.error('[siteWidget] Failed to open sidepanel:', response?.error);
-      } else {
-        console.log('[siteWidget] Sidepanel opened successfully');
-      }
+      // Open fullscreen page
+      const fullscreenUrl = chrome.runtime.getURL('src/ui/fullscreen/index.html');
+      await chrome.runtime.sendMessage({
+        type: 'OPEN_FULLSCREEN_WITH_PROMPT',
+        data: { url: fullscreenUrl }
+      });
+      
+      console.log('[siteWidget] Fullscreen opened successfully');
     } catch (error) {
-      console.error('[siteWidget] Error sending prompt:', error);
+      console.error('[siteWidget] Error opening fullscreen:', error);
     }
-    */
   });
 }
 

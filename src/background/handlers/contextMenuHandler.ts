@@ -29,6 +29,14 @@ export async function handleContextMenuClick(
   });
 
   try {
+    // ========== HANDLE FULLSCREEN OPEN ==========
+    if (commandId === 'open_fullscreen' || commandId === 'open_fullscreen_action') {
+      console.log('[ContextMenu] Opening fullscreen chat');
+      const url = chrome.runtime.getURL('src/ui/fullscreen/index.html');
+      await chrome.tabs.create({ url });
+      return;
+    }
+
     // ========== HANDLE PERSONAL DATA INSERTION ==========
     if (commandId.startsWith('personal_info_')) {
       const fieldName = commandId.replace('personal_info_', '') as keyof PersonalInfo;

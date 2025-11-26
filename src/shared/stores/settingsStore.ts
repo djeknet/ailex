@@ -15,6 +15,7 @@ export interface ExportedSettings {
     language: ExtensionSettings['language'];
     historyMode: ExtensionSettings['historyMode'];
     showAISuggestions: boolean;
+    showSiteWidget: boolean;
     developerMode?: boolean;
     autoDeletionDays?: number;
   };
@@ -41,6 +42,7 @@ interface SettingsStore extends ExtensionSettings {
   setLanguage: (language: ExtensionSettings['language']) => Promise<void>;
   setHistoryMode: (mode: ExtensionSettings['historyMode']) => void;
   setShowAISuggestions: (enabled: boolean) => void;
+  setShowSiteWidget: (enabled: boolean) => void;
   setDeveloperMode: (enabled: boolean) => void;
   setAutoDeletionDays: (days: number) => void;
   updateOperators: (operators: ExtensionSettings['operators']) => Promise<void>;
@@ -67,6 +69,7 @@ export const useSettingsStore = create<SettingsStore>()(
       activeView: 'chat',
       activeSettingsTab: 'operators',
       showAISuggestions: true,
+      showSiteWidget: true,
       maxFileSize: 10, // 10MB by default
       maxImageSize: 5, // 5MB by default
       developerMode: false, // Developer mode disabled by default
@@ -97,6 +100,11 @@ export const useSettingsStore = create<SettingsStore>()(
       setShowAISuggestions: (showAISuggestions) => {
         set({ showAISuggestions });
         chrome.storage.sync.set({ showAISuggestions });
+      },
+
+      setShowSiteWidget: (showSiteWidget) => {
+        set({ showSiteWidget });
+        chrome.storage.sync.set({ showSiteWidget });
       },
 
       setDeveloperMode: (developerMode) => {
@@ -191,7 +199,7 @@ export const useSettingsStore = create<SettingsStore>()(
         console.log('[settingsStore] initializeSettings called');
         return new Promise((resolve) => {
           chrome.storage.sync.get(
-            ['theme', 'language', 'historyMode', 'operators', 'personalInfo', 'generalInstruction', 'instructions', 'showAISuggestions', 'developerMode', 'autoDeletionDays'],
+            ['theme', 'language', 'historyMode', 'operators', 'personalInfo', 'generalInstruction', 'instructions', 'showAISuggestions', 'showSiteWidget', 'developerMode', 'autoDeletionDays'],
             async (result) => {
               console.log('[settingsStore] Loaded from sync storage:', {
                 theme: result.theme,
@@ -263,6 +271,7 @@ export const useSettingsStore = create<SettingsStore>()(
                 generalInstruction: result.generalInstruction || '',
                 instructions: result.instructions || [],
                 showAISuggestions: result.showAISuggestions !== undefined ? result.showAISuggestions : true,
+                showSiteWidget: result.showSiteWidget !== undefined ? result.showSiteWidget : true,
                 developerMode: result.developerMode || false,
                 autoDeletionDays: result.autoDeletionDays || 30
               });
@@ -295,6 +304,7 @@ export const useSettingsStore = create<SettingsStore>()(
             language: state.language,
             historyMode: state.historyMode,
             showAISuggestions: state.showAISuggestions,
+            showSiteWidget: state.showSiteWidget,
             developerMode: state.developerMode,
             autoDeletionDays: state.autoDeletionDays
           },
@@ -375,12 +385,13 @@ export const useSettingsStore = create<SettingsStore>()(
 
         // Import general settings
         if (options.generalSettings && data.generalSettings) {
-          const { theme, language, historyMode, showAISuggestions, developerMode, autoDeletionDays } = data.generalSettings;
+          const { theme, language, historyMode, showAISuggestions, showSiteWidget, developerMode, autoDeletionDays } = data.generalSettings;
           
           if (theme) state.setTheme(theme);
           if (language) await state.setLanguage(language);
           if (historyMode) state.setHistoryMode(historyMode);
           if (showAISuggestions !== undefined) state.setShowAISuggestions(showAISuggestions);
+          if (showSiteWidget !== undefined) state.setShowSiteWidget(showSiteWidget);
           if (developerMode !== undefined) state.setDeveloperMode(developerMode);
           if (autoDeletionDays !== undefined) state.setAutoDeletionDays(autoDeletionDays);
         }

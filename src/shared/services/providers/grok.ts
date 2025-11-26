@@ -146,7 +146,7 @@ export class GrokProvider implements AIProvider {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
+          const chunk = decoder.decode(value, { stream: true }); // Добавлен stream: true
           buffer += chunk;
           
           // Split by lines but keep last incomplete line in buffer

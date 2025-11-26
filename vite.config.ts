@@ -41,7 +41,8 @@ export default defineConfig(({ mode }) => {
       } : undefined,
       rollupOptions: {
         input: {
-          sidepanel: 'src/ui/sidepanel/index.html'
+          sidepanel: 'src/ui/sidepanel/index.html',
+          fullscreen: 'src/ui/fullscreen/index.html'
         }
       }
     }

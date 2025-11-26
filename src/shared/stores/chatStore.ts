@@ -24,6 +24,10 @@ interface ChatStore {
   streamingContent: string;
   streamingImages: number; // Количество генерируемых изображений
   editingImageResponseId: string | null; // Response ID для редактирования изображения
+  editingMessage: {
+    text: string;
+    attachments: MessageAttachment[];
+  } | null; // Данные сообщения для редактирования
   error: string | null;
   folders: ChatFolder[];
   chats: Chat[];
@@ -54,12 +58,14 @@ interface ChatStore {
     instructionData?: { id: string; content: string },
     quotedText?: string,
     previousResponseId?: string,
-    retryMessageId?: string // ID существующего сообщения для повтора
+    retryMessageId?: string, // ID существующего сообщения для повтора
+    sourceTabId?: number // ID исходной вкладки для site prompts
   ) => Promise<void>;
   setSelectedOperator: (operator: AIOperatorConfig | null) => void;
   setPageContextEnabled: (enabled: boolean) => void;
   setPageContextType: (type: PageContextType) => void;
   setEditingImageResponseId: (responseId: string | null) => void;
+  setEditingMessage: (data: { text: string; attachments: MessageAttachment[] } | null) => void;
   createNewChat: (site: string) => Promise<Chat>;
   loadOrCreateChat: (site: string, historyMode: HistoryMode) => Promise<void>;
   clearChat: () => void;
@@ -70,6 +76,7 @@ interface ChatStore {
   setGeneratingQuestionsForMessage: (messageId: string | null) => void;
   stopGeneration: () => Promise<string>;
   sendSitePrompt: (prompt: any) => Promise<void>;
+  sendSitePromptWithTabId: (prompt: any, tabId: number) => Promise<void>;
   
   // Folders
   loadFolders: () => Promise<void>;
@@ -97,6 +104,7 @@ export const useChatStore = create<ChatStore>()(
       streamingContent: '',
       streamingImages: 0,
       editingImageResponseId: null,
+      editingMessage: null,
       error: null,
       folders: [],
       chats: [],
@@ -126,7 +134,7 @@ export const useChatStore = create<ChatStore>()(
     }
   },
 
-  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId, retryMessageId) => {
+  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId) => {
     const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController, editingImageResponseId } = get();
     
     if (!currentChat || !selectedOperator) {
@@ -184,14 +192,26 @@ export const useChatStore = create<ChatStore>()(
 
     try {
       // Get current page URL, title and icon for context tracking
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      // If sourceTabId is provided (from site prompts), use that tab instead of active
+      let tab;
+      if (sourceTabId) {
+        try {
+          tab = await chrome.tabs.get(sourceTabId);
+        } catch (error) {
+          console.warn('[chatStore] Could not get source tab, falling back to active:', error);
+          [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        }
+      } else {
+        [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      }
+      
       const currentUrl = tab?.url || '';
       const pageTitle = tab?.title ? (tab.title.length > 30 ? tab.title.substring(0, 30) + '...' : tab.title) : undefined;
       const pageIcon = tab?.favIconUrl || undefined;
 
-      // Disable page context for system pages
+      // Disable page context for system pages ONLY if pageContext was not explicitly provided
       const isSystem = isSystemPage(currentUrl);
-      const effectivePageContextEnabled = pageContextEnabled && !isSystem;
+      const effectivePageContextEnabled = pageContext ? true : (pageContextEnabled && !isSystem);
 
       // Calculate hash of page context if provided
       let pageContextHash: string | undefined;
@@ -211,6 +231,7 @@ export const useChatStore = create<ChatStore>()(
         pageContextType,
         url: currentUrl,
         isSystemPage: isSystem,
+        pageContextExplicitlyProvided: !!pageContext,
         hasAttachments: attachments.length > 0,
         attachmentTypes: attachments.map(a => a.type)
       });
@@ -1122,6 +1143,8 @@ export const useChatStore = create<ChatStore>()(
 
   setEditingImageResponseId: (responseId) => set({ editingImageResponseId: responseId }),
 
+  setEditingMessage: (data) => set({ editingMessage: data }),
+
   createNewChat: async (site) => {
     const chat: Chat = {
       id: `chat_${Date.now()}`,
@@ -1480,10 +1503,19 @@ ${responseContext}`;
           const { captureScreenshot } = await import('@shared/utils/screenshotUtils');
           const screenshotData = await captureScreenshot();
           
+          // Убираем префикс data URL, API ожидает только чистый base64
+          let base64Data = screenshotData;
+          if (base64Data.startsWith('data:')) {
+            const commaIndex = base64Data.indexOf(',');
+            if (commaIndex !== -1) {
+              base64Data = base64Data.substring(commaIndex + 1);
+            }
+          }
+          
           attachments.push({
             type: 'image',
             name: `screenshot_${Date.now()}.png`,
-            data: screenshotData,
+            data: base64Data,
             mimeType: 'image/png'
           });
           
@@ -1531,6 +1563,150 @@ ${responseContext}`;
       );
       
       console.log('[chatStore] Site prompt sent successfully');
+    } catch (error) {
+      console.error('[chatStore] Error sending site prompt:', error);
+      set({ error: error instanceof Error ? error.message : 'Failed to send site prompt' });
+    }
+  },
+
+  sendSitePromptWithTabId: async (prompt: any, tabId: number) => {
+    console.log('[chatStore] ===== sendSitePromptWithTabId START =====');
+    console.log('[chatStore] Prompt:', prompt);
+    console.log('[chatStore] TabId:', tabId);
+    
+    const { sendUserMessage, selectedOperator, pageContextType } = get();
+    
+    console.log('[chatStore] Selected operator:', selectedOperator?.operator);
+    console.log('[chatStore] Page context type:', pageContextType);
+    
+    if (!selectedOperator) {
+      console.error('[chatStore] No operator selected for site prompt');
+      return;
+    }
+
+    try {
+      const { capabilities, text, textKey } = prompt;
+      
+      console.log('[chatStore] Sending site prompt with tabId:', tabId, { text: textKey || text, capabilities });
+      
+      let pageContext: string | undefined;
+      let attachments: any[] = [];
+      let webSearchEnabled = false;
+
+      // Обработка capability 'context' - получить контекст страницы
+      if (capabilities.includes('context')) {
+        console.log('[chatStore] Requesting page context from tab:', tabId);
+        try {
+          const response = await chrome.tabs.sendMessage(tabId, {
+            type: 'GET_PAGE_CONTEXT',
+            data: { type: pageContextType }
+          });
+          
+          console.log('[chatStore] Page context response:', response);
+          
+          if (response?.success && response.data) {
+            pageContext = typeof response.data === 'string' ? response.data : response.data.content;
+            console.log('[chatStore] Got page context:', pageContext?.length || 0, 'chars');
+          } else {
+            console.warn('[chatStore] Page context response invalid:', response);
+          }
+        } catch (error) {
+          console.warn('[chatStore] Could not get page context:', error);
+        }
+      }
+
+      // Обработка capability 'search' - включить web search
+      if (capabilities.includes('search')) {
+        webSearchEnabled = true;
+        console.log('[chatStore] Web search enabled for site prompt');
+      }
+
+      // Обработка capability 'vision' - сделать скриншот
+      if (capabilities.includes('vision')) {
+        try {
+          const response = await chrome.tabs.sendMessage(tabId, {
+            type: 'CAPTURE_SCREENSHOT',
+            data: { tabId } // Передаем tabId целевой страницы
+          });
+          
+          if (response?.success && response.data) {
+            // Убираем префикс data URL, API ожидает только чистый base64
+            let base64Data = response.data;
+            if (base64Data.startsWith('data:')) {
+              const commaIndex = base64Data.indexOf(',');
+              if (commaIndex !== -1) {
+                base64Data = base64Data.substring(commaIndex + 1);
+              }
+            }
+            
+            attachments.push({
+              type: 'image',
+              name: `screenshot_${Date.now()}.png`,
+              data: base64Data,
+              mimeType: 'image/png'
+            });
+            
+            console.log('[chatStore] Screenshot captured for site prompt');
+          }
+        } catch (error) {
+          console.error('[chatStore] Error capturing screenshot:', error);
+        }
+      }
+
+      // Обработка capability 'transcribe_youtube' - получить транскрипцию YouTube
+      if (capabilities.includes('transcribe_youtube')) {
+        try {
+          const response = await chrome.tabs.sendMessage(tabId, {
+            type: 'EXECUTE_DOM_FUNCTION',
+            data: {
+              functionName: 'youtubeTranscribe',
+              params: { language: 'ru', autoGenerated: true }
+            }
+          });
+          
+          if (response?.success && response.result) {
+            const transcript = response.result;
+            pageContext = (pageContext || '') + '\n\n--- YouTube Video Transcript ---\n' + transcript;
+            console.log('[chatStore] YouTube transcript added:', transcript.length, 'chars');
+          } else {
+            console.warn('[chatStore] Could not get YouTube transcript:', response?.error);
+          }
+        } catch (error) {
+          console.warn('[chatStore] Error getting YouTube transcript:', error);
+        }
+      }
+
+      // Получаем локализованный текст
+      const { i18nService } = await import('@shared/i18n/i18nService');
+      const localizedText = textKey ? i18nService.getMessage(textKey) : text;
+
+      console.log('[chatStore] Preparing to send message:', {
+        textLength: localizedText.length,
+        hasPageContext: !!pageContext,
+        pageContextLength: pageContext?.length || 0,
+        attachmentsCount: attachments.length,
+        webSearchEnabled
+      });
+      
+      console.log('[chatStore] Page context value:', pageContext ? pageContext.substring(0, 200) + '...' : 'NONE');
+
+      // Отправляем сообщение
+      await sendUserMessage(
+        localizedText,
+        pageContext,
+        undefined, // replyTo
+        undefined, // actionLabel
+        attachments,
+        webSearchEnabled,
+        undefined, // instructionData
+        undefined, // quotedText
+        undefined, // previousResponseId
+        undefined, // retryMessageId
+        tabId // sourceTabId
+      );
+
+      console.log('[chatStore] Site prompt sent successfully');
+      console.log('[chatStore] ===== sendSitePromptWithTabId END =====');
     } catch (error) {
       console.error('[chatStore] Error sending site prompt:', error);
       set({ error: error instanceof Error ? error.message : 'Failed to send site prompt' });

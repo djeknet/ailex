@@ -4,7 +4,7 @@ import { useChatStore } from '@shared/stores/chatStore';
 import { Button } from '@/ui/components/ui/button';
 import { Badge } from '@/ui/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/components/ui/tooltip';
-import { MessageSquarePlus, History, CircleDollarSign } from 'lucide-react';
+import { MessageSquarePlus, History, CircleDollarSign, Expand } from 'lucide-react';
 import ChatHistoryPanel from './ChatHistoryPanel';
 
 export default function ChatHeader() {
@@ -16,6 +16,15 @@ export default function ChatHeader() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const site = tab.url ? new URL(tab.url).hostname : 'unknown';
     await createNewChat(site);
+  };
+
+  const handleExpandToFullscreen = async () => {
+    if (currentChat) {
+      const url = chrome.runtime.getURL(`src/ui/fullscreen/index.html?chatId=${currentChat.id}`);
+      await chrome.tabs.create({ url });
+      // Закрыть сайдпанель
+      window.close();
+    }
   };
 
   // Calculate total tokens for current chat
@@ -56,6 +65,14 @@ export default function ChatHeader() {
           )}
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleExpandToFullscreen}
+            title={t('expandChat')}
+          >
+            <Expand className="h-5 w-5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"

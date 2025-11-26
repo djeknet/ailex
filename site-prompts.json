@@ -220,7 +220,7 @@
         ],
         "prompts": [
           {
-            "text": "Сделай подробный конспект видео с таймкодами (TL;DR).",
+            "text": "Make a detailed summary of the video with timecodes (TL;DR).",
             "capabilities": [
               "context",
               "transcribe_youtube"
@@ -228,7 +228,7 @@
             "textKey": "sitePrompt_youtube_video_0"
           },
           {
-            "text": "Проанализируй комментарии: о чем спорят люди и какой общий настрой?",
+            "text": "Analyze the comments: what are people arguing about and what is the general mood?",
             "capabilities": [
               "context",
               "transcribe_youtube"
@@ -236,7 +236,7 @@
             "textKey": "sitePrompt_youtube_video_1"
           },
           {
-            "text": "Найди видео, опровергающие факты из этого ролика.",
+            "text": "Find videos that refute the facts in this video.",
             "capabilities": [
               "search",
               "transcribe_youtube"
@@ -244,12 +244,20 @@
             "textKey": "sitePrompt_youtube_video_2"
           },
           {
-            "text": "Если это туториал, преврати его в текстовую пошаговую инструкцию.",
+            "text": "If this is a tutorial, turn it into a step-by-step text guide.",
             "capabilities": [
               "context",
               "transcribe_youtube"
             ],
             "textKey": "sitePrompt_youtube_video_3"
+          },
+          {
+            "text": "Write down the words for review from the language video with example sentences.",
+            "capabilities": [
+              "context",
+              "transcribe_youtube"
+            ],
+            "textKey": "sitePrompt_youtube_video_4"
           }
         ]
       },

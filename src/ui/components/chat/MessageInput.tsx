@@ -6,6 +6,7 @@ import { useTranslation } from '@shared/i18n/useTranslation';
 import { getModelContextLimit, getModelCapabilities } from '@shared/constants';
 import { readFileAsBase64, readTextFile, isTextFile, validateFileSize } from '@shared/utils/fileUtils';
 import { captureScreenshot, compressImage } from '@shared/utils/screenshotUtils';
+import { isPdfPage, getPdfUrlFromPage, extractFilenameFromUrl } from '@shared/utils/pageUtils';
 import { Button } from '@/ui/components/ui/button';
 import { ButtonGroup } from '@/ui/components/ui/button-group';
 import {
@@ -83,7 +84,11 @@ interface ImageAttachment {
   mimeType?: string;
 }
 
-export default function MessageInput() {
+interface MessageInputProps {
+  isFullscreen?: boolean;
+}
+
+export default function MessageInput({ isFullscreen = false }: MessageInputProps) {
   const { t } = useTranslation();
   const { maxFileSize = 10, maxImageSize = 5, instructions } = useSettingsStore();
   const { availableTools, loadTools } = useToolsStore();
@@ -125,7 +130,11 @@ export default function MessageInput() {
     stopGeneration, 
     setPageContextType: setGlobalPageContextType,
     editingImageResponseId,
-    setEditingImageResponseId
+    setEditingImageResponseId,
+    editingMessage,
+    setEditingMessage,
+    currentChat,
+    createNewChat
   } = useChatStore();
   
   // Get model capabilities (default: enabled if model not found)
@@ -344,6 +353,59 @@ export default function MessageInput() {
     const shouldShow = text.includes('@') && text.length > 0;
     setShowTabMentionDropdown(shouldShow);
   }, [text]);
+
+  // Handle editingMessage - восстановить текст и attachments
+  useEffect(() => {
+    if (editingMessage) {
+      console.log('[MessageInput] Restoring message for editing:', editingMessage);
+      
+      // Установить текст
+      setText(editingMessage.text);
+      
+      // Установить attachments
+      const images: ImageAttachment[] = [];
+      const files: FileAttachment[] = [];
+      const tabs: TabReference[] = [];
+      
+      editingMessage.attachments.forEach((att, idx) => {
+        if (att.type === 'image') {
+          images.push({
+            data: att.data,
+            name: att.name,
+            mimeType: att.mimeType
+          });
+        } else if (att.type === 'file' || att.type === 'dom') {
+          files.push({
+            type: att.type as 'file' | 'dom',
+            name: att.name,
+            data: att.data,
+            xpath: att.xpath
+          });
+        } else if (att.type === 'tab') {
+          // Восстановить tab references
+          tabs.push({
+            id: idx, // Используем индекс как временный ID
+            title: att.tabTitle || att.name,
+            url: att.tabUrl || '',
+            favicon: att.tabFavicon
+          });
+        }
+      });
+      
+      setAttachedImages(images);
+      setAttachedFiles(files);
+      setAttachedTabs(tabs);
+      
+      console.log('[MessageInput] Restored:', {
+        images: images.length,
+        files: files.length,
+        tabs: tabs.length
+      });
+      
+      // Очистить editingMessage после загрузки
+      setEditingMessage(null);
+    }
+  }, [editingMessage, setEditingMessage]);
 
   const handleCancelSelection = async () => {
     if (isSelectingElement) {
@@ -819,6 +881,26 @@ export default function MessageInput() {
     const hasText = Boolean(message.text);
     if (!hasText || isLoading) return;
 
+    // Ensure we have a chat - create one if needed
+    if (!currentChat) {
+      console.log('[MessageInput] No current chat, creating new one');
+      if (isFullscreen) {
+        await createNewChat('fullscreen');
+      } else {
+        try {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          const site = tab.url ? new URL(tab.url).hostname : 'unknown';
+          await createNewChat(site);
+        } catch (error) {
+          console.error('[MessageInput] Error creating chat:', error);
+          await createNewChat('unknown');
+        }
+      }
+      // Небольшая задержка, чтобы store обновился
+      await new Promise(resolve => setTimeout(resolve, 50));
+      console.log('[MessageInput] Chat created, currentChat:', useChatStore.getState().currentChat?.id);
+    }
+
     const content = message.text!.trim();
     setText('');
     setShowToolsDropdown(false); // Скрыть dropdown при отправке
@@ -858,6 +940,94 @@ export default function MessageInput() {
         };
       })
     ];
+    
+    // Auto-attach PDF if this is the first message in a new chat
+    const { messages } = useChatStore.getState();
+    const isFirstMessage = !messages || messages.length === 0;
+    
+    if (isFirstMessage && !isFullscreen) {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        // Check if current page is a PDF
+        if (tab.url && isPdfPage(tab.url, (tab as any).mimeType)) {
+          console.log('[MessageInput] PDF detected, auto-attaching:', tab.url);
+          
+          let pdfData: string | null = null;
+          let pdfSize = 0;
+          const pdfUrl = tab.url;
+          
+          // Try to get PDF data based on URL type
+          if (pdfUrl.startsWith('file://')) {
+            // For file:// URLs, use background script
+            try {
+              const response = await chrome.runtime.sendMessage({
+                type: 'GET_PDF_FILE',
+                data: { url: pdfUrl }
+              });
+              
+              if (response.success) {
+                pdfData = response.data;
+                pdfSize = response.size || 0;
+                console.log('[MessageInput] PDF fetched from file://, size:', pdfSize);
+              } else if (response.error === 'FILE_ACCESS_DENIED') {
+                console.warn('[MessageInput] File access denied:', response.message);
+                alert(t('pdfAccessDenied'));
+              } else {
+                console.error('[MessageInput] Failed to fetch PDF:', response.error);
+              }
+            } catch (error) {
+              console.error('[MessageInput] Error fetching file:// PDF:', error);
+            }
+          } else if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
+            // For http(s):// URLs, use content script
+            try {
+              if (tab.id) {
+                const response = await chrome.tabs.sendMessage(tab.id, {
+                  type: 'GET_PDF_DATA',
+                  data: { url: pdfUrl }
+                });
+                
+                if (response.success) {
+                  pdfData = response.data;
+                  pdfSize = response.size || 0;
+                  console.log('[MessageInput] PDF fetched from https://, size:', pdfSize);
+                } else {
+                  console.error('[MessageInput] Failed to fetch PDF:', response.error);
+                }
+              }
+            } catch (error) {
+              console.error('[MessageInput] Error fetching https:// PDF:', error);
+            }
+          }
+          
+          // Add PDF to attachments if successfully fetched
+          if (pdfData) {
+            // Validate file size
+            const sizeInMB = pdfSize / (1024 * 1024);
+            if (sizeInMB > maxFileSize) {
+              console.warn('[MessageInput] PDF too large:', sizeInMB.toFixed(2), 'MB, max:', maxFileSize, 'MB');
+              alert(t('pdfTooLarge').replace('{size}', `${maxFileSize}MB`));
+            } else {
+              const filename = extractFilenameFromUrl(pdfUrl) || 'document.pdf';
+              attachments.push({
+                type: 'file',
+                name: filename,
+                data: pdfData,
+                mimeType: 'application/pdf'
+              });
+              
+              console.log('[MessageInput] PDF auto-attached:', filename, 'size:', sizeInMB.toFixed(2), 'MB');
+              
+              // Show notification
+              console.log('[MessageInput] PDF automatically attached to message');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[MessageInput] Error in PDF auto-attach:', error);
+      }
+    }
     
     // Get tab contents if tabs are attached (BEFORE clearing attachedTabs)
     const tabsToProcess = [...attachedTabs]; // Make a copy
@@ -1256,22 +1426,26 @@ export default function MessageInput() {
                           <ImageIcon className="h-4 w-4" />
                           {t('attachPhoto')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={handleTakeScreenshot}
-                          disabled={!modelCapabilities.supportsImages}
-                          title={!modelCapabilities.supportsImages ? t('featureNotAvailableForModel') : ''}
-                        >
-                          <Monitor className="h-4 w-4" />
-                          {t('takeScreenshot')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={handleTakeFullPageScreenshot}
-                          disabled={!modelCapabilities.supportsImages}
-                          title={!modelCapabilities.supportsImages ? t('featureNotAvailableForModel') : ''}
-                        >
-                          <Square className="h-4 w-4" />
-                          {t('takeFullPageScreenshot')}
-                        </DropdownMenuItem>
+                        {!isFullscreen && (
+                          <>
+                            <DropdownMenuItem 
+                              onClick={handleTakeScreenshot}
+                              disabled={!modelCapabilities.supportsImages}
+                              title={!modelCapabilities.supportsImages ? t('featureNotAvailableForModel') : ''}
+                            >
+                              <Monitor className="h-4 w-4" />
+                              {t('takeScreenshot')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={handleTakeFullPageScreenshot}
+                              disabled={!modelCapabilities.supportsImages}
+                              title={!modelCapabilities.supportsImages ? t('featureNotAvailableForModel') : ''}
+                            >
+                              <Square className="h-4 w-4" />
+                              {t('takeFullPageScreenshot')}
+                            </DropdownMenuItem>
+                          </>
+                        )}
                         <DropdownMenuItem 
                           onClick={handleTakePhoto}
                           disabled={!modelCapabilities.supportsImages}
@@ -1280,10 +1454,12 @@ export default function MessageInput() {
                           <Camera className="h-4 w-4" />
                           {t('takePhoto')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleSelectElement}>
-                          <MousePointer2 className="h-4 w-4" />
-                          {t('selectElement')}
-                        </DropdownMenuItem>
+                        {!isFullscreen && (
+                          <DropdownMenuItem onClick={handleSelectElement}>
+                            <MousePointer2 className="h-4 w-4" />
+                            {t('selectElement')}
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem onClick={() => {
                           setText(prev => prev + (prev && !prev.endsWith(' ') ? ' ' : '') + '@');
                         }}>
@@ -1355,115 +1531,117 @@ export default function MessageInput() {
                   operator={selectedOperator?.operator || 'anthropic'}
                 />
 
-                <ButtonGroup className="h-10">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        type="button"
-                        onClick={() => !isSystemPage && setPageContextEnabled(!pageContextEnabled)}
-                        disabled={isSystemPage}
-                        className={pageContextEnabled ? 'text-primary h-10' : 'h-10'}
-                      >
-                        <div className="relative flex items-center">
-                          {siteFavicon ? (
-                            <>
-                              <img 
-                                src={siteFavicon} 
-                                alt="Site icon" 
-                                className="h-4 w-4 mr-1 rounded-sm"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                                }}
-                              />
-                              {pageContextEnabled && (
-                                <span className={`absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ${
-                                  contentScriptAvailable ? 'bg-green-500' : 'bg-red-500'
-                                }`} />
-                              )}
-                            </>
-                          ) : (
-                            <CircleFadingPlus className="h-4 w-4 mr-1" />
-                          )}
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isSystemPage 
-                        ? t('unavailableOnSystemPages') 
-                        : !contentScriptAvailable 
-                          ? t('pageNeedsRefresh')
-                          : t('currentPageContext')
-                      }
-                    </TooltipContent>
-                  </Tooltip>
-                  <DropdownMenu>
+                {!isFullscreen && (
+                  <ButtonGroup className="h-10">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="icon"
+                          size="sm"
                           type="button"
-                          disabled={!pageContextEnabled || isSystemPage}
-                          className={pageContextEnabled ? 'text-primary h-10 w-10' : 'h-10 w-10'}
+                          onClick={() => !isSystemPage && setPageContextEnabled(!pageContextEnabled)}
+                          disabled={isSystemPage}
+                          className={pageContextEnabled ? 'text-primary h-10' : 'h-10'}
                         >
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">{t('contextType')}</span>
-                          </Button>
-                        </DropdownMenuTrigger>
+                          <div className="relative flex items-center">
+                            {siteFavicon ? (
+                              <>
+                                <img 
+                                  src={siteFavicon} 
+                                  alt="Site icon" 
+                                  className="h-4 w-4 mr-1 rounded-sm"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                  }}
+                                />
+                                {pageContextEnabled && (
+                                  <span className={`absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ${
+                                    contentScriptAvailable ? 'bg-green-500' : 'bg-red-500'
+                                  }`} />
+                                )}
+                              </>
+                            ) : (
+                              <CircleFadingPlus className="h-4 w-4 mr-1" />
+                            )}
+                          </div>
+                        </Button>
                       </TooltipTrigger>
-                      <TooltipContent>{t('contextType')}</TooltipContent>
+                      <TooltipContent>
+                        {isSystemPage 
+                          ? t('unavailableOnSystemPages') 
+                          : !contentScriptAvailable 
+                            ? t('pageNeedsRefresh')
+                            : t('currentPageContext')
+                        }
+                      </TooltipContent>
                     </Tooltip>
-                    <DropdownMenuContent align="start" className="w-48">
-                      <DropdownMenuLabel>{t('contextType')}</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setPageContextType('text');
-                            setGlobalPageContextType('text');
-                          }} 
-                          className="flex items-center justify-between cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" /> 
-                            {t('textOnly')}
-                          </div>
-                          {pageContextType === 'text' && <Check className="h-4 w-4 text-green-500" />}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setPageContextType('dom');
-                            setGlobalPageContextType('dom');
-                          }} 
-                          className="flex items-center justify-between cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Code className="h-4 w-4" /> 
-                            {t('domPage')}
-                          </div>
-                          {pageContextType === 'dom' && <Check className="h-4 w-4 text-green-500" />}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setPageContextType('html');
-                            setGlobalPageContextType('html');
-                          }} 
-                          className="flex items-center justify-between cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2">
-                            <FileCode className="h-4 w-4" /> 
-                            {t('htmlPage')}
-                          </div>
-                          {pageContextType === 'html' && <Check className="h-4 w-4 text-green-500" />}
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </ButtonGroup>
+                    <DropdownMenu>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            type="button"
+                            disabled={!pageContextEnabled || isSystemPage}
+                            className={pageContextEnabled ? 'text-primary h-10 w-10' : 'h-10 w-10'}
+                          >
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">{t('contextType')}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('contextType')}</TooltipContent>
+                      </Tooltip>
+                      <DropdownMenuContent align="start" className="w-48">
+                        <DropdownMenuLabel>{t('contextType')}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setPageContextType('text');
+                              setGlobalPageContextType('text');
+                            }} 
+                            className="flex items-center justify-between cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" /> 
+                              {t('textOnly')}
+                            </div>
+                            {pageContextType === 'text' && <Check className="h-4 w-4 text-green-500" />}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setPageContextType('dom');
+                              setGlobalPageContextType('dom');
+                            }} 
+                            className="flex items-center justify-between cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Code className="h-4 w-4" /> 
+                              {t('domPage')}
+                            </div>
+                            {pageContextType === 'dom' && <Check className="h-4 w-4 text-green-500" />}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setPageContextType('html');
+                              setGlobalPageContextType('html');
+                            }} 
+                            className="flex items-center justify-between cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <FileCode className="h-4 w-4" /> 
+                              {t('htmlPage')}
+                            </div>
+                            {pageContextType === 'html' && <Check className="h-4 w-4 text-green-500" />}
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </ButtonGroup>
+                )}
                 <InstructionSelector value={selectedInstruction} onValueChange={setSelectedInstruction} />
               </div>
 

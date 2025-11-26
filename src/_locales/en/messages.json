@@ -479,6 +479,9 @@
   "copy": {
     "message": "Copy"
   },
+  "edit": {
+    "message": "Edit"
+  },
   "retryRequest": {
     "message": "Retry request"
   },
@@ -815,6 +818,12 @@
   "aiSuggestionsDescription": {
     "message": "Automatically generate related questions under AI responses. Disable to save tokens."
   },
+  "siteWidget": {
+    "message": "Site Prompts Widget"
+  },
+  "siteWidgetDescription": {
+    "message": "Show relevant prompts for the current page on websites for quick processing in fullscreen mode"
+  },
   "developerMode": {
     "message": "Developer Mode"
   },
@@ -925,6 +934,15 @@
   },
   "errorReadingFile": {
     "message": "Error reading file"
+  },
+  "pdfAutoAttached": {
+    "message": "PDF automatically attached"
+  },
+  "pdfTooLarge": {
+    "message": "PDF file is too large (max {size})"
+  },
+  "pdfAccessDenied": {
+    "message": "Cannot access local PDF. Please enable 'Allow access to file URLs' in chrome://extensions for this extension."
   },
   "dropImagesHere": {
     "message": "Drop images here"
@@ -3007,5 +3025,191 @@
   },
   "sitePrompt_www_threads_post_14": {
     "message": "Find similar viral posts on this topic from the past."
+  },
+  "expandChat": {
+    "message": "Expand to Fullscreen"
+  },
+  "openFullscreen": {
+    "message": "Open in Fullscreen"
+  },
+  "collapseSidebar": {
+    "message": "Collapse Sidebar"
+  },
+  "expandSidebar": {
+    "message": "Expand Sidebar"
+  },
+  "noFolder": {
+    "message": "No Folder"
+  },
+  "createNewFolder": {
+    "message": "Create New Folder"
+  },
+  "enterFolderName": {
+    "message": "Enter folder name"
+  },
+  "confirmDeleteFolder": {
+    "message": "Delete Folder?"
+  },
+  "confirmDeleteFolderDescription": {
+    "message": "This folder will be deleted. Chats inside will not be deleted."
+  },
+  "confirmDeleteChatDescription": {
+    "message": "This chat will be permanently deleted. This action cannot be undone."
+  },
+  "chatTitle": {
+    "message": "Chat Title"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "confirmDeleteChat": {
+    "message": "Delete Chat?"
+  },
+  "helpPageTitle": {
+    "message": "Help"
+  },
+  "helpPageSubtitle": {
+    "message": "Learn about all the features of AiLex extension"
+  },
+  "noVideoAvailable": {
+    "message": "Video coming soon"
+  },
+  "helpCategory_chat": {
+    "message": "Chat and Models"
+  },
+  "helpCategory_media": {
+    "message": "Media and Attachments"
+  },
+  "helpCategory_tools": {
+    "message": "Tools"
+  },
+  "helpCategory_contextMenu": {
+    "message": "Context Menus"
+  },
+  "helpCategory_history": {
+    "message": "History and Settings"
+  },
+  "helpTitle_aiProviders": {
+    "message": "Multiple AI Providers"
+  },
+  "helpDescription_aiProviders": {
+    "message": "Support for various AI providers: OpenAI, Anthropic, OpenRouter, Grok, Gemini, and LM Studio. You can choose any provider and model from an extensive list. Each provider is configured separately with its own API key and the ability to specify a custom endpoint for self-hosted models."
+  },
+  "helpTitle_modelFilters": {
+    "message": "Model Filters"
+  },
+  "helpDescription_modelFilters": {
+    "message": "Powerful model filtering system by context length, input and output modalities (text, image, file), and AI operators. Filters are saved automatically and display the number of models found. Perfect for quickly finding the right model among hundreds of available options."
+  },
+  "helpTitle_sitePrompts": {
+    "message": "Context-Dependent Prompts"
+  },
+  "helpDescription_sitePrompts": {
+    "message": "Smart ready-made queries that automatically appear depending on the type of page you're viewing. For Amazon - review analysis, for YouTube - video summary with timestamps, for articles - brief overview. Each prompt automatically activates necessary functions: page context, web search, or video transcription."
+  },
+  "helpTitle_fullscreenMode": {
+    "message": "Fullscreen Chat Mode"
+  },
+  "helpDescription_fullscreenMode": {
+    "message": "ChatGPT-like interface with sidebar, chat and folder management. Automatic synchronization with sidepanel, chat creation on first message, chat search and folder grouping. All external links open in new tabs, and URL syncs with current chatId."
+  },
+  "helpTitle_messageEditing": {
+    "message": "Message Editing"
+  },
+  "helpDescription_messageEditing": {
+    "message": "Ability to reuse sent messages with all attachments. Click the Edit button on any message - text, images, files, DOM elements, and tab references will automatically restore to the input field. Perfect for correcting queries without re-attaching files."
+  },
+  "helpTitle_fileAttachments": {
+    "message": "File Attachments"
+  },
+  "helpDescription_fileAttachments": {
+    "message": "Support for documents (PDF, DOC, DOCX), code (JS, TS, PY, etc.) and data (JSON, CSV, XML). Text files are read as text, binary files are converted to Base64. Automatic model support checking with preview and history saving. Size limit: 10 MB."
+  },
+  "helpTitle_screenshotCapture": {
+    "message": "Screenshot Capture"
+  },
+  "helpDescription_screenshotCapture": {
+    "message": "Interactive screen area selection with darkening and highlighting of the selected zone. Automatic image compression when limit is exceeded. Cancel selection via Esc or click on input field. Result is saved as an image with support for multimodal models."
+  },
+  "helpTitle_tabMentions": {
+    "message": "Tab References via @"
+  },
+  "helpDescription_tabMentions": {
+    "message": "Powerful feature for comparing information from multiple pages. Type @ in the input field to select open browser tabs (up to 5). Filter by name, current domain priority, visual badges with icons. Perfect for price comparison, competitor analysis, or fact-checking."
+  },
+  "helpTitle_voiceInput": {
+    "message": "Voice Input"
+  },
+  "helpDescription_voiceInput": {
+    "message": "Speech recognition via Web Speech API in a separate popup with beautiful UI. Automatic recording start, dark and light theme support, visual process indication. Continuous recognition with real-time text preview and automatic addition to input field."
+  },
+  "helpTitle_webcamCapture": {
+    "message": "Webcam Capture"
+  },
+  "helpDescription_webcamCapture": {
+    "message": "Device camera activation with preview before capture. Browser permission handling, automatic compression and photo saving. Support for multimodal models with AI image analysis capability. Photos are saved in history and can be reused."
+  },
+  "helpTitle_functionCalling": {
+    "message": "Function Calling"
+  },
+  "helpDescription_functionCalling": {
+    "message": "Tool system with automatic AI function calling based on context. Support for recursive calls (up to 5 iterations), built-in and custom tools, 40+ DOM functions. Visual indication with green highlighting and stop button. Full integration with OpenRouter and Anthropic."
+  },
+  "helpTitle_summarizeContacts": {
+    "message": "Summarization and Contact Collection"
+  },
+  "helpDescription_summarizeContacts": {
+    "message": "Extracting page text content to create a summary. Automatic contact collection: email, phones, Telegram using regular expressions. Support for different output formats: text, JSON, CSV. Display of found contacts count."
+  },
+  "helpTitle_formFilling": {
+    "message": "Form Auto-filling"
+  },
+  "helpDescription_formFilling": {
+    "message": "Two-step process: AI analyzes form fields and automatically matches them with personal information from settings. Support for all field types: text, email, tel, textarea, select. Smart field search by id, name, placeholder with report on filled fields."
+  },
+  "helpTitle_pageParsing": {
+    "message": "Page Parsing"
+  },
+  "helpDescription_pageParsing": {
+    "message": "Automatic data extraction from multiple pages. AI finds CSS selectors by description, traverses links and collects data. Smart filtering of relevant links, JSON/CSV/text formats. Visual indication with progress bar, hang protection and pause after 20 pages."
+  },
+  "helpTitle_textContextMenu": {
+    "message": "Selected Text Menu"
+  },
+  "helpDescription_textContextMenu": {
+    "message": "24 commands in 6 categories for processing selected text: analysis, editing, research, education, translation, and combined. Automatic localization, some commands activate web search. Save quotes in chat history and smart addition to current dialog."
+  },
+  "helpTitle_fieldContextMenu": {
+    "message": "Input Field Menu"
+  },
+  "helpDescription_fieldContextMenu": {
+    "message": "Intelligent field filling with AI: generate responses in different tones (professional, friendly, direct), process by instruction, instant personal data insertion. AI analyzes page context and generates text in page language without opening the extension."
+  },
+  "helpTitle_chatHistory": {
+    "message": "Grouped History"
+  },
+  "helpDescription_chatHistory": {
+    "message": "History of all dialogs grouped by days: Today, Yesterday, N days ago. Site information with quick navigation, icons of used operators, token count. Pagination of 30 chats per page with navigation. Click on chat automatically opens site and loads history."
+  },
+  "helpTitle_tokenStatistics": {
+    "message": "Token Statistics"
+  },
+  "helpDescription_tokenStatistics": {
+    "message": "Detailed usage analytics with filters by periods and operators. Charts: token dynamics by day, distribution by AI operators, top-10 models. Overall metrics of messages and tokens for the period. All data is automatically saved to IndexedDB with each request."
+  },
+  "helpTitle_exportImport": {
+    "message": "Export and Import Settings"
+  },
+  "helpDescription_exportImport": {
+    "message": "Backup of all extension settings: API keys (decrypted), models, theme, language, personal information, instructions. Data validation, selective import of needed sections, error handling. Perfect for transferring between computers or sharing configurations."
+  },
+  "helpTitle_developerMode": {
+    "message": "Developer Mode"
+  },
+  "helpDescription_developerMode": {
+    "message": "API request debugging panel without DevTools. Display of all calls in real-time: timestamps, headers (with key masking), request and response body with JSON formatting. Interactive interface with data copying, color indication, and storage of up to 200 entries in IndexedDB."
+  },
+  "sitePrompt_youtube_video_4": {
+    "message": "Write down the words for review from the language video with example sentences."
   }
 }

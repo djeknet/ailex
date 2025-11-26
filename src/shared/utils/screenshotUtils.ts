@@ -83,18 +83,30 @@ export async function captureScreenshot(area?: CaptureArea): Promise<string> {
       type: 'CAPTURE_SCREENSHOT'
     });
     
-    if (response.error) {
-      throw new Error(response.error);
+    if (!response?.success) {
+      throw new Error(response?.error || 'Failed to capture screenshot');
     }
     
-    const dataUrl = response.dataUrl;
+    // Background теперь возвращает { success: true, data: "base64..." }
+    const dataUrl = response.data;
+    
+    if (!dataUrl) {
+      throw new Error('No screenshot data received');
+    }
     
     // If area is specified, crop the image
     if (area) {
-      return await cropImage(dataUrl, area);
+      // Если data - это уже чистый base64, добавляем префикс для cropImage
+      const fullDataUrl = dataUrl.startsWith('data:') ? dataUrl : `data:image/png;base64,${dataUrl}`;
+      return await cropImage(fullDataUrl, area);
     }
     
-    // Return base64 without data URL prefix
+    // Если уже чистый base64, возвращаем как есть
+    if (!dataUrl.startsWith('data:')) {
+      return dataUrl;
+    }
+    
+    // Иначе убираем префикс data URL
     return dataUrl.split(',')[1];
   } catch (error) {
     console.error('Error capturing screenshot:', error);

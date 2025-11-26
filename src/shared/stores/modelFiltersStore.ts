@@ -33,10 +33,8 @@ export const useModelFiltersStore = create<ModelFiltersState>((set, get) => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       initialFilters = JSON.parse(stored);
-      console.log('[modelFiltersStore] 📂 Loaded filters from localStorage:', initialFilters);
     }
   } catch (error) {
-    console.error('[modelFiltersStore] Error loading filters:', error);
   }
 
   return {
@@ -44,25 +42,15 @@ export const useModelFiltersStore = create<ModelFiltersState>((set, get) => {
 
     updateFilters: (updates: Partial<ModelFilters>) => {
       const currentFilters = get().filters;
-      console.log('[modelFiltersStore] 🔄 Updating filters with:', updates);
-      console.log('[modelFiltersStore] 📋 Current filters:', currentFilters);
       
       const newFilters = { ...currentFilters, ...updates };
-      console.log('[modelFiltersStore] ✨ New filters:', newFilters);
-      
       set({ filters: newFilters });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newFilters));
-      console.log('[modelFiltersStore] 💾 Saved to localStorage');
     },
 
     resetFilters: () => {
-      const currentFilters = get().filters;
-      console.log('[modelFiltersStore] 🔄 RESET filters to default:', DEFAULT_FILTERS);
-      console.log('[modelFiltersStore] 📋 Current filters before reset:', currentFilters);
-      
       set({ filters: DEFAULT_FILTERS });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_FILTERS));
-      console.log('[modelFiltersStore] 💾 Reset saved to localStorage');
     },
 
     hasActiveFilters: () => {
@@ -74,7 +62,6 @@ export const useModelFiltersStore = create<ModelFiltersState>((set, get) => {
         filters.outputModalities.length > 0 ||
         filters.operators.length > 0
       );
-      console.log('[modelFiltersStore] 🔍 hasActiveFilters called, result:', isActive, 'filters:', filters);
       return isActive;
     },
 
@@ -82,12 +69,9 @@ export const useModelFiltersStore = create<ModelFiltersState>((set, get) => {
       const { filters } = get();
       const modelInfo = getModelInfo(model.id, operator);
 
-      console.log(`[modelFiltersStore] 🔍 Checking model ${model.name} (${operator}) against filters:`, filters);
-
       // Check context length
       const contextLength = modelInfo?.context_length || model.context_length || 0;
       if (filters.minContext !== null && contextLength > 0 && contextLength < filters.minContext) {
-        console.log(`[modelFiltersStore] ❌ ${model.name}: Context too small:`, contextLength, '<', filters.minContext);
         return false;
       }
 
@@ -100,7 +84,6 @@ export const useModelFiltersStore = create<ModelFiltersState>((set, get) => {
         );
         
         if (!hasAllInputs) {
-          console.log(`[modelFiltersStore] ❌ ${model.name}: Missing required input modalities. Required:`, filters.inputModalities, 'Has:', modelInputModalities);
           return false;
         }
       }
@@ -114,20 +97,17 @@ export const useModelFiltersStore = create<ModelFiltersState>((set, get) => {
         );
         
         if (!hasAllOutputs) {
-          console.log(`[modelFiltersStore] ❌ ${model.name}: Missing required output modalities. Required:`, filters.outputModalities, 'Has:', modelOutputModalities);
           return false;
         }
       }
 
       // Check operator
       if (filters.operators.length > 0 && !filters.operators.includes(operator)) {
-        console.log(`[modelFiltersStore] ❌ ${model.name}: Operator not in filter list. Required:`, filters.operators, 'Has:', operator);
         return false;
       }
-
-      console.log(`[modelFiltersStore] ✅ ${model.name}: Matches all filters`);
       return true;
     }
   };
 });
+
 
