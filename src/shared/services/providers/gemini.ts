@@ -64,7 +64,8 @@ export class GeminiProvider implements AIProvider {
     tools?: ToolDefinition[],
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
     _previousResponseId?: string,
-    editingImageBase64?: string
+    editingImageBase64?: string,
+    _onReasoningChunk?: (chunk: string) => void
   ): Promise<AIResponse> {
     console.log('[Gemini] chat - Starting');
     console.log('[Gemini] chat - Model:', model);

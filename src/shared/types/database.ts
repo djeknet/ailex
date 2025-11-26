@@ -27,6 +27,8 @@ export interface ChatMessage {
   suggestedQuestions?: string[]; // Array of related follow-up questions for AI responses
   citations?: Citation[]; // Web search citations from AI responses
   webSearch?: boolean; // Whether web search was used for this message
+  reasoningContent?: string; // Цепочка рассуждений (DeepSeek reasoner), не отправляется в контексте
+  reasoningDuration?: number; // Длительность рассуждений в секундах
   
   // Tool calling информация
   toolCalls?: ToolExecution[]; // Информация о выполненных инструментах

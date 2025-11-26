@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from '@/ui/components/ui/alert-dialog';
 
-const operators: AIOperator[] = ['openai', 'anthropic', 'openrouter', 'grok', 'gemini', 'lmstudio'];
+const operators: AIOperator[] = ['openai', 'anthropic', 'openrouter', 'grok', 'gemini', 'lmstudio', 'deepseek'];
 
 export default function OperatorsTab() {
   const { t } = useTranslation();

@@ -36,7 +36,9 @@ export class OpenRouterProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    _previousResponseId?: string
+    _previousResponseId?: string,
+    _editingImageBase64?: string,
+    _onReasoningChunk?: (chunk: string) => void
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://openrouter.ai/api/v1';
     const url = `${baseUrl}/chat/completions`;

@@ -6,6 +6,7 @@ import { OpenRouterProvider } from './providers/openrouter';
 import { GrokProvider } from './providers/grok';
 import { GeminiProvider } from './providers/gemini';
 import { LMStudioProvider } from './providers/lmstudio';
+import { DeepSeekProvider } from './providers/deepseek';
 import { AIProvider } from './providers/base';
 
 const providers: Record<AIOperator, AIProvider> = {
@@ -14,7 +15,8 @@ const providers: Record<AIOperator, AIProvider> = {
   openrouter: new OpenRouterProvider(),
   grok: new GrokProvider(),
   gemini: new GeminiProvider(),
-  lmstudio: new LMStudioProvider()
+  lmstudio: new LMStudioProvider(),
+  deepseek: new DeepSeekProvider()
 };
 
 export async function sendMessage(
@@ -27,7 +29,8 @@ export async function sendMessage(
   tools?: ToolDefinition[],
   onToolCall?: (toolCall: ToolCall) => Promise<any>,
   previousResponseId?: string,
-  editingImageBase64?: string
+  editingImageBase64?: string,
+  onReasoningChunk?: (chunk: string) => void
 ): Promise<AIResponse> {
   console.log('[aiService] sendMessage - Starting');
   console.log('[aiService] sendMessage - Operator:', config.operator);
@@ -67,7 +70,8 @@ export async function sendMessage(
     tools,
     onToolCall,
     previousResponseId,
-    editingImageBase64
+    editingImageBase64,
+    onReasoningChunk
   );
 }
 
@@ -130,7 +134,8 @@ export function getOperatorName(operator: AIOperator): string {
     openrouter: 'OpenRouter',
     grok: 'Grok',
     gemini: 'Gemini',
-    lmstudio: 'LM Studio'
+    lmstudio: 'LM Studio',
+    deepseek: 'DeepSeek'
   };
   
   return names[operator] || operator;

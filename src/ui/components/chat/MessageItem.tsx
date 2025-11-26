@@ -13,6 +13,8 @@ export interface MessageBranch {
   citations?: Citation[];
   generatedImages?: string;
   responseId?: string;
+  reasoningContent?: string;
+  reasoningDuration?: number;
 }
 
 interface MessageItemProps {

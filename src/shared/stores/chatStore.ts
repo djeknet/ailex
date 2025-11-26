@@ -22,6 +22,8 @@ interface ChatStore {
   pageContextEnabled: boolean;
   pageContextType: PageContextType;
   streamingContent: string;
+  streamingReasoning: string; // Reasoning content для DeepSeek
+  reasoningStartTime: number | null; // Время начала reasoning для подсчета длительности
   streamingImages: number; // Количество генерируемых изображений
   editingImageResponseId: string | null; // Response ID для редактирования изображения
   editingMessage: {
@@ -102,6 +104,8 @@ export const useChatStore = create<ChatStore>()(
       pageContextEnabled: true,
       pageContextType: 'text',
       streamingContent: '',
+      streamingReasoning: '',
+      reasoningStartTime: null,
       streamingImages: 0,
       editingImageResponseId: null,
       editingMessage: null,
@@ -163,7 +167,9 @@ export const useChatStore = create<ChatStore>()(
     
     set({ 
       isLoading: true, 
-      streamingContent: '', 
+      streamingContent: '',
+      streamingReasoning: '',
+      reasoningStartTime: null,
       error: null,
       loadingChats: newLoadingChats,
       activeRequestController: controller
@@ -815,6 +821,7 @@ export const useChatStore = create<ChatStore>()(
         }
       } else {
         // Normal chat request
+        let reasoningContent = '';
         response = await sendAIMessage(
           aiMessages,
           selectedOperator,
@@ -828,7 +835,16 @@ export const useChatStore = create<ChatStore>()(
           toolDefinitions.length > 0 ? toolDefinitions : undefined,
           undefined, // Don't execute tools during first call
           selectedOperator.operator === 'gemini' ? undefined : (responseIdForEditing || undefined), // previousResponseId only for non-Gemini
-          editingImageBase64 // editingImageBase64 for Gemini
+          editingImageBase64, // editingImageBase64 for Gemini
+          (reasoningChunk) => {
+            reasoningContent += reasoningChunk;
+            const currentState = get();
+            // Начинаем отсчет времени при первом чанке reasoning
+            if (!currentState.reasoningStartTime) {
+              set({ reasoningStartTime: Date.now() });
+            }
+            set({ streamingReasoning: reasoningContent });
+          }
         );
       }
       
@@ -938,7 +954,8 @@ export const useChatStore = create<ChatStore>()(
         
         // Send again to get final response from AI
         assistantContent = ''; // Reset content for new response
-        set({ streamingContent: '', isLoading: true }); // Keep loading state with empty content
+        let reasoningContent = '';
+        set({ streamingContent: '', streamingReasoning: '', reasoningStartTime: null, isLoading: true }); // Keep loading state with empty content
         
         response = await sendAIMessage(
           aiMessages,
@@ -951,7 +968,18 @@ export const useChatStore = create<ChatStore>()(
           webSearchSettings,
           controller.signal,
           toolDefinitions.length > 0 ? toolDefinitions : undefined, // Pass tools again for follow-up calls
-          undefined
+          undefined,
+          undefined,
+          undefined,
+          (reasoningChunk) => {
+            reasoningContent += reasoningChunk;
+            const currentState = get();
+            // Начинаем отсчет времени при первом чанке reasoning
+            if (!currentState.reasoningStartTime) {
+              set({ reasoningStartTime: Date.now() });
+            }
+            set({ streamingReasoning: reasoningContent });
+          }
         );
       }
       
@@ -988,6 +1016,14 @@ export const useChatStore = create<ChatStore>()(
       });
 
       // Save assistant message with citations, tool executions and generated images
+      // Calculate reasoning duration if available
+      const { reasoningStartTime } = get();
+      let reasoningDuration: number | undefined;
+      if (reasoningStartTime && response.reasoning_content) {
+        reasoningDuration = Math.ceil((Date.now() - reasoningStartTime) / 1000); // seconds
+        console.log('[chatStore] Reasoning duration:', reasoningDuration, 'seconds');
+      }
+      
       const assistantMessage: ChatMessage = {
         id: assistantMessageId,
         createdAt: Date.now(),
@@ -1000,7 +1036,9 @@ export const useChatStore = create<ChatStore>()(
         citations: response.citations,
         toolCalls: toolExecutions.length > 0 ? toolExecutions : undefined,
         generatedImages: response.images ? JSON.stringify(response.images) : undefined,
-        responseId: response.response_id
+        responseId: response.response_id,
+        reasoningContent: response.reasoning_content, // Сохраняем reasoning отдельно, не отправляется в контексте
+        reasoningDuration // Сохраняем длительность рассуждения
       };
 
       await addMessage(assistantMessage);
@@ -1128,6 +1166,8 @@ export const useChatStore = create<ChatStore>()(
       set({ 
         isLoading: false, 
         streamingContent: '',
+        streamingReasoning: '',
+        reasoningStartTime: null,
         activeToolExecutions: [], // Очищаем после завершения
         loadingChats: newLoadingChats,
         activeRequestController: null
@@ -1186,6 +1226,8 @@ export const useChatStore = create<ChatStore>()(
             loadingChats: newLoadingChats,
             isLoading: false,
             streamingContent: '',
+            streamingReasoning: '',
+            reasoningStartTime: null,
             activeToolExecutions: [], // Очищаем
             activeRequestController: null
           });
@@ -1284,7 +1326,7 @@ export const useChatStore = create<ChatStore>()(
     }
   },
 
-  clearChat: () => set({ currentChat: null, messages: [], streamingContent: '', error: null }),
+  clearChat: () => set({ currentChat: null, messages: [], streamingContent: '', streamingReasoning: '', reasoningStartTime: null, error: null }),
 
   clearError: () => set({ error: null }),
 
@@ -1437,6 +1479,8 @@ ${responseContext}`;
       set({ 
         isLoading: false, 
         streamingContent: '',
+        streamingReasoning: '',
+        reasoningStartTime: null,
         loadingChats: newLoadingChats,
         activeRequestController: null
       });

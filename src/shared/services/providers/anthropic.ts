@@ -15,7 +15,9 @@ export class AnthropicProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    _previousResponseId?: string
+    _previousResponseId?: string,
+    _editingImageBase64?: string,
+    _onReasoningChunk?: (chunk: string) => void
   ): Promise<AIResponse> {
     console.log('[Anthropic] Starting chat request');
     console.log('[Anthropic] Model:', model);

@@ -9,9 +9,15 @@ import {
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
 import { Response } from '@/components/ai-elements/response';
+import {
+  Reasoning,
+  ReasoningTrigger,
+  ReasoningContent,
+} from '@/components/ai-elements/reasoning';
 import { 
   AlertCircle, 
-  X
+  X,
+  BrainIcon
 } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
 import {
@@ -41,6 +47,7 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
   const { 
     messages, 
     streamingContent,
+    streamingReasoning,
     activeToolExecutions, // Добавил
     isLoading, 
     error, 
@@ -122,7 +129,9 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
           suggestedQuestions: msg.suggestedQuestions,
           citations: msg.citations,
           generatedImages: msg.generatedImages,
-          responseId: msg.responseId
+          responseId: msg.responseId,
+          reasoningContent: msg.reasoningContent,
+          reasoningDuration: msg.reasoningDuration
         });
       }
     });
@@ -954,7 +963,7 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
           </div>
         )}
 
-        {isLoading && streamingContent && (
+        {isLoading && (streamingContent || streamingReasoning) && (
           <div className="flex flex-col">
             {/* Show active tool executions */}
             {activeToolExecutions.length > 0 && (
@@ -965,9 +974,32 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
               </div>
             )}
             
-            <div className="rounded-lg p-4 max-w-[80%] text-base">
-              <Response>{streamingContent}</Response>
-            </div>
+            {/* Show streaming reasoning if available */}
+            {streamingReasoning && (
+              <Reasoning isStreaming={true} defaultOpen={true} className="pl-[5px]">
+                <ReasoningTrigger>
+                  <div className="flex items-center gap-2">
+                    <BrainIcon className="size-4" />
+                    <span className="text-muted-foreground text-sm">
+                      Thinking
+                      <span className="inline-flex gap-0.5 ml-1">
+                        <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
+                        <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
+                        <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+                      </span>
+                    </span>
+                  </div>
+                </ReasoningTrigger>
+                <ReasoningContent>{streamingReasoning}</ReasoningContent>
+              </Reasoning>
+            )}
+            
+            {/* Show streaming content */}
+            {streamingContent && (
+              <div className="rounded-lg p-4 max-w-[80%] text-base">
+                <Response>{streamingContent}</Response>
+              </div>
+            )}
           </div>
         )}
 

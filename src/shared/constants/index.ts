@@ -151,6 +151,7 @@ export const EXTERNAL_URLS = {
   OPENROUTER_API_KEYS: 'https://openrouter.ai/keys',
   GROK_CONSOLE: 'https://console.x.ai/',
   GEMINI_API_KEY: 'https://makersuite.google.com/app/apikey',
+  DEEPSEEK_API_KEYS: 'https://platform.deepseek.com/api_keys',
   
   // Tools and Resources
   LMSTUDIO_DOWNLOAD: 'https://lmstudio.ai/',
@@ -167,6 +168,7 @@ export const AI_OPERATOR_LINKS: Record<AIOperator, string> = {
   grok: EXTERNAL_URLS.GROK_CONSOLE,
   gemini: EXTERNAL_URLS.GEMINI_API_KEY,
   lmstudio: '', // Local operator, no API key needed
+  deepseek: EXTERNAL_URLS.DEEPSEEK_API_KEYS,
 } as const;
 
 // =============================================================================
@@ -181,6 +183,7 @@ export const API_CONFIG = {
   GROK_ENDPOINT: 'https://api.x.ai/v1',
   GEMINI_ENDPOINT: 'https://generativelanguage.googleapis.com/v1beta',
   LMSTUDIO_ENDPOINT: 'http://localhost:1234/v1',
+  DEEPSEEK_ENDPOINT: 'https://api.deepseek.com',
   
   // Cache settings
   MODELS_CACHE_DURATION: 24 * 60 * 60 * 1000, // 24 hours

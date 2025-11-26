@@ -16,7 +16,9 @@ export class OpenAIProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    previousResponseId?: string
+    previousResponseId?: string,
+    _editingImageBase64?: string,
+    _onReasoningChunk?: (chunk: string) => void
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.openai.com/v1';
     

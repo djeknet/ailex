@@ -61,6 +61,11 @@ import {
   InlineCitationCarouselItem,
   InlineCitationSource,
 } from '@/components/ai-elements/inline-citation';
+import {
+  Reasoning,
+  ReasoningTrigger,
+  ReasoningContent,
+} from '@/components/ai-elements/reasoning';
 import CompareModelSelect from './CompareModelSelect';
 import SuggestedQuestions from './SuggestedQuestions';
 
@@ -457,6 +462,19 @@ export default function AIMessage({
                 </div>
               )}
               
+              {/* Show reasoning if available (DeepSeek reasoner) */}
+              {message.reasoningContent && (
+                <Reasoning 
+                  defaultOpen={false} 
+                  isStreaming={false}
+                  duration={message.reasoningDuration}
+                  className="pl-[5px] pr-[5px]"
+                >
+                  <ReasoningTrigger />
+                  <ReasoningContent>{message.reasoningContent}</ReasoningContent>
+                </Reasoning>
+              )}
+              
               <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
                 {renderMessageWithCitations(message.text, message.citations, message.operator)}
               </div>
@@ -470,6 +488,19 @@ export default function AIMessage({
             /* Pages 1+: Alternative responses */
             ...branches.map((branch, idx) => (
               <div key={`branch-${idx}`}>
+                {/* Show reasoning if available (DeepSeek reasoner) */}
+                {branch.reasoningContent && (
+                  <Reasoning 
+                    defaultOpen={false} 
+                    isStreaming={false}
+                    duration={branch.reasoningDuration}
+                    className="pl-[5px]"
+                  >
+                    <ReasoningTrigger />
+                    <ReasoningContent>{branch.reasoningContent}</ReasoningContent>
+                  </Reasoning>
+                )}
+                
                 <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
                   {renderMessageWithCitations(branch.text, branch.citations, branch.operator)}
                 </div>
@@ -534,6 +565,19 @@ export default function AIMessage({
             <ToolExecutionDisplay key={toolExecution.id} toolExecution={toolExecution} />
           ))}
         </div>
+      )}
+      
+      {/* Show reasoning if available (DeepSeek reasoner) */}
+      {message.reasoningContent && (
+        <Reasoning 
+          defaultOpen={false} 
+          isStreaming={false}
+          duration={message.reasoningDuration}
+          className="pl-[5px]"
+        >
+          <ReasoningTrigger />
+          <ReasoningContent>{message.reasoningContent}</ReasoningContent>
+        </Reasoning>
       )}
       
       <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
