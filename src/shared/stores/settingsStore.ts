@@ -3,6 +3,10 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { ExtensionSettings, Instruction } from '@shared/types/extension';
 import { encryptApiKey, decryptApiKey, getEncryptionMetadata } from '@shared/utils/encryption';
 import { i18nService } from '@shared/i18n/i18nService';
+import { ColorScheme } from '@shared/constants/colorSchemes';
+import { applyColorScheme } from '@shared/utils/colorScheme';
+import { FontFamily } from '@shared/constants/fonts';
+import { applyFontFamily } from '@shared/utils/fontFamily';
 
 export interface ExportedSettings {
   version: string;
@@ -12,6 +16,8 @@ export interface ExportedSettings {
   operators: ExtensionSettings['operators'];
   generalSettings: {
     theme: ExtensionSettings['theme'];
+    colorScheme?: ColorScheme;
+    fontFamily?: FontFamily;
     language: ExtensionSettings['language'];
     historyMode: ExtensionSettings['historyMode'];
     showAISuggestions: boolean;
@@ -39,6 +45,8 @@ interface SettingsStore extends ExtensionSettings {
   setActiveView: (view: SettingsStore['activeView']) => void;
   setActiveSettingsTab: (tab: SettingsStore['activeSettingsTab']) => void;
   setTheme: (theme: ExtensionSettings['theme']) => void;
+  setColorScheme: (scheme: ColorScheme) => void;
+  setFontFamily: (font: FontFamily) => void;
   setLanguage: (language: ExtensionSettings['language']) => Promise<void>;
   setHistoryMode: (mode: ExtensionSettings['historyMode']) => void;
   setShowAISuggestions: (enabled: boolean) => void;
@@ -62,6 +70,8 @@ export const useSettingsStore = create<SettingsStore>()(
     (set, _get) => ({
       // Default values
       theme: 'system',
+      colorScheme: 'green',
+      fontFamily: 'system',
       language: 'en',
       historyMode: 'all',
       operators: [],
@@ -82,6 +92,24 @@ export const useSettingsStore = create<SettingsStore>()(
       setTheme: (theme) => {
         set({ theme });
         chrome.storage.sync.set({ theme });
+        // Применяем цветовую схему при изменении темы
+        const { colorScheme } = _get();
+        applyColorScheme(colorScheme || 'green', theme);
+      },
+
+      setColorScheme: (colorScheme) => {
+        set({ colorScheme });
+        chrome.storage.sync.set({ colorScheme });
+        // Применяем цветовую схему сразу
+        const { theme } = _get();
+        applyColorScheme(colorScheme, theme);
+      },
+
+      setFontFamily: (fontFamily) => {
+        set({ fontFamily });
+        chrome.storage.sync.set({ fontFamily });
+        // Применяем шрифт сразу
+        applyFontFamily(fontFamily);
       },
 
       setLanguage: async (language) => {
@@ -199,10 +227,12 @@ export const useSettingsStore = create<SettingsStore>()(
         console.log('[settingsStore] initializeSettings called');
         return new Promise((resolve) => {
           chrome.storage.sync.get(
-            ['theme', 'language', 'historyMode', 'operators', 'personalInfo', 'generalInstruction', 'instructions', 'showAISuggestions', 'showSiteWidget', 'developerMode', 'autoDeletionDays'],
+            ['theme', 'colorScheme', 'fontFamily', 'language', 'historyMode', 'operators', 'personalInfo', 'generalInstruction', 'instructions', 'showAISuggestions', 'showSiteWidget', 'developerMode', 'autoDeletionDays'],
             async (result) => {
               console.log('[settingsStore] Loaded from sync storage:', {
                 theme: result.theme,
+                colorScheme: result.colorScheme,
+                fontFamily: result.fontFamily,
                 language: result.language,
                 historyMode: result.historyMode,
                 operatorsCount: result.operators?.length || 0,
@@ -264,6 +294,8 @@ export const useSettingsStore = create<SettingsStore>()(
               
               set({
                 theme: result.theme || 'system',
+                colorScheme: result.colorScheme || 'green',
+                fontFamily: result.fontFamily || 'system',
                 language: result.language || 'en',
                 historyMode: result.historyMode || 'all',
                 operators: operatorsWithModels,
@@ -275,6 +307,16 @@ export const useSettingsStore = create<SettingsStore>()(
                 developerMode: result.developerMode || false,
                 autoDeletionDays: result.autoDeletionDays || 30
               });
+
+              // Применяем цветовую схему после загрузки настроек
+              const colorScheme = result.colorScheme || 'green';
+              const theme = result.theme || 'system';
+              applyColorScheme(colorScheme as ColorScheme, theme);
+
+              // Применяем шрифт после загрузки настроек
+              const fontFamily = result.fontFamily || 'system';
+              applyFontFamily(fontFamily as FontFamily);
+
               resolve();
             }
           );
@@ -301,6 +343,8 @@ export const useSettingsStore = create<SettingsStore>()(
           operators: operatorsForExport,
           generalSettings: {
             theme: state.theme,
+            colorScheme: state.colorScheme,
+            fontFamily: state.fontFamily,
             language: state.language,
             historyMode: state.historyMode,
             showAISuggestions: state.showAISuggestions,
@@ -385,9 +429,11 @@ export const useSettingsStore = create<SettingsStore>()(
 
         // Import general settings
         if (options.generalSettings && data.generalSettings) {
-          const { theme, language, historyMode, showAISuggestions, showSiteWidget, developerMode, autoDeletionDays } = data.generalSettings;
+          const { theme, colorScheme, fontFamily, language, historyMode, showAISuggestions, showSiteWidget, developerMode, autoDeletionDays } = data.generalSettings;
           
           if (theme) state.setTheme(theme);
+          if (colorScheme) state.setColorScheme(colorScheme);
+          if (fontFamily) state.setFontFamily(fontFamily);
           if (language) await state.setLanguage(language);
           if (historyMode) state.setHistoryMode(historyMode);
           if (showAISuggestions !== undefined) state.setShowAISuggestions(showAISuggestions);

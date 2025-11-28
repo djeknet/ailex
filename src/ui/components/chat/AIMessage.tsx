@@ -8,6 +8,7 @@ import { useChatStore } from '@shared/stores/chatStore';
 import ToolExecutionDisplay from './ToolExecutionDisplay';
 import GeneratedImage from './GeneratedImage';
 import type { GeneratedImage as GeneratedImageType } from '@shared/types/ai';
+import { useState, useRef } from 'react';
 import {
   Copy,
   Check,
@@ -67,6 +68,7 @@ import {
   ReasoningContent,
 } from '@/components/ai-elements/reasoning';
 import CompareModelSelect from './CompareModelSelect';
+import ConsulModelSelect from './ConsulModelSelect';
 import SuggestedQuestions from './SuggestedQuestions';
 
 interface AIMessageProps {
@@ -79,6 +81,7 @@ interface AIMessageProps {
   onCopy?: (text: string, messageId: string, withFormatting?: boolean) => void;
   onRewrite?: (messageId: string, action: string) => void;
   onCompare?: (messageId: string, operator: AIOperatorConfig, modelId: string) => void;
+  onConsulSummary?: (messageId: string, operator: AIOperatorConfig, modelId: string) => void;
   onBranchChange?: (branchIndex: number) => void;
   onQuestionClick?: (question: string, operator?: string, model?: string) => void;
   operators?: AIOperatorConfig[];
@@ -98,6 +101,7 @@ export default function AIMessage({
   onCopy,
   onRewrite,
   onCompare,
+  onConsulSummary,
   onBranchChange,
   onQuestionClick,
   isLoading = false,
@@ -108,6 +112,33 @@ export default function AIMessage({
   const { t } = useTranslation();
   const { citationMode } = useWebSearchStore();
   const { setEditingImageResponseId } = useChatStore();
+  const [isNavigationHovered, setIsNavigationHovered] = useState(false);
+  const [isConsulMenuOpen, setIsConsulMenuOpen] = useState(false);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle mouse enter - show button immediately
+  const handleMouseEnter = () => {
+    // Clear any pending hide timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    setIsNavigationHovered(true);
+  };
+
+  // Handle mouse leave - hide button with delay (only if menu is not open)
+  const handleMouseLeave = () => {
+    // Don't hide if menu is open
+    if (isConsulMenuOpen) {
+      return;
+    }
+    
+    // Set timeout to hide button after 1 second
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsNavigationHovered(false);
+      hideTimeoutRef.current = null;
+    }, 1000);
+  };
 
   // Handler for editing an image
   const handleEditImage = (responseId: string) => {
@@ -515,7 +546,11 @@ export default function AIMessage({
         </BranchMessages>
         
         {/* Branch navigation at the bottom with model names */}
-        <div className="mt-2 flex items-center gap-2">
+        <div 
+          className="mt-2 flex items-center gap-2"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <BranchSelector from="assistant">
             <BranchPrevious />
             <BranchPage />
@@ -532,6 +567,36 @@ export default function AIMessage({
               }
             })()}
           </span>
+          
+          {/* Consul Summary Button - показываем только при наведении и если есть 2+ ответа */}
+          {hasBranches && (branches.length > 0 || activeBranchIndex > 0) && onConsulSummary && (
+            <div 
+              className="transition-opacity duration-200"
+              style={{ opacity: isNavigationHovered ? 1 : 0, pointerEvents: isNavigationHovered ? 'auto' : 'none' }}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <ConsulModelSelect
+                onModelSelect={(operator, modelId) => {
+                  onConsulSummary(message.id, operator, modelId);
+                }}
+                currentOperator={message.operator}
+                currentModel={message.model}
+                onOpenChange={(open) => {
+                  setIsConsulMenuOpen(open);
+                  // If menu is opening, cancel any hide timeout
+                  if (open && hideTimeoutRef.current) {
+                    clearTimeout(hideTimeoutRef.current);
+                    hideTimeoutRef.current = null;
+                  }
+                  // If menu is closing, start hide timeout
+                  if (!open) {
+                    handleMouseLeave();
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
         
         {/* Show questions for active branch */}

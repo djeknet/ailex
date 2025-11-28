@@ -79,6 +79,16 @@ function extractTextContent(): string {
   const nonContent = clone.querySelectorAll(nonContentSelectors);
   nonContent.forEach(el => el.remove());
   
+  // Add spaces around block elements to prevent word concatenation
+  const blockElements = clone.querySelectorAll('div, p, h1, h2, h3, h4, h5, h6, li, td, th, section, article, header, footer, aside, nav, blockquote, pre');
+  blockElements.forEach(el => {
+    // Add space before the element's text if it doesn't start with whitespace
+    const textNode = document.createTextNode(' ');
+    el.insertBefore(textNode, el.firstChild);
+    // Add space after the element's text if it doesn't end with whitespace
+    el.appendChild(document.createTextNode(' '));
+  });
+  
   // Try to extract main content first
   const mainContent = clone.querySelector('main, article, [role="main"], .main-content, #content, #main');
   let rawText = '';
@@ -90,17 +100,17 @@ function extractTextContent(): string {
   }
   
   // Clean up the text:
-  // 1. Remove multiple consecutive blank lines (more than 2 newlines in a row)
+  // 1. Collapse multiple spaces into single space
+  rawText = rawText.replace(/ {2,}/g, ' ');
+  
+  // 2. Remove multiple consecutive blank lines (more than 2 newlines in a row)
   rawText = rawText.replace(/\n{3,}/g, '\n\n');
   
-  // 2. Remove lines that contain only whitespace
+  // 3. Remove lines that contain only whitespace
   rawText = rawText.split('\n')
     .map(line => line.trim())
     .filter(line => line.length > 0)
     .join('\n');
-  
-  // 3. Collapse multiple spaces into single space
-  rawText = rawText.replace(/ {2,}/g, ' ');
   
   // 4. Remove excessive newlines again after trimming
   rawText = rawText.replace(/\n{2,}/g, '\n\n');

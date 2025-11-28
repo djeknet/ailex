@@ -12,11 +12,13 @@ import { HistoryMode } from '@shared/types/extension';
 import { historyAPI, chatAPI } from '@shared/utils/messaging';
 import { Trash2, CheckCircle2, Download, Upload } from 'lucide-react';
 import { UI_LANGUAGES, SUPPORTED_LANGUAGES } from '@shared/constants';
+import { ColorScheme } from '@shared/constants/colorSchemes';
+import { FontFamily, FONT_FAMILIES } from '@shared/constants/fonts';
 import ImportDialog from './ImportDialog';
 
 export default function GeneralTab() {
   const { t } = useTranslation();
-  const { theme, language, historyMode, showAISuggestions, showSiteWidget, developerMode, autoDeletionDays, setTheme, setLanguage, setHistoryMode, setShowAISuggestions, setShowSiteWidget, setDeveloperMode, setAutoDeletionDays, exportSettings } = useSettingsStore();
+  const { theme, colorScheme, fontFamily, language, historyMode, showAISuggestions, showSiteWidget, developerMode, autoDeletionDays, setTheme, setColorScheme, setFontFamily, setLanguage, setHistoryMode, setShowAISuggestions, setShowSiteWidget, setDeveloperMode, setAutoDeletionDays, exportSettings } = useSettingsStore();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -111,6 +113,41 @@ export default function GeneralTab() {
             <SelectItem value="light">{t('light')}</SelectItem>
             <SelectItem value="dark">{t('dark')}</SelectItem>
             <SelectItem value="system">{t('system')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>{t('colorScheme')}</Label>
+        <Select value={colorScheme || 'green'} onValueChange={(value) => setColorScheme(value as ColorScheme)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="green">{t('colorSchemeGreen')}</SelectItem>
+            <SelectItem value="blue">{t('colorSchemeBlue')}</SelectItem>
+            <SelectItem value="neutral">{t('colorSchemeNeutral')}</SelectItem>
+            <SelectItem value="orange">{t('colorSchemeOrange')}</SelectItem>
+            <SelectItem value="red">{t('colorSchemeRed')}</SelectItem>
+            <SelectItem value="rose">{t('colorSchemeRose')}</SelectItem>
+            <SelectItem value="violet">{t('colorSchemeViolet')}</SelectItem>
+            <SelectItem value="yellow">{t('colorSchemeYellow')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>{t('fontFamily')}</Label>
+        <Select value={fontFamily || 'system'} onValueChange={(value) => setFontFamily(value as FontFamily)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(FONT_FAMILIES).map(([key]) => (
+              <SelectItem key={key} value={key}>
+                {t(`fontFamily${key.charAt(0).toUpperCase() + key.slice(1).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())}`)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

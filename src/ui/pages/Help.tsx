@@ -2,13 +2,15 @@ import { useTranslation } from '@shared/i18n/useTranslation';
 import { HELP_SECTIONS } from '@shared/constants/helpSections';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@ui/components/ui/accordion';
 import { ScrollArea } from '@ui/components/ui/scroll-area';
+import { Button } from '@/ui/components/ui/button';
 import VideoPlayer from '@ui/components/help/VideoPlayer';
 import { 
   MessageSquare, 
   Paperclip, 
   Wrench, 
   MousePointerClick, 
-  History 
+  History,
+  ArrowLeft
 } from 'lucide-react';
 
 const categoryIcons = {
@@ -19,7 +21,19 @@ const categoryIcons = {
   history: History,
 };
 
-export default function Help() {
+const categoryKeys: Record<string, string> = {
+  'chat': 'chat',
+  'media': 'media',
+  'tools': 'tools',
+  'context-menu': 'contextMenu',
+  'history': 'history',
+};
+
+interface HelpProps {
+  onBack?: () => void;
+}
+
+export default function Help({ onBack }: HelpProps = {}) {
   const { t } = useTranslation();
 
   // Group sections by category
@@ -35,7 +49,15 @@ export default function Help() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="border-b px-6 py-4">
-        <h1 className="text-2xl font-bold mb-1">{t('helpPageTitle')}</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold">{t('helpPageTitle')}</h1>
+          {onBack && (
+            <Button variant="ghost" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t('back')}
+            </Button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">{t('helpPageSubtitle')}</p>
       </div>
 
@@ -52,7 +74,7 @@ export default function Help() {
                   <div className="flex items-center gap-2 mb-2">
                     {Icon && <Icon className="h-5 w-5 text-primary" />}
                     <h2 className="text-lg font-semibold">
-                      {t(`helpCategory_${category.replace('-', '')}` as any)}
+                      {t(`helpCategory_${categoryKeys[category] || category}` as any)}
                     </h2>
                   </div>
 

@@ -23,6 +23,12 @@ import {
   DialogTitle,
 } from '@/ui/components/ui/dialog';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/ui/components/ui/tooltip';
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -40,15 +46,21 @@ import {
   FolderInput,
   Trash2,
   Plus,
+  History,
+  HelpCircle,
+  Wrench,
 } from 'lucide-react';
 
 interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   onOpenSettings: () => void;
+  onOpenHistory: () => void;
+  onOpenHelp: () => void;
+  onOpenTools: () => void;
 }
 
-export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, onOpenHistory, onOpenHelp, onOpenTools }: SidebarProps) {
   const { t } = useTranslation();
   const {
     chats,
@@ -262,7 +274,13 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
                   
                   {/* Folder menu */}
                   <div className="flex-shrink-0 ml-auto pr-3">
-                    {(hoveredChatId === folder.id || openDropdownId === folder.id) && (
+                    <div
+                      className="transition-opacity"
+                      style={{
+                        opacity: (hoveredChatId === folder.id || openDropdownId === folder.id) ? 1 : 0,
+                        pointerEvents: (hoveredChatId === folder.id || openDropdownId === folder.id) ? 'auto' : 'none'
+                      }}
+                    >
                       <DropdownMenu
                         open={openDropdownId === folder.id}
                         onOpenChange={(open) => setOpenDropdownId(open ? folder.id : null)}
@@ -300,7 +318,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    )}
+                    </div>
                   </div>
                 </div>
                 <CollapsibleContent className="ml-4 mt-1 space-y-1">
@@ -316,7 +334,13 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
                     >
                       <span className="flex-1 truncate min-w-0 mr-1">{chat.title}</span>
                       <div className="flex-shrink-0 ml-auto">
-                        {(hoveredChatId === chat.id || openDropdownId === chat.id) && (
+                        <div
+                          className="transition-opacity"
+                          style={{
+                            opacity: (hoveredChatId === chat.id || openDropdownId === chat.id) ? 1 : 0,
+                            pointerEvents: (hoveredChatId === chat.id || openDropdownId === chat.id) ? 'auto' : 'none'
+                          }}
+                        >
                           <DropdownMenu
                             open={openDropdownId === chat.id}
                             onOpenChange={(open) => setOpenDropdownId(open ? chat.id : null)}
@@ -374,7 +398,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -395,7 +419,13 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
               >
                 <span className="flex-1 truncate min-w-0 mr-1">{chat.title}</span>
                 <div className="flex-shrink-0 ml-auto">
-                  {(hoveredChatId === chat.id || openDropdownId === chat.id) && (
+                  <div
+                    className="transition-opacity"
+                    style={{
+                      opacity: (hoveredChatId === chat.id || openDropdownId === chat.id) ? 1 : 0,
+                      pointerEvents: (hoveredChatId === chat.id || openDropdownId === chat.id) ? 'auto' : 'none'
+                    }}
+                  >
                     <DropdownMenu
                       open={openDropdownId === chat.id}
                       onOpenChange={(open) => setOpenDropdownId(open ? chat.id : null)}
@@ -462,7 +492,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -471,14 +501,69 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings }:
 
         {/* Footer */}
         <div className="p-3 border-t">
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={onOpenSettings}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            {t('settings')}
-          </Button>
+          <TooltipProvider>
+            <div className="flex items-center justify-around gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onOpenSettings}
+                  >
+                    <Settings className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('settings')}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onOpenHistory}
+                  >
+                    <History className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('history')}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onOpenHelp}
+                  >
+                    <HelpCircle className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('help')}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onOpenTools}
+                  >
+                    <Wrench className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('tools')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
       </div>
 

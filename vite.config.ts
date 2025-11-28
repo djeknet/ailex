@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
         targets: [
           { src: 'src/_locales', dest: '' },
           { src: 'icons', dest: '' },
+          { src: 'fonts', dest: '' },
           { src: 'site-prompts.json', dest: '' }
         ]
       })

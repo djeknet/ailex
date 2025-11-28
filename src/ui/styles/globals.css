@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font Faces */
+@layer base {
+  /* System Default (Sans-serif) - no @font-face needed */
+  
+  @font-face {
+    font-family: 'Urbanist';
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/Urbanist.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/JetBrainsMono.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/IBMPlexSans.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Manrope';
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/Manrope.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Ubuntu Sans';
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/UbuntuSans.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+}
+
 
 @layer base {
   :root {
@@ -195,6 +235,17 @@
   /* Для inline кода */
   .rounded-lg code {
     white-space: pre-wrap;
+  }
+  
+  /* Переопределение inline-стилей от streamdown для блоков кода */
+  .rounded-lg pre {
+    background-color: hsl(var(--muted) / 0.4) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  /* Переопределение цветов span'ов внутри блоков кода для темной темы */
+  .dark .rounded-lg pre code span[style*="color"] {
+    filter: invert(1) hue-rotate(180deg) brightness(1.2);
   }
 }
 

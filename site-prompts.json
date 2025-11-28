@@ -11,14 +11,14 @@
         ],
         "prompts": [
           {
-            "text": "Проанализируй отзывы: отсей фейковые и составь честный список плюсов и минусов.",
+            "text": "Analyze reviews: filter out fake ones and make an honest list of pros and cons.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_amazon_product_0"
           },
           {
-            "text": "Проверь цену этого товара на других сайтах (Walmart, eBay) и найди дешевле.",
+            "text": "Check the price of this product on other sites (Walmart, eBay) and find a cheaper one.",
             "capabilities": [
               "context",
               "search"
@@ -26,7 +26,7 @@
             "textKey": "sitePrompt_amazon_product_1"
           },
           {
-            "text": "Посмотри на фото из отзывов и сравни с рекламными. Есть ли явные отличия?",
+            "text": "Look at photos from reviews and compare them with advertising photos. Are there any obvious differences?",
             "capabilities": [
               "vision",
               "context"
@@ -34,7 +34,7 @@
             "textKey": "sitePrompt_amazon_product_2"
           },
           {
-            "text": "Найди видеообзор этого товара на YouTube и выдели главные проблемы.",
+            "text": "Find a video review of this product on YouTube and highlight the main issues.",
             "capabilities": [
               "context",
               "search"
@@ -51,14 +51,14 @@
         ],
         "prompts": [
           {
-            "text": "Выбери 3 лучших товара со страницы по соотношению цена/рейтинг.",
+            "text": "Select the 3 best products from the page based on price/rating ratio.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_amazon_search_0"
           },
           {
-            "text": "Есть ли здесь товары с подозрительно накрученными отзывами?",
+            "text": "Are there any products here with suspiciously inflated reviews?",
             "capabilities": [
               "context"
             ],
@@ -75,11 +75,11 @@
         "selectors": [
           "h1.x-item-title__mainTitle",
           "#itemTitle",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Проверь репутацию продавца: были ли у него негативные отзывы за последний месяц?",
+            "text": "Check the seller's reputation: have they had any negative reviews in the last month?",
             "capabilities": [
               "context",
               "search"
@@ -87,14 +87,14 @@
             "textKey": "sitePrompt_ebay_product_0"
           },
           {
-            "text": "Сравни цену с 'Купить сейчас' и аукционами. Как выгоднее?",
+            "text": "Compare the price with ‘Buy Now’ and auctions. Which is more profitable?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_ebay_product_1"
           },
           {
-            "text": "Посмотри историю цен на этот товар в интернете: это хорошая сделка?",
+            "text": "Check the price history for this item online: is it a good deal?",
             "capabilities": [
               "search"
             ],
@@ -109,20 +109,20 @@
     "pageTypes": {
       "product": {
         "selectors": [
-          "h1[itemprop='name']",
+          "h1[itemprop=‘name’]",
           "h1#main-title",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Сформируй краткий отчет: плюсы, минусы и скрытые недостатки из отзывов.",
+            "text": "Generate a brief report: pros, cons, and hidden flaws from reviews.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_walmart_product_0"
           },
           {
-            "text": "Сравни цену с Amazon прямо сейчас.",
+            "text": "Compare the price with Amazon right now.",
             "capabilities": [
               "context",
               "search"
@@ -130,7 +130,7 @@
             "textKey": "sitePrompt_walmart_product_1"
           },
           {
-            "text": "Найди этот же товар под другим брендом (White Label) дешевле.",
+            "text": "Find the same product under a different brand (White Label) for less.",
             "capabilities": [
               "context",
               "search"
@@ -148,11 +148,11 @@
         "selectors": [
           ".product-title-text",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "По фото товара найди оригинал бренда. Это копия или оригинал?",
+            "text": "Find the original brand based on the product photo. Is this a copy or the original?",
             "capabilities": [
               "vision",
               "search",
@@ -161,14 +161,14 @@
             "textKey": "sitePrompt_aliexpress_product_0"
           },
           {
-            "text": "Проанализируй рейтинг магазина и отзывы: безопасно ли здесь покупать?",
+            "text": "Analyze the store's rating and reviews: is it safe to buy here?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_aliexpress_product_1"
           },
           {
-            "text": "Найди этот товар на Amazon/Wildberries, чтобы понять реальную наценку.",
+            "text": "Find this product on Amazon/Wildberries to understand the real markup.",
             "capabilities": [
               "context",
               "search"
@@ -190,7 +190,7 @@
         ],
         "prompts": [
           {
-            "text": "Проверь через поиск по картинке: это действительно ручная работа или перепродажа с AliExpress?",
+            "text": "Check using image search: is this really handmade or resold from AliExpress?",
             "capabilities": [
               "vision",
               "search",
@@ -199,7 +199,7 @@
             "textKey": "sitePrompt_etsy_product_0"
           },
           {
-            "text": "Выдели упоминания о качестве материалов в отзывах.",
+            "text": "Highlight mentions of material quality in reviews.",
             "capabilities": [
               "context"
             ],
@@ -216,7 +216,7 @@
         "selectors": [
           "h1.ytd-watch-metadata",
           "#title h1",
-          "meta[name='title']"
+          "meta[name=‘title’]"
         ],
         "prompts": [
           {
@@ -264,18 +264,18 @@
       "channel": {
         "selectors": [
           "#channel-name",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "О чем этот канал? Сделай анализ тематики и аудитории.",
+            "text": "What is this channel about? Analyze the topics and audience.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_youtube_channel_0"
           },
           {
-            "text": "Какие видео на канале самые популярные и почему?",
+            "text": "Which videos on the channel are the most popular and why?",
             "capabilities": [
               "context"
             ],
@@ -296,7 +296,7 @@
         ],
         "prompts": [
           {
-            "text": "Стоит ли смотреть? Проверь рейтинги на IMDb и Rotten Tomatoes.",
+            "text": "Should you watch it? Check out the ratings on IMDb and Rotten Tomatoes.",
             "capabilities": [
               "context",
               "search"
@@ -304,7 +304,7 @@
             "textKey": "sitePrompt_netflix_title_0"
           },
           {
-            "text": "Кратко напомни сюжет предыдущих сезонов (без спойлеров к этому).",
+            "text": "Briefly remind me of the plot of previous seasons (without spoilers for this one).",
             "capabilities": [
               "context",
               "search"
@@ -312,7 +312,7 @@
             "textKey": "sitePrompt_netflix_title_1"
           },
           {
-            "text": "Найди похожие сериалы с рейтингом выше 8.0.",
+            "text": "Find similar series with a rating above 8.0.",
             "capabilities": [
               "context",
               "search"
@@ -333,14 +333,14 @@
         ],
         "prompts": [
           {
-            "text": "Проверь 'Parents Guide': есть ли сцены, не подходящие для детей?",
+            "text": "Check the Parents Guide: are there any scenes that are not suitable for children?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_imdb_title_0"
           },
           {
-            "text": "Где можно посмотреть этот фильм онлайн (стриминги)?",
+            "text": "Where can I watch this movie online (streaming)?",
             "capabilities": [
               "context",
               "search"
@@ -348,7 +348,7 @@
             "textKey": "sitePrompt_imdb_title_1"
           },
           {
-            "text": "Объясни концовку фильма (Осторожно: спойлеры!).",
+            "text": "Explain the ending of the movie (Warning: spoilers!).",
             "capabilities": [
               "context",
               "search"
@@ -366,18 +366,18 @@
         "selectors": [
           "h1.headline__text",
           "article h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Сделай буллеты с ключевыми фактами статьи.",
+            "text": "Make bullet points with key facts from the article.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_cnn_article_0"
           },
           {
-            "text": "Проверь факты: есть ли подтверждение в других авторитетных источниках?",
+            "text": "Check the facts: is there confirmation in other authoritative sources?",
             "capabilities": [
               "context",
               "search"
@@ -385,7 +385,7 @@
             "textKey": "sitePrompt_cnn_article_1"
           },
           {
-            "text": "Оцени уровень политической предвзятости текста.",
+            "text": "Assess the level of political bias in the text.",
             "capabilities": [
               "context"
             ],
@@ -400,20 +400,20 @@
     "pageTypes": {
       "article": {
         "selectors": [
-          "h1[data-testid='headline']",
+          "h1[data-testid=‘headline’]",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Сделай краткое резюме (Summary) статьи.",
+            "text": "Summarize the article.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_nytimes_article_0"
           },
           {
-            "text": "Найди альтернативные мнения по этой теме.",
+            "text": "Find alternative opinions on this topic.",
             "capabilities": [
               "context",
               "search"
@@ -421,7 +421,7 @@
             "textKey": "sitePrompt_nytimes_article_1"
           },
           {
-            "text": "Объясни контекст: что привело к этим событиям?",
+            "text": "Explain the context: what led to these events?",
             "capabilities": [
               "context",
               "search"
@@ -439,18 +439,18 @@
         "selectors": [
           "h1#main-heading",
           "article h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Кратко перескажи суть новости.",
+            "text": "Briefly summarize the essence of the news.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_bbc_article_0"
           },
           {
-            "text": "Есть ли более свежая информация по этой теме (Update)?",
+            "text": "Is there any more recent information on this topic (Update)?",
             "capabilities": [
               "context",
               "search"
@@ -466,20 +466,20 @@
     "pageTypes": {
       "listing": {
         "selectors": [
-          "h1[data-testid='title']",
+          "h1[data-testid=‘title’]",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Проанализируй отзывы: есть ли жалобы на грязь, шум или хозяина?",
+            "text": "Analyze reviews: are there any complaints about dirt, noise, or the host?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_airbnb_listing_0"
           },
           {
-            "text": "Проверь локацию: безопасно ли там гулять ночью?",
+            "text": "Check the location: is it safe to walk around at night?",
             "capabilities": [
               "context",
               "search"
@@ -487,14 +487,14 @@
             "textKey": "sitePrompt_airbnb_listing_1"
           },
           {
-            "text": "Найди скрытые платежи в описании (уборка, налоги).",
+            "text": "Find hidden fees in the description (cleaning, taxes).",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_airbnb_listing_2"
           },
           {
-            "text": "Посмотри вид из окна на фото и проверь по картам — это правда?",
+            "text": "Look at the view from the window in the photo and check the maps — is it true?",
             "capabilities": [
               "vision",
               "search",
@@ -517,14 +517,14 @@
         ],
         "prompts": [
           {
-            "text": "Выпиши ТОП-3 плюса и ТОП-3 минуса из свежих отзывов.",
+            "text": "Write down the top 3 pros and top 3 cons from recent reviews.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_booking_hotel_0"
           },
           {
-            "text": "Сравни цену на этот отель на сайте отеля и других агрегаторах.",
+            "text": "Compare the price of this hotel on the hotel website and other aggregators.",
             "capabilities": [
               "context",
               "search"
@@ -532,7 +532,7 @@
             "textKey": "sitePrompt_booking_hotel_1"
           },
           {
-            "text": "Как далеко отсюда до главных достопримечательностей?",
+            "text": "How far is it from here to the main attractions?",
             "capabilities": [
               "context",
               "search"
@@ -554,14 +554,14 @@
         ],
         "prompts": [
           {
-            "text": "Сделай сводку по отзывам: что хвалят, а что ругают?",
+            "text": "Summarize the reviews: what do people praise and what do they criticize?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_maps_google_place_0"
           },
           {
-            "text": "Посмотри на фото меню/еды и посоветуй, что заказать.",
+            "text": "Look at the photos of the menu/food and recommend what to order.",
             "capabilities": [
               "vision",
               "context"
@@ -569,7 +569,7 @@
             "textKey": "sitePrompt_maps_google_place_1"
           },
           {
-            "text": "Найди места с рейтингом выше поблизости.",
+            "text": "Find places with higher ratings nearby.",
             "capabilities": [
               "context",
               "search"
@@ -587,18 +587,18 @@
         "selectors": [
           "h1.css-1se8maq",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Стоит ли идти? Оцени соотношение плохих и хороших отзывов.",
+            "text": "Should you go? Evaluate the ratio of bad and good reviews.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_yelp_business_0"
           },
           {
-            "text": "Какие блюда упоминают чаще всего как 'вкусные'?",
+            "text": "Which dishes are most often mentioned as ‘delicious’?",
             "capabilities": [
               "context"
             ],
@@ -618,21 +618,21 @@
         ],
         "prompts": [
           {
-            "text": "Объясни эту тему простыми словами (ELI5).",
+            "text": "Explain this topic in simple terms (ELI5).",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_wikipedia_article_0"
           },
           {
-            "text": "Составь хронологию (Timeline) ключевых событий.",
+            "text": "Create a timeline of key events.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_wikipedia_article_1"
           },
           {
-            "text": "Найди современные исследования, которые дополняют эту статью.",
+            "text": "Find contemporary research that complements this article.",
             "capabilities": [
               "context",
               "search"
@@ -648,12 +648,12 @@
     "pageTypes": {
       "course": {
         "selectors": [
-          "h1[data-e2e='hero-title']",
+          "h1[data-e2e=‘hero-title’]",
           "h1"
         ],
         "prompts": [
           {
-            "text": "Стоит ли проходить? Оцени актуальность программы на 2024-25 год.",
+            "text": "Is it worth taking? Assess the relevance of the program for 2024-25.",
             "capabilities": [
               "context",
               "search"
@@ -661,7 +661,7 @@
             "textKey": "sitePrompt_coursera_course_0"
           },
           {
-            "text": "Поможет ли этот сертификат при поиске работы? (Мнения с Reddit).",
+            "text": "Will this certificate help me find a job? (Opinions from Reddit).",
             "capabilities": [
               "context",
               "search"
@@ -669,7 +669,7 @@
             "textKey": "sitePrompt_coursera_course_1"
           },
           {
-            "text": "Найди бесплатные аналоги этого курса на YouTube.",
+            "text": "Find free alternatives to this course on YouTube.",
             "capabilities": [
               "context",
               "search"
@@ -690,14 +690,14 @@
         ],
         "prompts": [
           {
-            "text": "Напиши персонализированный инвайт (Connection Request) для этого человека.",
+            "text": "Write a personalized invitation (Connection Request) for this person.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_linkedin_profile_0"
           },
           {
-            "text": "Сделай Summary профиля в стиле рекрутера: сильные/слабые стороны.",
+            "text": "Create a recruiter-style profile summary: strengths/weaknesses.",
             "capabilities": [
               "context"
             ],
@@ -712,7 +712,7 @@
         ],
         "prompts": [
           {
-            "text": "Подготовь меня к собеседованию: культура компании и частые вопросы.",
+            "text": "Prepare me for the interview: company culture and frequently asked questions.",
             "capabilities": [
               "context",
               "search"
@@ -720,7 +720,7 @@
             "textKey": "sitePrompt_linkedin_company_0"
           },
           {
-            "text": "Найди отзывы сотрудников об этой компании.",
+            "text": "Find employee reviews about this company.",
             "capabilities": [
               "context",
               "search"
@@ -741,14 +741,14 @@
         ],
         "prompts": [
           {
-            "text": "Выдели 'красные флаги' в отзывах сотрудников.",
+            "text": "Highlight ‘red flags’ in employee reviews.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_glassdoor_company_0"
           },
           {
-            "text": "Сравни предлагаемую зарплату с рыночной.",
+            "text": "Compare the offered salary with the market rate.",
             "capabilities": [
               "context",
               "search"
@@ -764,19 +764,19 @@
     "pageTypes": {
       "repo": {
         "selectors": [
-          "strong[itemprop='name'] a",
+          "strong[itemprop=‘name’] a",
           "#repository-container-header strong a"
         ],
         "prompts": [
           {
-            "text": "Объясни, что делает этот код и как его запустить (из README).",
+            "text": "Explain what this code does and how to run it (from README).",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_github_repo_0"
           },
           {
-            "text": "Посмотри на структуру файлов (дерево) и оцени архитектуру.",
+            "text": "Look at the file structure (tree) and evaluate the architecture.",
             "capabilities": [
               "vision",
               "context"
@@ -784,14 +784,14 @@
             "textKey": "sitePrompt_github_repo_1"
           },
           {
-            "text": "Проанализируй Issues: какие баги встречаются чаще всего?",
+            "text": "Analyze Issues: which bugs occur most often?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_github_repo_2"
           },
           {
-            "text": "Найди более популярные или свежие аналоги этой библиотеки.",
+            "text": "Find more popular or recent alternatives to this library.",
             "capabilities": [
               "context",
               "search"
@@ -812,14 +812,14 @@
         ],
         "prompts": [
           {
-            "text": "Объясни лучшее решение простым языком.",
+            "text": "Explain the best solution in simple terms.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_stackoverflow_question_0"
           },
           {
-            "text": "Проверь, не устарел ли этот код (deprecated)? Найди современный аналог.",
+            "text": "Check if this code is deprecated. Find a modern equivalent.",
             "capabilities": [
               "context",
               "search"
@@ -827,7 +827,7 @@
             "textKey": "sitePrompt_stackoverflow_question_1"
           },
           {
-            "text": "Напиши юнит-тест для этого фрагмента кода.",
+            "text": "Write a unit test for this code snippet.",
             "capabilities": [
               "context"
             ],
@@ -847,7 +847,7 @@
         ],
         "prompts": [
           {
-            "text": "В чем уникальность продукта? Сравни с конкурентами.",
+            "text": "What makes the product unique? Compare it with competitors.",
             "capabilities": [
               "context",
               "search"
@@ -855,7 +855,7 @@
             "textKey": "sitePrompt_producthunt_product_0"
           },
           {
-            "text": "Кто целевая аудитория продукта?",
+            "text": "Who is the target audience for the product?",
             "capabilities": [
               "context"
             ],
@@ -875,14 +875,14 @@
         ],
         "prompts": [
           {
-            "text": "Сделай краткое резюме статьи (TL;DR).",
+            "text": "Provide a brief summary of the article (TL;DR).",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_medium_article_0"
           },
           {
-            "text": "Выдели полезные инсайты в виде чеклиста.",
+            "text": "Highlight useful insights in the form of a checklist.",
             "capabilities": [
               "context"
             ],
@@ -902,21 +902,21 @@
         ],
         "prompts": [
           {
-            "text": "Собери главные аргументы 'За' и 'Против' из обсуждения.",
+            "text": "Collect the main arguments ‘For’ and ‘Against’ from the discussion.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_reddit_post_0"
           },
           {
-            "text": "Найди самый полезный/залайканный совет в треде.",
+            "text": "Find the most useful/liked advice in the thread.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_reddit_post_1"
           },
           {
-            "text": "Определи общее настроение (Sentiment) комментаторов.",
+            "text": "Determine the overall sentiment of commenters.",
             "capabilities": [
               "context"
             ],
@@ -931,34 +931,34 @@
     "pageTypes": {
       "post": {
         "selectors": [
-          "article[data-testid='tweet']",
+          "article[data-testid=‘tweet’]",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Проверь факты из этого твита: правда или фейк?",
+            "text": "Check the facts from this tweet: true or fake?",
             "capabilities": [
               "search"
             ],
             "textKey": "sitePrompt_twitter_post_0"
           },
           {
-            "text": "Найди первоисточник информации из твита.",
+            "text": "Find the original source of information from the tweet.",
             "capabilities": [
               "search"
             ],
             "textKey": "sitePrompt_twitter_post_1"
           },
           {
-            "text": "Проанализируй тональность обсуждения в комментариях.",
+            "text": "Analyze the tone of the discussion in the comments.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_twitter_post_2"
           },
           {
-            "text": "Есть ли другие мнения экспертов по этой теме?",
+            "text": "Are there other expert opinions on this topic?",
             "capabilities": [
               "search"
             ],
@@ -973,34 +973,34 @@
     "pageTypes": {
       "post": {
         "selectors": [
-          "article[data-testid='tweet']",
+          "article[data-testid=‘tweet’]",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Проверь факты из этого твита: правда или фейк?",
+            "text": "Check the facts from this tweet: true or fake?",
             "capabilities": [
               "search"
             ],
             "textKey": "sitePrompt_x_post_0"
           },
           {
-            "text": "Найди первоисточник информации из твита.",
+            "text": "Find the original source of information from the tweet.",
             "capabilities": [
               "search"
             ],
             "textKey": "sitePrompt_x_post_1"
           },
           {
-            "text": "Проанализируй тональность обсуждения в комментариях.",
+            "text": "Analyze the tone of the discussion in the comments.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_x_post_2"
           },
           {
-            "text": "Есть ли другие мнения экспертов по этой теме?",
+            "text": "Are there other expert opinions on this topic?",
             "capabilities": [
               "search"
             ],
@@ -1020,7 +1020,7 @@
         ],
         "prompts": [
           {
-            "text": "Найди оригинал этого фото через обратный поиск.",
+            "text": "Find the original of this photo using reverse image search.",
             "capabilities": [
               "vision",
               "search",
@@ -1029,7 +1029,7 @@
             "textKey": "sitePrompt_instagram_post_0"
           },
           {
-            "text": "Проверь, не подделано ли это изображение (фотошоп)?",
+            "text": "Check if this image is fake (photoshopped).",
             "capabilities": [
               "vision",
               "context"
@@ -1037,7 +1037,7 @@
             "textKey": "sitePrompt_instagram_post_1"
           },
           {
-            "text": "Найди похожий контент или тренд.",
+            "text": "Find similar content or trends.",
             "capabilities": [
               "context",
               "search"
@@ -1188,14 +1188,14 @@
         ],
         "prompts": [
           {
-            "text": "Проанализируй отзывы: честные плюсы и минусы товара.",
+            "text": "Analyze reviews: honest pros and cons of the product.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_wildberries_product_0"
           },
           {
-            "text": "Проверь динамику цены: сейчас выгодная цена или лучше подождать?",
+            "text": "Check price dynamics: is the price favorable now, or is it better to wait?",
             "capabilities": [
               "context",
               "search"
@@ -1203,7 +1203,7 @@
             "textKey": "sitePrompt_wildberries_product_1"
           },
           {
-            "text": "Сравни с аналогами на Ozon и Яндекс.Маркете.",
+            "text": "Compare with similar products on Ozon and Yandex.Market.",
             "capabilities": [
               "context",
               "search"
@@ -1211,7 +1211,7 @@
             "textKey": "sitePrompt_wildberries_product_2"
           },
           {
-            "text": "Проверь фото из отзывов: соответствует ли товар описанию?",
+            "text": "Check photos from reviews: does the product match the description?",
             "capabilities": [
               "vision",
               "context"
@@ -1227,20 +1227,20 @@
     "pageTypes": {
       "product": {
         "selectors": [
-          "h1[data-widget='webProductHeading']",
+          "h1[data-widget=‘webProductHeading’]",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Отфильтруй фейковые отзывы и дай объективную оценку.",
+            "text": "Filter out fake reviews and give an objective assessment.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_ozon_product_0"
           },
           {
-            "text": "Найди этот товар дешевле на WB или Яндекс.Маркете.",
+            "text": "Find this product cheaper on WB or Yandex.Market.",
             "capabilities": [
               "context",
               "search"
@@ -1248,14 +1248,14 @@
             "textKey": "sitePrompt_ozon_product_1"
           },
           {
-            "text": "Проверь рейтинг продавца: можно ли ему доверять?",
+            "text": "Check the seller's rating: can they be trusted?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_ozon_product_2"
           },
           {
-            "text": "Сравни характеристики с фото в отзывах реальных покупателей.",
+            "text": "Compare the characteristics with photos in reviews from real buyers.",
             "capabilities": [
               "vision",
               "context"
@@ -1271,13 +1271,13 @@
     "pageTypes": {
       "listing": {
         "selectors": [
-          "h1[itemprop='name']",
+          "h1[itemprop=‘name’]",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Проверь объявление на признаки мошенничества.",
+            "text": "Check the ad for signs of fraud.",
             "capabilities": [
               "context",
               "vision"
@@ -1285,7 +1285,7 @@
             "textKey": "sitePrompt_avito_listing_0"
           },
           {
-            "text": "Оцени адекватность цены: завышена или занижена?",
+            "text": "Assess the adequacy of the price: is it overpriced or underpriced?",
             "capabilities": [
               "context",
               "search"
@@ -1293,7 +1293,7 @@
             "textKey": "sitePrompt_avito_listing_1"
           },
           {
-            "text": "Проанализируй фото: есть ли скрытые дефекты?",
+            "text": "Analyze the photo: are there any hidden defects?",
             "capabilities": [
               "vision",
               "context"
@@ -1301,7 +1301,7 @@
             "textKey": "sitePrompt_avito_listing_2"
           },
           {
-            "text": "Найди похожие предложения для сравнения цены.",
+            "text": "Find similar offers to compare prices.",
             "capabilities": [
               "context",
               "search"
@@ -1319,11 +1319,11 @@
         "selectors": [
           "h1.sc-65e7f566-0",
           "h1",
-          "meta[property='og:title']"
+          "meta[property=‘og:title’]"
         ],
         "prompts": [
           {
-            "text": "Проанализируй проект: легитимный или возможный скам?",
+            "text": "Analyze the project: legitimate or possible scam?",
             "capabilities": [
               "context",
               "search"
@@ -1331,7 +1331,7 @@
             "textKey": "sitePrompt_coinmarketcap_coin_0"
           },
           {
-            "text": "Найди последние новости и обновления по этой монете.",
+            "text": "Find the latest news and updates on this coin.",
             "capabilities": [
               "context",
               "search"
@@ -1339,7 +1339,7 @@
             "textKey": "sitePrompt_coinmarketcap_coin_1"
           },
           {
-            "text": "Сравни с конкурентами в этой нише.",
+            "text": "Compare with competitors in this niche.",
             "capabilities": [
               "context",
               "search"
@@ -1347,7 +1347,7 @@
             "textKey": "sitePrompt_coinmarketcap_coin_2"
           },
           {
-            "text": "Что говорят эксперты о перспективах проекта?",
+            "text": "What do experts say about the project's prospects?",
             "capabilities": [
               "context",
               "search"
@@ -1773,7 +1773,7 @@
         ],
         "prompts": [
           {
-            "text": "Найди похожие треки с таким же вайбом.",
+            "text": "Find similar tracks with the same vibe.",
             "capabilities": [
               "context",
               "search"
@@ -1781,7 +1781,7 @@
             "textKey": "sitePrompt_spotify_track_0"
           },
           {
-            "text": "Переведи и объясни текст песни (если не на русском).",
+            "text": "Translate and explain the song text (if not in Russian).",
             "capabilities": [
               "context",
               "search"
@@ -1789,7 +1789,7 @@
             "textKey": "sitePrompt_spotify_track_1"
           },
           {
-            "text": "Расскажи историю создания этой песни.",
+            "text": "Tell the story of the creation of this song.",
             "capabilities": [
               "context",
               "search"
@@ -1805,7 +1805,7 @@
         ],
         "prompts": [
           {
-            "text": "Проанализируй плейлист и порекомендуй новые треки.",
+            "text": "Analyze the playlist and recommend new tracks.",
             "capabilities": [
               "context",
               "search"
@@ -1813,7 +1813,7 @@
             "textKey": "sitePrompt_spotify_playlist_0"
           },
           {
-            "text": "Определи жанр и настроение плейлиста.",
+            "text": "Determine the genre and mood of the playlist.",
             "capabilities": [
               "context"
             ],
@@ -1833,7 +1833,7 @@
         ],
         "prompts": [
           {
-            "text": "Оцени цену: справедливая или завышена для этого района?",
+            "text": "Evaluate the price: fair or overpriced for this neighborhood?",
             "capabilities": [
               "context",
               "search"
@@ -1841,7 +1841,7 @@
             "textKey": "sitePrompt_zillow_listing_0"
           },
           {
-            "text": "Проверь историю продаж и изменение цены.",
+            "text": "Check the sales history and price changes.",
             "capabilities": [
               "context",
               "search"
@@ -1849,7 +1849,7 @@
             "textKey": "sitePrompt_zillow_listing_1"
           },
           {
-            "text": "Какие скрытые проблемы могут быть у этого дома?",
+            "text": "What hidden problems might this house have?",
             "capabilities": [
               "context",
               "search"
@@ -1857,7 +1857,7 @@
             "textKey": "sitePrompt_zillow_listing_2"
           },
           {
-            "text": "Проанализируй безопасность и инфраструктуру района.",
+            "text": "Analyze the safety and infrastructure of the neighborhood.",
             "capabilities": [
               "context",
               "search"
@@ -1878,28 +1878,28 @@
         ],
         "prompts": [
           {
-            "text": "Объясни эту концепцию простым языком с примером.",
+            "text": "Explain this concept simply with an example.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_developer_mozilla_article_0"
           },
           {
-            "text": "Покажи совместимость с браузерами и альтернативы.",
+            "text": "Show compatibility with browsers and alternatives.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_developer_mozilla_article_1"
           },
           {
-            "text": "Напиши рабочий пример кода для этого API.",
+            "text": "Write a working example code for this API.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_developer_mozilla_article_2"
           },
           {
-            "text": "Есть ли более современные способы решить эту задачу?",
+            "text": "Are there more modern ways to solve this task?",
             "capabilities": [
               "search"
             ],
@@ -1919,28 +1919,28 @@
         ],
         "prompts": [
           {
-            "text": "Адаптируй рецепт под продукты, которые есть у меня дома.",
+            "text": "Adapt the recipe to the ingredients I have at home.",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_allrecipes_recipe_0"
           },
           {
-            "text": "Сделай версию рецепта более здоровой (меньше калорий/сахара).",
+            "text": "Make a healthier version of the recipe (fewer calories/sugar).",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_allrecipes_recipe_1"
           },
           {
-            "text": "Проанализируй отзывы: какие есть важные советы от тех, кто готовил?",
+            "text": "Analyze the reviews: what are the important tips from those who cooked this recipe?",
             "capabilities": [
               "context"
             ],
             "textKey": "sitePrompt_allrecipes_recipe_2"
           },
           {
-            "text": "Переведи рецепт в метрическую систему (граммы/мл).",
+            "text": "Convert the recipe to the metric system (grams/ml).",
             "capabilities": [
               "context"
             ],
@@ -1961,27 +1961,27 @@
         ],
         "prompts": [
           {
-            "text": "О чем эта страница? Краткое содержание.",
+            "text": "What is this page about? Brief summary.",
             "capabilities": [
               "context"
             ]
           },
           {
-            "text": "Проверь факты со страницы: правда или вымысел?",
+            "text": "Check the facts on the page: true or fiction?",
             "capabilities": [
               "context",
               "search"
             ]
           },
           {
-            "text": "Найди похожие сайты или альтернативы по этой теме.",
+            "text": "Find similar sites or alternatives on this topic.",
             "capabilities": [
               "context",
               "search"
             ]
           },
           {
-            "text": "Сделай скриншот и объясни, что не так с дизайном/UX.",
+            "text": "Take a screenshot and explain what's wrong with the design/UX.",
             "capabilities": [
               "vision",
               "context"

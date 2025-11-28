@@ -40,12 +40,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/ui/select';
-import { Plus, Edit, Trash2, Save, X, BookOpen, MousePointer2, Lightbulb, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, BookOpen, MousePointer2, Lightbulb, Download, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription } from '@/ui/components/ui/alert';
 import DOMFunctionsModal from '@/ui/components/tools/DOMFunctionsModal';
 import AvailableToolsModal from '@/ui/components/tools/AvailableToolsModal';
 
-export default function Tools() {
+export default function Tools({ onBack }: { onBack?: () => void } = {}) {
   const { t } = useTranslation();
   const {
     customTools,
@@ -346,6 +346,12 @@ export default function Tools() {
           <p className="text-muted-foreground">{t('toolsPageDescription')}</p>
         </div>
         <div className="flex gap-2">
+          {onBack && (
+            <Button variant="ghost" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t('back')}
+            </Button>
+          )}
           <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} title={t('importTool')}>
             <Import className="h-4 w-4" />
           </Button>

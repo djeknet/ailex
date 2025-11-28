@@ -59,6 +59,54 @@
   "system": {
     "message": "Системная"
   },
+  "colorScheme": {
+    "message": "Цветовая схема"
+  },
+  "colorSchemeGreen": {
+    "message": "Зеленая"
+  },
+  "colorSchemeBlue": {
+    "message": "Синяя"
+  },
+  "colorSchemeNeutral": {
+    "message": "Нейтральная"
+  },
+  "colorSchemeOrange": {
+    "message": "Оранжевая"
+  },
+  "colorSchemeRed": {
+    "message": "Красная"
+  },
+  "colorSchemeRose": {
+    "message": "Розовая"
+  },
+  "colorSchemeViolet": {
+    "message": "Фиолетовая"
+  },
+  "colorSchemeYellow": {
+    "message": "Желтая"
+  },
+  "fontFamily": {
+    "message": "Шрифт"
+  },
+  "fontFamilySystem": {
+    "message": "Системный"
+  },
+  "fontFamilyUrbanist": {
+    "message": "Urbanist"
+  },
+  "fontFamilyJetbrainsMono": {
+    "message": "JetBrains Mono"
+  },
+  "fontFamilyIbmPlexSans": {
+    "message": "IBM Plex Sans"
+  },
+  "fontFamilyManrope": {
+    "message": "Manrope"
+  },
+  "fontFamilyUbuntuSans": {
+    "message": "Ubuntu Sans"
+  },
   "apiKey": {
     "message": "API ключ"
   },
@@ -520,6 +568,27 @@
   },
   "compareResponses": {
     "message": "Сравнить ответы"
+  },
+  "consulSummary": {
+    "message": "Итоговый ответ консула"
+  },
+  "consulMessage": {
+    "message": "Проанализируй все предыдущие ответы и пришли результат"
+  },
+  "consulTooltip": {
+    "message": "Получить итоговый ответ от выбранной модели на основе всех ответов"
+  },
+  "consulPromptInstruction": {
+    "message": "Сравни все ответы на запрос пользователя от разных ИИ и выдай итоговый, максимально взвешенный и качественный ответ на исходный пользовательский запрос."
+  },
+  "consulPromptQuestion": {
+    "message": "Вопрос:"
+  },
+  "consulPromptAnswers": {
+    "message": "Ответы:"
+  },
+  "consulPromptAnswer": {
+    "message": "Ответ $1 ($2 - $3):"
   },
   "favorites": {
     "message": "Избранные"

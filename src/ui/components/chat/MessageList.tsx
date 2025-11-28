@@ -835,6 +835,109 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
     }
   };
 
+  const handleConsulSummary = async (
+    messageId: string,
+    operator: AIOperatorConfig,
+    modelId: string
+  ) => {
+    try {
+      // Find the AI message
+      const messageIndex = messages.findIndex(m => m.id === messageId);
+      if (messageIndex === -1) {
+        throw new Error(t('errorMessageNotFound'));
+      }
+
+      const aiMessage = messages[messageIndex];
+      
+      // Find the previous user message
+      let userMessage = null;
+      for (let i = messageIndex - 1; i >= 0; i--) {
+        if (messages[i].isUser) {
+          userMessage = messages[i];
+          break;
+        }
+      }
+      
+      if (!userMessage) {
+        throw new Error(t('errorOriginalMessageNotFound'));
+      }
+
+      // Collect all responses from branches (original + all branches)
+      const allResponses: Array<{ model: string; operator: string; text: string }> = [];
+      
+      // Add original response
+      allResponses.push({
+        model: aiMessage.model || t('unknownModel'),
+        operator: aiMessage.operator || 'unknown',
+        text: aiMessage.text
+      });
+      
+      // Add branch responses
+      const branches = messageBranches[messageId] || [];
+      branches.forEach(branch => {
+        allResponses.push({
+          model: branch.model,
+          operator: branch.operator,
+          text: branch.text
+        });
+      });
+
+      // Ensure we have at least 2 responses
+      if (allResponses.length < 2) {
+        console.warn('[MessageList] Not enough responses for consul summary');
+        return;
+      }
+
+      // Format responses text
+      const responsesText = allResponses
+        .map((resp, index) => {
+          const answerLabel = t('consulPromptAnswer', [`${index + 1}`, resp.operator, resp.model]);
+          return `${answerLabel}\n${resp.text}`;
+        })
+        .join('\n\n---\n\n');
+
+      // Build the consul prompt that will be sent as pageContext
+      const consulPrompt = `${t('consulPromptInstruction')}
+
+${t('consulPromptQuestion')} ${userMessage.text}
+
+${t('consulPromptAnswers')}
+${responsesText}`;
+
+      console.log('[MessageList] Sending consul summary request:', {
+        messageId,
+        operator: operator.operator,
+        model: modelId,
+        responsesCount: allResponses.length,
+        userQuestion: userMessage.text.substring(0, 100)
+      });
+
+      // Switch to selected operator/model
+      if (operators.length > 0) {
+        const targetOperator = operators.find(op => op.operator === operator.operator);
+        if (targetOperator) {
+          const operatorWithModel = {
+            ...targetOperator,
+            selectedModel: modelId
+          };
+          console.log('[MessageList] Switching to consul model:', { operator: operator.operator, model: modelId });
+          setSelectedOperator(operatorWithModel);
+        }
+      }
+
+      // Send short localized message with full prompt in pageContext
+      await sendUserMessage(
+        t('consulMessage'), // Короткий текст в UI
+        consulPrompt, // Полный промпт в pageContext
+        undefined, // replyTo
+        t('consulSummary') // actionLabel
+      );
+
+    } catch (error) {
+      console.error('[MessageList] Error in handleConsulSummary:', error);
+    }
+  };
+
   if (messages.length === 0 && !error) {
     return (
       <div className="flex-1 flex flex-col overflow-auto">
@@ -925,6 +1028,7 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
               onCopy={handleCopy}
               onRewrite={handleRewrite}
               onCompare={handleCompareResponse}
+              onConsulSummary={handleConsulSummary}
               onMouseEnter={() => setHoveredMessageId(message.id)}
               onMouseLeave={() => setHoveredMessageId(null)}
               onQuestionClick={handleQuestionClick}

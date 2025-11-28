@@ -59,6 +59,54 @@
   "system": {
     "message": "System"
   },
+  "colorScheme": {
+    "message": "Color Scheme"
+  },
+  "colorSchemeGreen": {
+    "message": "Green"
+  },
+  "colorSchemeBlue": {
+    "message": "Blue"
+  },
+  "colorSchemeNeutral": {
+    "message": "Neutral"
+  },
+  "colorSchemeOrange": {
+    "message": "Orange"
+  },
+  "colorSchemeRed": {
+    "message": "Red"
+  },
+  "colorSchemeRose": {
+    "message": "Rose"
+  },
+  "colorSchemeViolet": {
+    "message": "Violet"
+  },
+  "colorSchemeYellow": {
+    "message": "Yellow"
+  },
+  "fontFamily": {
+    "message": "Font"
+  },
+  "fontFamilySystem": {
+    "message": "System Default"
+  },
+  "fontFamilyUrbanist": {
+    "message": "Urbanist"
+  },
+  "fontFamilyJetbrainsMono": {
+    "message": "JetBrains Mono"
+  },
+  "fontFamilyIbmPlexSans": {
+    "message": "IBM Plex Sans"
+  },
+  "fontFamilyManrope": {
+    "message": "Manrope"
+  },
+  "fontFamilyUbuntuSans": {
+    "message": "Ubuntu Sans"
+  },
   "apiKey": {
     "message": "API Key"
   },
@@ -643,6 +691,27 @@
   },
   "compareResponses": {
     "message": "Compare responses"
+  },
+  "consulSummary": {
+    "message": "Consul Summary Response"
+  },
+  "consulMessage": {
+    "message": "Analyze all previous responses and send the result"
+  },
+  "consulTooltip": {
+    "message": "Get a summary response from selected model based on all responses"
+  },
+  "consulPromptInstruction": {
+    "message": "Compare all responses to the user's request from different AI models and provide a final, well-balanced, and high-quality answer to the original user request."
+  },
+  "consulPromptQuestion": {
+    "message": "Question:"
+  },
+  "consulPromptAnswers": {
+    "message": "Answers:"
+  },
+  "consulPromptAnswer": {
+    "message": "Answer $1 ($2 - $3):"
   },
   "favorites": {
     "message": "Favorites"

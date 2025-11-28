@@ -27,6 +27,9 @@ import Sidebar from '@/ui/components/fullscreen/Sidebar';
 import MessageList from '@/ui/components/chat/MessageList';
 import MessageInput from '@/ui/components/chat/MessageInput';
 import Settings from './Settings';
+import History from './History';
+import Help from './Help';
+import Tools from './Tools';
 
 // Context для передачи флага fullscreen в дочерние компоненты
 export const FullscreenContext = createContext({ isFullscreen: true });
@@ -46,6 +49,9 @@ export default function FullscreenChat() {
   
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showTools, setShowTools] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -287,6 +293,30 @@ export default function FullscreenChat() {
     );
   }
 
+  if (showHistory) {
+    return (
+      <div className="flex flex-col h-screen bg-background text-foreground">
+        <History onBack={() => setShowHistory(false)} />
+      </div>
+    );
+  }
+
+  if (showHelp) {
+    return (
+      <div className="flex flex-col h-screen bg-background text-foreground">
+        <Help onBack={() => setShowHelp(false)} />
+      </div>
+    );
+  }
+
+  if (showTools) {
+    return (
+      <div className="flex flex-col h-screen bg-background text-foreground">
+        <Tools onBack={() => setShowTools(false)} />
+      </div>
+    );
+  }
+
   return (
     <FullscreenContext.Provider value={{ isFullscreen: true }}>
       <div className="flex h-screen bg-background text-foreground">
@@ -295,6 +325,9 @@ export default function FullscreenChat() {
           collapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           onOpenSettings={() => setShowSettings(true)}
+          onOpenHistory={() => setShowHistory(true)}
+          onOpenHelp={() => setShowHelp(true)}
+          onOpenTools={() => setShowTools(true)}
         />
 
         {/* Main content */}

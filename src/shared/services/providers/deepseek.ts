@@ -26,22 +26,19 @@ export class DeepSeekProvider implements AIProvider {
     const requestBody: any = {
       model,
       messages: messages.map(msg => {
-        // DeepSeek supports content as string or array (multimodal)
+        // DeepSeek does NOT support multimodal content (images)
+        // Only text is supported
         let content = msg.content;
         
-        // If content is array, ensure proper format
+        // If content is array (multimodal), extract only text parts
         if (Array.isArray(msg.content)) {
-          content = msg.content.map(item => {
-            if (item.type === 'text') {
-              return { type: 'text', text: item.text || '' };
-            } else if (item.type === 'image_url' && item.image_url) {
-              return {
-                type: 'image_url',
-                image_url: item.image_url
-              };
-            }
-            return item;
-          });
+          const textParts = msg.content.filter(item => item.type === 'text');
+          if (textParts.length > 0) {
+            // Join all text parts
+            content = textParts.map(item => item.text || '').join('\n');
+          } else {
+            content = ''; // No text content
+          }
         }
         
         return {

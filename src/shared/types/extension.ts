@@ -17,6 +17,8 @@ export interface Instruction {
 
 export interface ExtensionSettings {
   theme: Theme;
+  colorScheme?: 'green' | 'blue' | 'neutral' | 'orange' | 'red' | 'rose' | 'violet' | 'yellow'; // Color scheme
+  fontFamily?: 'system' | 'urbanist' | 'jetbrains-mono' | 'ibm-plex-sans' | 'manrope' | 'ubuntu-sans'; // Font family
   language: SupportedLanguage;
   historyMode: HistoryMode;
   operators: AIOperatorConfig[];

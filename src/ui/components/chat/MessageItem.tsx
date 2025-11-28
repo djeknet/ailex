@@ -32,6 +32,7 @@ interface MessageItemProps {
   onCopy?: (text: string, messageId: string, withFormatting?: boolean) => void;
   onRewrite?: (messageId: string, action: string) => void;
   onCompare?: (messageId: string, operator: AIOperatorConfig, modelId: string) => void;
+  onConsulSummary?: (messageId: string, operator: AIOperatorConfig, modelId: string) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onQuestionClick?: (question: string, operator?: string, model?: string) => void;
@@ -58,6 +59,7 @@ export default function MessageItem({
   onCopy,
   onRewrite,
   onCompare,
+  onConsulSummary,
   onMouseEnter,
   onMouseLeave,
   onQuestionClick,
@@ -101,6 +103,7 @@ export default function MessageItem({
       onCopy={onCopy}
       onRewrite={onRewrite}
       onCompare={onCompare}
+      onConsulSummary={onConsulSummary}
       onBranchChange={onBranchChange}
       onQuestionClick={onQuestionClick}
       operators={operators}

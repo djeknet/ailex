@@ -2,6 +2,8 @@ import { SitePrompt, SitePromptsConfig } from '@shared/types/sitePrompts';
 
 // Cache for configuration
 let cachedConfig: SitePromptsConfig | null = null;
+let cachedTranslations: Record<string, string> = {};
+let cachedLanguage: string | null = null;
 
 // Load configuration from background
 async function loadConfig(): Promise<SitePromptsConfig> {
@@ -24,6 +26,44 @@ async function loadConfig(): Promise<SitePromptsConfig> {
     console.error('[siteWidget] Error loading config:', error);
     return {};
   }
+}
+
+// Load translations from extension settings
+async function loadTranslations(): Promise<void> {
+  try {
+    // Get language from settings
+    const result = await chrome.storage.sync.get('language');
+    const language = result.language || 'en';
+    
+    // If language hasn't changed and we have translations, skip
+    if (cachedLanguage === language && Object.keys(cachedTranslations).length > 0) {
+      return;
+    }
+    
+    cachedLanguage = language;
+    
+    // Load translation file
+    const url = chrome.runtime.getURL(`_locales/${language}/messages.json`);
+    const response = await fetch(url);
+    const messages = await response.json();
+    
+    // Convert to simple key-value format
+    cachedTranslations = {};
+    for (const [key, value] of Object.entries(messages)) {
+      cachedTranslations[key] = (value as any).message || key;
+    }
+    
+    console.log('[siteWidget] Loaded translations for language:', language);
+  } catch (error) {
+    console.error('[siteWidget] Error loading translations:', error);
+    // Fallback to chrome.i18n
+    cachedTranslations = {};
+  }
+}
+
+// Get translated text
+function t(key: string, fallback?: string): string {
+  return cachedTranslations[key] || fallback || chrome.i18n.getMessage(key) || key;
 }
 
 // Extract domain from URL
@@ -171,8 +211,8 @@ function createWidget(prompts: SitePrompt[], favicon: string | null): HTMLElemen
   panel.className = 'ailex-prompts-panel';
   panel.id = 'ailex-prompts-panel';
 
-  // Get localized messages
-  const titleText = chrome.i18n.getMessage('sitePromptsSectionTitle') || 'You might be interested in:';
+  // Get localized messages using extension settings language
+  const titleText = t('sitePromptsSectionTitle', 'You might be interested in:');
   
   panel.innerHTML = `
     <div class="ailex-prompts-panel-header">
@@ -192,9 +232,9 @@ function createWidget(prompts: SitePrompt[], favicon: string | null): HTMLElemen
     item.className = 'ailex-prompt-item';
     item.dataset.promptIndex = String(index);
     
-    // Get localized text
+    // Get localized text using extension settings language
     const promptText = prompt.textKey 
-      ? chrome.i18n.getMessage(prompt.textKey) || prompt.text
+      ? t(prompt.textKey, prompt.text)
       : prompt.text;
     
     item.innerHTML = `
@@ -222,6 +262,9 @@ export async function initSiteWidget() {
       console.log('[siteWidget] Widget already exists');
       return;
     }
+
+    // Load translations first
+    await loadTranslations();
 
     // Get prompts for current page
     const result = await getPromptsForPage();

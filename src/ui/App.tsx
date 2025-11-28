@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
+import { applyColorScheme } from '@shared/utils/colorScheme';
+import { applyFontFamily } from '@shared/utils/fontFamily';
 import Chat from './pages/Chat';
 import Settings from './pages/Settings';
 import History from './pages/History';
@@ -9,7 +11,7 @@ import Footer from './components/layout/Footer';
 import ApiLogsPanel from './components/developer/ApiLogsPanel';
 
 export default function App() {
-  const { activeView, theme, developerMode, initializeSettings } = useSettingsStore();
+  const { activeView, theme, colorScheme, fontFamily, developerMode, initializeSettings } = useSettingsStore();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,34 @@ export default function App() {
         root.classList.remove('dark');
       }
     }
-  }, [theme]);
+
+    // Применяем цветовую схему при изменении темы
+    applyColorScheme(colorScheme || 'green', theme);
+  }, [theme, colorScheme]);
+
+  // Применяем шрифт при изменении
+  useEffect(() => {
+    applyFontFamily(fontFamily || 'system');
+  }, [fontFamily]);
+
+  // Слушаем изменения системной темы
+  useEffect(() => {
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = (e: MediaQueryListEvent) => {
+        const root = document.documentElement;
+        if (e.matches) {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+        // Применяем цветовую схему при изменении системной темы
+        applyColorScheme(colorScheme || 'green', theme);
+      };
+      mediaQuery.addEventListener('change', handler);
+      return () => mediaQuery.removeEventListener('change', handler);
+    }
+  }, [theme, colorScheme]);
 
   if (!isReady) {
     return (
