@@ -833,6 +833,12 @@
   "usedTokens": {
     "message": "Used tokens"
   },
+  "clickToEdit": {
+    "message": "Click to edit chat title"
+  },
+  "clickToViewStats": {
+    "message": "Click to view statistics"
+  },
   "noChats": {
     "message": "No chats"
   },
@@ -1587,7 +1593,19 @@
     "message": "Highlights terms and definitions for memorization"
   },
   "contextMenu_makeFlashcards_prompt": {
-    "message": "Create flashcards in JSON format [{term, definition}] from this text:"
+    "message": "Create flashcards from this text. Return ONLY clean JSON array in format: [{\"term\": \"term\", \"definition\": \"definition\"}]. Do not add any text before or after the JSON:"
+  },
+  "flashcard_term": {
+    "message": "Term"
+  },
+  "flashcard_definition": {
+    "message": "Definition"
+  },
+  "flashcard_flipCard": {
+    "message": "Flip card"
+  },
+  "flashcard_clickToFlip": {
+    "message": "Click on card to flip"
   },
   "contextMenu_translateText": {
     "message": "Translate"
@@ -3280,5 +3298,8 @@
   },
   "sitePrompt_youtube_video_4": {
     "message": "Write down the words for review from the language video with example sentences."
+  },
+  "toAccept": {
+    "message": "to accept"
   }
 }

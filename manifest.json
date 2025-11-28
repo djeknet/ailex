@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
+  "author": "Yevhen Zakhodiakin",
+  "homepage_url": "https://nitiweb.net",
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",

@@ -11,7 +11,7 @@ import Footer from './components/layout/Footer';
 import ApiLogsPanel from './components/developer/ApiLogsPanel';
 
 export default function App() {
-  const { activeView, theme, colorScheme, fontFamily, developerMode, initializeSettings } = useSettingsStore();
+  const { activeView, theme, colorScheme, fontFamily, developerMode, historyInitialTab, initializeSettings } = useSettingsStore();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function App() {
       <main className="flex-1 overflow-hidden">
         {activeView === 'chat' && <Chat />}
         {activeView === 'settings' && <Settings />}
-        {activeView === 'history' && <History />}
+        {activeView === 'history' && <History initialTab={historyInitialTab} />}
         {activeView === 'help' && <Help />}
         {activeView === 'tools' && <Tools />}
       </main>

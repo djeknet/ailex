@@ -451,3 +451,4 @@ export const COLOR_SCHEME_NAMES: Record<ColorScheme, { en: string; ru: string }>
   yellow: { en: 'Yellow', ru: 'Желтый' },
 };
 
+

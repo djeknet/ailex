@@ -42,8 +42,10 @@ export interface ImportOptions {
 interface SettingsStore extends ExtensionSettings {
   activeView: 'chat' | 'settings' | 'history' | 'help' | 'tools';
   activeSettingsTab: 'operators' | 'general' | 'personalInfo' | 'instructions';
+  historyInitialTab?: 'chats' | 'statistics';
   setActiveView: (view: SettingsStore['activeView']) => void;
   setActiveSettingsTab: (tab: SettingsStore['activeSettingsTab']) => void;
+  setHistoryInitialTab: (tab: 'chats' | 'statistics') => void;
   setTheme: (theme: ExtensionSettings['theme']) => void;
   setColorScheme: (scheme: ColorScheme) => void;
   setFontFamily: (font: FontFamily) => void;
@@ -88,6 +90,8 @@ export const useSettingsStore = create<SettingsStore>()(
       setActiveView: (view) => set({ activeView: view }),
 
       setActiveSettingsTab: (tab) => set({ activeSettingsTab: tab }),
+
+      setHistoryInitialTab: (tab) => set({ historyInitialTab: tab }),
 
       setTheme: (theme) => {
         set({ theme });

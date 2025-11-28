@@ -70,6 +70,8 @@ import {
 import CompareModelSelect from './CompareModelSelect';
 import ConsulModelSelect from './ConsulModelSelect';
 import SuggestedQuestions from './SuggestedQuestions';
+import FlashcardViewer from './FlashcardViewer';
+import { parseFlashcards } from '@shared/utils/parseFlashcards';
 
 interface AIMessageProps {
   message: ChatMessage;
@@ -248,6 +250,12 @@ export default function AIMessage({
 
   // Helper function to render message text with citations
   const renderMessageWithCitations = (text: string, citations?: any[], operator?: AIOperator) => {
+    // Проверяем, является ли ответ флеш-карточками
+    const flashcards = parseFlashcards(text);
+    if (flashcards) {
+      return <FlashcardViewer cards={flashcards} />;
+    }
+    
     if (!citations || citations.length === 0) {
       return <Response>{text}</Response>;
     }

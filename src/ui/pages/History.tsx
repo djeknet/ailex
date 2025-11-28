@@ -8,9 +8,10 @@ import StatisticsTab from '@/ui/components/history/StatisticsTab';
 
 interface HistoryProps {
   onBack?: () => void;
+  initialTab?: 'chats' | 'statistics';
 }
 
-export default function History({ onBack }: HistoryProps = {}) {
+export default function History({ onBack, initialTab }: HistoryProps = {}) {
   const { t } = useTranslation();
   
   return (
@@ -25,7 +26,7 @@ export default function History({ onBack }: HistoryProps = {}) {
             </Button>
           </div>
         )}
-        <Tabs defaultValue="chats" className="flex-1 flex flex-col overflow-hidden">
+        <Tabs defaultValue={initialTab || "chats"} className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="mx-4 mt-4">
             <TabsTrigger value="chats">{t('chatsTab')}</TabsTrigger>
             <TabsTrigger value="statistics">{t('statisticsTab')}</TabsTrigger>

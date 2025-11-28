@@ -692,6 +692,12 @@
   "usedTokens": {
     "message": "Использованные токены"
   },
+  "clickToEdit": {
+    "message": "Нажмите для редактирования названия чата"
+  },
+  "clickToViewStats": {
+    "message": "Нажмите для просмотра статистики"
+  },
   "noChats": {
     "message": "Нет чатов"
   },
@@ -1716,7 +1722,19 @@
     "message": "Выделяет термины и определения для запоминания"
   },
   "contextMenu_makeFlashcards_prompt": {
-    "message": "Создай флеш-карточки в формате JSON [{term, definition}] из этого текста:"
+    "message": "Создай флеш-карточки из этого текста. Верни ТОЛЬКО чистый JSON массив формата: [{\"term\": \"термин\", \"definition\": \"определение\"}]. Не добавляй текст до или после JSON:"
+  },
+  "flashcard_term": {
+    "message": "Термин"
+  },
+  "flashcard_definition": {
+    "message": "Определение"
+  },
+  "flashcard_flipCard": {
+    "message": "Перевернуть карточку"
+  },
+  "flashcard_clickToFlip": {
+    "message": "Нажмите на карточку, чтобы перевернуть"
   },
   "contextMenu_translateText": {
     "message": "Перевести"
@@ -3547,6 +3565,10 @@
   },
   "sitePrompt_youtube_video_4": {
     "message": "Выпиши слова для повторения из языкового видео с примерами предложений.",
+    "description": ""
+  },
+  "toAccept": {
+    "message": "для принятия",
     "description": ""
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useChatStore } from '@shared/stores/chatStore';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useToolsStore } from '@shared/stores/toolsStore';
@@ -7,6 +7,8 @@ import { getModelContextLimit, getModelCapabilities } from '@shared/constants';
 import { readFileAsBase64, readTextFile, isTextFile, validateFileSize } from '@shared/utils/fileUtils';
 import { captureScreenshot, compressImage } from '@shared/utils/screenshotUtils';
 import { isPdfPage, getPdfUrlFromPage, extractFilenameFromUrl } from '@shared/utils/pageUtils';
+import { chatAPI, historyAPI } from '@shared/utils/messaging';
+import { ChatMessage } from '@shared/types/database';
 import { Button } from '@/ui/components/ui/button';
 import { ButtonGroup } from '@/ui/components/ui/button-group';
 import {
@@ -119,8 +121,15 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   
+  // Autocomplete state
+  const [userMessageHistory, setUserMessageHistory] = useState<string[]>([]);
+  const [matchedSuggestions, setMatchedSuggestions] = useState<string[]>([]);
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [autocompleteSuggestion, setAutocompleteSuggestion] = useState<string>('');
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const { 
     sendUserMessage, 
@@ -146,6 +155,107 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
   useEffect(() => {
     loadTools();
   }, [loadTools]);
+
+  // Load user message history for autocomplete
+  useEffect(() => {
+    const loadUserMessageHistory = async () => {
+      try {
+        // Get all chats
+        const allChats = await chatAPI.getAllChats();
+        
+        if (!allChats || allChats.length === 0) {
+          return;
+        }
+        
+        // Collect all user messages from all chats
+        const allUserMessages: string[] = [];
+        
+        for (const chat of allChats) {
+          try {
+            const messages = await historyAPI.getMessages(chat.id);
+            messages
+              .filter((msg: ChatMessage) => msg.isUser && msg.text && msg.text.trim().length > 0)
+              .forEach((msg: ChatMessage) => {
+                allUserMessages.push(msg.text.trim());
+              });
+          } catch (error) {
+            console.error('[MessageInput] Error loading messages for chat:', chat.id, error);
+          }
+        }
+        
+        // Remove duplicates and sort by frequency
+        const messageFrequency = new Map<string, number>();
+        allUserMessages.forEach(msg => {
+          messageFrequency.set(msg, (messageFrequency.get(msg) || 0) + 1);
+        });
+        
+        const uniqueMessages = Array.from(new Set(allUserMessages));
+        
+        // Sort by frequency (most used first)
+        uniqueMessages.sort((a, b) => 
+          (messageFrequency.get(b) || 0) - (messageFrequency.get(a) || 0)
+        );
+        
+        setUserMessageHistory(uniqueMessages);
+        console.log('[MessageInput] Loaded', uniqueMessages.length, 'unique user messages for autocomplete');
+      } catch (error) {
+        console.error('[MessageInput] Error loading user message history:', error);
+      }
+    };
+    
+    loadUserMessageHistory();
+  }, []);
+
+  // Autocomplete matching with debounce
+  const updateAutocompleteSuggestions = useCallback((inputText: string) => {
+    if (inputText.length < 2) {
+      setMatchedSuggestions([]);
+      setAutocompleteSuggestion('');
+      setSuggestionIndex(0);
+      return;
+    }
+    
+    // Find messages that start with the input text
+    const lowerText = inputText.toLowerCase();
+    const matches = userMessageHistory.filter(msg => 
+      msg.toLowerCase().startsWith(lowerText) && msg.length > inputText.length
+    );
+    
+    setMatchedSuggestions(matches);
+    setSuggestionIndex(0);
+    
+    if (matches.length > 0) {
+      // Show only the missing part
+      setAutocompleteSuggestion(matches[0].substring(inputText.length));
+    } else {
+      setAutocompleteSuggestion('');
+    }
+  }, [userMessageHistory]);
+
+  // Update suggestions when text changes
+  useEffect(() => {
+    // Don't show autocomplete when tools or tab mention dropdowns are visible
+    if (showToolsDropdown || showTabMentionDropdown) {
+      setAutocompleteSuggestion('');
+      return;
+    }
+    
+    const timeoutId = setTimeout(() => {
+      updateAutocompleteSuggestions(text);
+    }, 150); // Debounce delay
+    
+    return () => clearTimeout(timeoutId);
+  }, [text, updateAutocompleteSuggestions, showToolsDropdown, showTabMentionDropdown]);
+
+  // Update suggestion when navigating with arrows
+  useEffect(() => {
+    if (matchedSuggestions.length > 0 && text.length >= 2) {
+      const currentMatch = matchedSuggestions[suggestionIndex];
+      if (currentMatch) {
+        setAutocompleteSuggestion(currentMatch.substring(text.length));
+      }
+    }
+  }, [suggestionIndex, matchedSuggestions, text]);
 
   // Listen for voice input capture
   useEffect(() => {
@@ -687,6 +797,52 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
 
   const handleRemoveTab = (tabId: number) => {
     setAttachedTabs(prev => prev.filter(t => t.id !== tabId));
+  };
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Handle Tab for accepting autocomplete suggestion
+    if (e.key === 'Tab' && autocompleteSuggestion && !showToolsDropdown && !showTabMentionDropdown) {
+      e.preventDefault();
+      setText(text + autocompleteSuggestion);
+      setAutocompleteSuggestion('');
+      setMatchedSuggestions([]);
+      setSuggestionIndex(0);
+      return;
+    }
+    
+    // Handle ArrowDown for next suggestion
+    if (e.key === 'ArrowDown' && matchedSuggestions.length > 1 && autocompleteSuggestion) {
+      e.preventDefault();
+      setSuggestionIndex((prev) => 
+        prev < matchedSuggestions.length - 1 ? prev + 1 : 0
+      );
+      return;
+    }
+    
+    // Handle ArrowUp for previous suggestion
+    if (e.key === 'ArrowUp' && matchedSuggestions.length > 1 && autocompleteSuggestion) {
+      e.preventDefault();
+      setSuggestionIndex((prev) => 
+        prev > 0 ? prev - 1 : matchedSuggestions.length - 1
+      );
+      return;
+    }
+    
+    // Handle Escape to dismiss autocomplete
+    if (e.key === 'Escape' && autocompleteSuggestion) {
+      e.preventDefault();
+      setAutocompleteSuggestion('');
+      setMatchedSuggestions([]);
+      setSuggestionIndex(0);
+      return;
+    }
+    
+    // Handle Enter - submit form (without Shift) or new line (with Shift)
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      e.currentTarget.form?.requestSubmit();
+      return;
+    }
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -1377,18 +1533,73 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
               </div>
             )}
             
-            <PromptInputTextarea
-              onChange={(event) => setText(event.target.value)}
-              value={text}
-              placeholder={t('messageInputPlaceholder')}
-              className="min-h-[60px] max-h-[200px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              onClick={() => {
-                // Cancel selection modes when clicking on chat input
-                if (isSelectingElement || isSelectingScreenshot) {
-                  handleCancelSelection();
-                }
-              }}
-            />
+            <div className="relative w-full">
+              <PromptInputTextarea
+                ref={textareaRef as any}
+                onChange={(event) => setText(event.target.value)}
+                onKeyDown={handleTextareaKeyDown}
+                value={text}
+                placeholder={t('messageInputPlaceholder')}
+                className="min-h-[60px] max-h-[200px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
+                onClick={() => {
+                  // Cancel selection modes when clicking on chat input
+                  if (isSelectingElement || isSelectingScreenshot) {
+                    handleCancelSelection();
+                  }
+                }}
+              />
+              
+              {/* Ghost text overlay для автокомплита - только одна строка */}
+              {autocompleteSuggestion && !showToolsDropdown && !showTabMentionDropdown && text.length > 0 && (
+                <div 
+                  className="absolute left-0 top-0 pointer-events-none overflow-hidden whitespace-nowrap"
+                  style={{
+                    height: '1.5rem',
+                    marginTop: '0.75rem',
+                    paddingLeft: '0.75rem',
+                    paddingRight: '0.75rem',
+                    width: 'calc(100% - 1.5rem)',
+                    maxWidth: 'calc(100% - 1.5rem)'
+                  }}
+                >
+                  <span 
+                    style={{ 
+                      fontSize: '0.875rem',
+                      lineHeight: '1.5rem',
+                      color: 'transparent',
+                      userSelect: 'none'
+                    }}
+                  >
+                    {text}
+                  </span><span 
+                    style={{ 
+                      fontSize: '0.875rem',
+                      lineHeight: '1.5rem',
+                      color: 'hsl(var(--muted-foreground))', 
+                      opacity: 0.5,
+                      userSelect: 'none'
+                    }}
+                  >
+                    {autocompleteSuggestion.split('\n')[0]}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {/* Индикатор Tab для принятия предложения - внизу под полем */}
+            {autocompleteSuggestion && !showToolsDropdown && !showTabMentionDropdown && (
+              <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground">
+                <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-muted rounded border border-border">Tab</kbd>
+                <span>{t('toAccept')}</span>
+                {matchedSuggestions.length > 1 && (
+                  <>
+                    <span className="mx-1">•</span>
+                    <kbd className="px-1 py-0.5 text-[10px] font-semibold bg-muted rounded border border-border">↑↓</kbd>
+                    <span>{suggestionIndex + 1}/{matchedSuggestions.length}</span>
+                  </>
+                )}
+              </div>
+            )}
           </PromptInputBody>
           
           <PromptInputFooter>

@@ -53,8 +53,9 @@ export default function DailyStatsChart({ statistics }: DailyStatsChartProps) {
                 tickMargin={10}
                 axisLine={false}
                 tickFormatter={(value) => {
-                  const date = new Date(value);
-                  return `${date.getMonth() + 1}/${date.getDate()}`;
+                  // Парсим дату напрямую из строки yyyy-MM-dd, чтобы избежать проблем с часовыми поясами
+                  const [year, month, day] = value.split('-');
+                  return `${parseInt(month)}/${parseInt(day)}`;
                 }}
               />
               <ChartTooltip
