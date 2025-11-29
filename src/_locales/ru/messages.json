@@ -3327,6 +3327,62 @@
     "message": "Развернуть на весь экран",
     "description": ""
   },
+  "exportToPDF": {
+    "message": "Экспорт в PDF",
+    "description": ""
+  },
+  "saveAllMessages": {
+    "message": "Сохранить весь чат",
+    "description": ""
+  },
+  "saveAIMessagesOnly": {
+    "message": "Сохранить только ответы ИИ",
+    "description": ""
+  },
+  "exportChat": {
+    "message": "Экспортировать чат",
+    "description": ""
+  },
+  "exportingPDF": {
+    "message": "Экспорт в PDF...",
+    "description": ""
+  },
+  "pdfExportAIOnly": {
+    "message": "Только ответы ИИ",
+    "description": ""
+  },
+  "pdfExportPage": {
+    "message": "Страница",
+    "description": ""
+  },
+  "pdfExportFile": {
+    "message": "Файл",
+    "description": ""
+  },
+  "pdfExportTab": {
+    "message": "Вкладка",
+    "description": ""
+  },
+  "pdfExportTool": {
+    "message": "Инструмент",
+    "description": ""
+  },
+  "pdfExportNoResult": {
+    "message": "Нет результата",
+    "description": ""
+  },
+  "pdfExportReasoning": {
+    "message": "Рассуждение",
+    "description": ""
+  },
+  "pdfExportSources": {
+    "message": "Источники",
+    "description": ""
+  },
+  "pdfExportSuggestedQuestions": {
+    "message": "Предложенные вопросы",
+    "description": ""
+  },
   "openFullscreen": {
     "message": "Открыть в полноэкранном режиме",
     "description": ""

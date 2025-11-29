@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sparkle Loader</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a1a;
+    }
+
+    .sparkle-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+
+    .sparkle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      animation: sparkle-rotate 6s linear infinite;
+      filter: drop-shadow(0 0 15px var(--sparkle-color, #00ff88))
+              drop-shadow(0 0 30px var(--sparkle-color, #00ff88))
+              drop-shadow(0 0 45px var(--sparkle-color, #00ff88));
+    }
+
+    .sparkle::before,
+    .sparkle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      filter: blur(1.5px);
+      box-shadow: 
+        0 0 10px var(--sparkle-color, #00ff88),
+        0 0 20px var(--sparkle-color, #00ff88),
+        0 0 40px var(--sparkle-color, #00ff88),
+        0 0 60px var(--sparkle-color, #00ff88),
+        inset 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .sparkle::before {
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(
+        50% 0%,
+        58% 42%,
+        100% 50%,
+        58% 58%,
+        50% 100%,
+        42% 58%,
+        0% 50%,
+        42% 42%
+      );
+      transform: translate(-50%, -50%);
+      background: var(--sparkle-color, #00ff88);
+      animation: sparkle-pulse 2s ease-in-out infinite;
+    }
+
+    .sparkle::after {
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(
+        50% 0%,
+        62% 38%,
+        100% 50%,
+        58% 58%,
+        50% 100%,
+        38% 62%,
+        0% 50%,
+        42% 42%
+      );
+      transform: translate(-50%, -50%) rotate(45deg);
+      background: var(--sparkle-color-2, #00d4ff);
+      mix-blend-mode: screen;
+      animation: sparkle-pulse 2s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes sparkle-rotate {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    @keyframes sparkle-pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+    }
+
+    /* Панель управления для демонстрации */
+    .controls {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .controls label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .controls input[type="color"] {
+      width: 100%;
+      height: 40px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .color-preset {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      margin: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.3s;
+    }
+
+    .color-preset:hover {
+      border-color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>
+      Цвет 1:
+      <input type="color" id="colorPicker1" value="#00ff88">
+    </label>
+    <label>
+      Цвет 2:
+      <input type="color" id="colorPicker2" value="#00d4ff">
+    </label>
+    <div>
+      <div class="color-preset" style="background: #00ff88" data-color1="#00ff88" data-color2="#00d4ff"></div>
+      <div class="color-preset" style="background: linear-gradient(45deg, #ff00ff, #ffff00)" data-color1="#ff00ff" data-color2="#ffff00"></div>
+      <div class="color-preset" style="background: linear-gradient(45deg, #ff4400, #ffaa00)" data-color1="#ff4400" data-color2="#ffaa00"></div>
+      <div class="color-preset" style="background: linear-gradient(45deg, #0088ff, #00ffaa)" data-color1="#0088ff" data-color2="#00ffaa"></div>
+      <div class="color-preset" style="background: linear-gradient(45deg, #ff0066, #00ffff)" data-color1="#ff0066" data-color2="#00ffff"></div>
+    </div>
+  </div>
+
+  <div class="sparkle-container">
+    <div class="sparkle"></div>
+  </div>
+
+  <script>
+    const colorPicker1 = document.getElementById('colorPicker1');
+    const colorPicker2 = document.getElementById('colorPicker2');
+    const sparkle = document.querySelector('.sparkle');
+    const presets = document.querySelectorAll('.color-preset');
+
+    function setSparkleColors(color1, color2) {
+      sparkle.style.setProperty('--sparkle-color', color1);
+      sparkle.style.setProperty('--sparkle-color-2', color2);
+    }
+
+    colorPicker1.addEventListener('input', (e) => {
+      setSparkleColors(e.target.value, colorPicker2.value);
+    });
+
+    colorPicker2.addEventListener('input', (e) => {
+      setSparkleColors(colorPicker1.value, e.target.value);
+    });
+
+    presets.forEach(preset => {
+      preset.addEventListener('click', () => {
+        const color1 = preset.dataset.color1;
+        const color2 = preset.dataset.color2;
+        colorPicker1.value = color1;
+        colorPicker2.value = color2;
+        setSparkleColors(color1, color2);
+      });
+    });
+
+    // Установка начальных цветов
+    setSparkleColors('#00ff88', '#00d4ff');
+  </script>
+</body>
+</html>

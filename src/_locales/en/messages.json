@@ -3116,6 +3116,48 @@
   "expandChat": {
     "message": "Expand to Fullscreen"
   },
+  "exportToPDF": {
+    "message": "Export to PDF"
+  },
+  "saveAllMessages": {
+    "message": "Save all messages"
+  },
+  "saveAIMessagesOnly": {
+    "message": "Save AI responses only"
+  },
+  "exportChat": {
+    "message": "Export chat"
+  },
+  "exportingPDF": {
+    "message": "Exporting to PDF..."
+  },
+  "pdfExportAIOnly": {
+    "message": "AI Responses Only"
+  },
+  "pdfExportPage": {
+    "message": "Page"
+  },
+  "pdfExportFile": {
+    "message": "File"
+  },
+  "pdfExportTab": {
+    "message": "Tab"
+  },
+  "pdfExportTool": {
+    "message": "Tool"
+  },
+  "pdfExportNoResult": {
+    "message": "No result"
+  },
+  "pdfExportReasoning": {
+    "message": "Reasoning"
+  },
+  "pdfExportSources": {
+    "message": "Sources"
+  },
+  "pdfExportSuggestedQuestions": {
+    "message": "Suggested questions"
+  },
   "openFullscreen": {
     "message": "Open in Fullscreen"
   },

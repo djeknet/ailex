@@ -6,8 +6,10 @@ import { Button } from '@/ui/components/ui/button';
 import { Badge } from '@/ui/components/ui/badge';
 import { Input } from '@/ui/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/components/ui/tooltip';
-import { MessageSquarePlus, History, CircleDollarSign, Expand } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/ui/components/ui/dropdown-menu';
+import { MessageSquarePlus, History, CircleDollarSign, Expand, Upload } from 'lucide-react';
 import ChatHistoryPanel from './ChatHistoryPanel';
+import { exportChatToPDF } from '@shared/utils/pdfExport';
 
 export default function ChatHeader() {
   const { t } = useTranslation();
@@ -72,6 +74,17 @@ export default function ChatHeader() {
   const handleOpenStatistics = () => {
     setHistoryInitialTab('statistics');
     setActiveView('history');
+  };
+
+  // Handle PDF export
+  const handleExportPDF = async (type: 'all' | 'ai-only') => {
+    if (currentChat && messages.length > 0) {
+      try {
+        await exportChatToPDF(messages, currentChat.title, type);
+      } catch (error) {
+        console.error('Error exporting to PDF:', error);
+      }
+    }
   };
 
   // Calculate total tokens for current chat
@@ -139,6 +152,31 @@ export default function ChatHeader() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{t('expandChat')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Upload className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{t('exportToPDF')}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleExportPDF('all')}>
+                      {t('saveAllMessages')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExportPDF('ai-only')}>
+                      {t('saveAIMessagesOnly')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TooltipTrigger>
+              <TooltipContent>{t('exportChat')}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
           
