@@ -1,13 +1,16 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Check, Star, Settings, Settings2 } from 'lucide-react';
+import { Check, Star, Settings, Settings2, Sparkles } from 'lucide-react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useChatStore } from '@shared/stores/chatStore';
 import { useModelFiltersStore } from '@shared/stores/modelFiltersStore';
 import { useFavoriteModels } from '@shared/hooks/useFavoriteModels';
 import { useTranslation } from '@shared/i18n/useTranslation';
 import { cn } from '@shared/utils/cn';
-import { getModelInfo } from '@shared/constants';
+import { getModelInfo, MAX_GROUP_CHAT_MODELS } from '@shared/constants';
 import { Button } from '@/ui/components/ui/button';
+import { Switch } from '@/ui/components/ui/switch';
+import { Badge } from '@/ui/components/ui/badge';
+import { Checkbox } from '@/ui/components/ui/checkbox';
 import ImageGenerationSettingsDialog from './ImageGenerationSettingsDialog';
 import ModelFiltersDialog from './ModelFiltersDialog';
 import {
@@ -35,7 +38,14 @@ import type { AIOperatorConfig, AIOperator } from '@shared/types/extension';
 export default function ModelSelect() {
   const { t } = useTranslation();
   const { operators } = useSettingsStore();
-  const { selectedOperator, setSelectedOperator } = useChatStore();
+  const { 
+    selectedOperator, 
+    setSelectedOperator,
+    groupChatMode,
+    groupChatModels,
+    setGroupChatMode,
+    toggleGroupChatModel
+  } = useChatStore();
   const { isFavorite, toggleFavorite } = useFavoriteModels();
   const { matchesFilters, hasActiveFilters } = useModelFiltersStore();
   const [open, setOpen] = useState(false);
@@ -123,8 +133,20 @@ export default function ModelSelect() {
         }
       });
     });
+    
+    // Сортировка: выбранные модели сверху в групповом режиме
+    if (groupChatMode) {
+      return favorites.sort((a, b) => {
+        const aSelected = groupChatModels.some(m => m.operator === a.operator && m.modelId === a.model.id);
+        const bSelected = groupChatModels.some(m => m.operator === b.operator && m.modelId === b.model.id);
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        return 0;
+      });
+    }
+    
     return favorites;
-  }, [configuredOperators, isFavorite, filterModels]);
+  }, [configuredOperators, isFavorite, filterModels, groupChatMode, groupChatModels]);
 
   return (
     <TooltipProvider>
@@ -138,80 +160,110 @@ export default function ModelSelect() {
                 type="button"
                 role="combobox"
                 aria-expanded={open}
+                className="relative"
               >
-                {selectedOperator && (
-                  <img 
-                    src={getOperatorIcon(selectedOperator.operator)}
-                    alt={selectedOperator.operator}
-                    className="w-5 h-5"
-                  />
+                {groupChatMode ? (
+                  <>
+                    <Sparkles className="w-5 h-5 text-green-500" />
+                    {groupChatModels.length > 0 && (
+                      <Badge 
+                        className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center p-0 text-[10px] font-semibold"
+                        variant="default"
+                      >
+                        {groupChatModels.length}
+                      </Badge>
+                    )}
+                  </>
+                ) : (
+                  selectedOperator && (
+                    <img 
+                      src={getOperatorIcon(selectedOperator.operator)}
+                      alt={selectedOperator.operator}
+                      className="w-5 h-5"
+                    />
+                  )
                 )}
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent className="max-w-xs" side="top">
-            {currentModel && modelInfo ? (
-              <div className="space-y-1.5 text-xs">
-                <div className="font-semibold">{currentModel.name}</div>
-                
-                {modelInfo.context_length && (
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-muted-foreground">▪</span>
-                    <span>
-                      <span className="text-muted-foreground">{t('modelContext')}:</span>{' '}
-                      {formatContextLength(modelInfo.context_length)}
-                    </span>
-                  </div>
-                )}
-                
-                {modelInfo.architecture?.input_modalities && modelInfo.architecture.input_modalities.length > 0 && (
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-muted-foreground">▪</span>
-                    <span>
-                      <span className="text-muted-foreground">{t('modelInputModalities')}:</span>{' '}
-                      {modelInfo.architecture.input_modalities.join(', ')}
-                    </span>
-                  </div>
-                )}
-                
-                {modelInfo.architecture?.output_modalities && modelInfo.architecture.output_modalities.length > 0 && (
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-muted-foreground">▪</span>
-                    <span>
-                      <span className="text-muted-foreground">{t('modelOutputModalities')}:</span>{' '}
-                      {modelInfo.architecture.output_modalities.join(', ')}
-                    </span>
-                  </div>
-                )}
-                
-                {modelInfo.pricing?.prompt && (
-                  <div className="flex items-start gap-1.5">
-                    <span className="text-muted-foreground">▪</span>
-                    <span>
-                      <span className="text-muted-foreground">{t('modelPrice')}:</span>{' '}
-                      {formatPrice(modelInfo.pricing.prompt)} / 1M
-                    </span>
-                  </div>
-                )}
-                
-                {/* Show image generation settings button if model supports image output */}
-                {modelInfo.architecture?.output_modalities?.includes('image') && selectedOperator && (
-                  <div className="pt-2 mt-2 border-t border-border">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSettingsDialogOpen(true);
-                      }}
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
-                    >
-                      <Settings className="w-3 h-3" />
-                      <span>{t('imageGenerationSettingsButton')}</span>
-                    </button>
-                  </div>
-                )}
+            {groupChatMode ? (
+              <div className="space-y-1 text-xs">
+                <div className="font-semibold">
+                  {t('groupChatModelsSelected').replace('{{count}}', String(groupChatModels.length))}
+                </div>
+                <div className="text-muted-foreground">
+                  {groupChatModels.map((m) => {
+                    const op = operators.find(o => o.operator === m.operator);
+                    const model = op?.models?.find(mod => mod.id === m.modelId);
+                    return model?.name;
+                  }).filter(Boolean).join(', ')}
+                </div>
               </div>
             ) : (
-              <div>{currentModel ? currentModel.name : 'Select model'}</div>
+              currentModel && modelInfo ? (
+                <div className="space-y-1.5 text-xs">
+                  <div className="font-semibold">{currentModel.name}</div>
+                  
+                  {modelInfo.context_length && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-muted-foreground">▪</span>
+                      <span>
+                        <span className="text-muted-foreground">{t('modelContext')}:</span>{' '}
+                        {formatContextLength(modelInfo.context_length)}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {modelInfo.architecture?.input_modalities && modelInfo.architecture.input_modalities.length > 0 && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-muted-foreground">▪</span>
+                      <span>
+                        <span className="text-muted-foreground">{t('modelInputModalities')}:</span>{' '}
+                        {modelInfo.architecture.input_modalities.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {modelInfo.architecture?.output_modalities && modelInfo.architecture.output_modalities.length > 0 && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-muted-foreground">▪</span>
+                      <span>
+                        <span className="text-muted-foreground">{t('modelOutputModalities')}:</span>{' '}
+                        {modelInfo.architecture.output_modalities.join(', ')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {modelInfo.pricing?.prompt && (
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-muted-foreground">▪</span>
+                      <span>
+                        <span className="text-muted-foreground">{t('modelPrice')}:</span>{' '}
+                        {formatPrice(modelInfo.pricing.prompt)} / 1M
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Show image generation settings button if model supports image output */}
+                  {modelInfo.architecture?.output_modalities?.includes('image') && selectedOperator && (
+                    <div className="pt-2 mt-2 border-t border-border">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSettingsDialogOpen(true);
+                        }}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+                      >
+                        <Settings className="w-3 h-3" />
+                        <span>{t('imageGenerationSettingsButton')}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>{currentModel ? currentModel.name : 'Select model'}</div>
+              )
             )}
           </TooltipContent>
         </Tooltip>
@@ -240,6 +292,23 @@ export default function ModelSelect() {
                 )}
               </Button>
             </div>
+            
+            {/* Group Chat Toggle */}
+            <div className="px-3 py-2 border-b">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{t('groupChat')}</span>
+                <Switch 
+                  checked={groupChatMode}
+                  onCheckedChange={(checked) => {
+                    setGroupChatMode(checked);
+                    if (checked && selectedOperator && selectedOperator.selectedModel) {
+                      toggleGroupChatModel(selectedOperator.operator, selectedOperator.selectedModel);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            
             <CommandList>
               <CommandEmpty>{t('modelNotFound')}</CommandEmpty>
               
@@ -248,17 +317,31 @@ export default function ModelSelect() {
                 <CommandGroup heading={t('favorites')}>
                   {favoriteModels.map(({ operator, model, config }) => {
                     const value = `${operator}::${model.id}`;
-                    const isSelected = currentValue === value;
+                    const isSelected = groupChatMode 
+                      ? groupChatModels.some(m => m.operator === operator && m.modelId === model.id)
+                      : currentValue === value;
+                    const isDisabled = groupChatMode && 
+                      !isSelected && 
+                      groupChatModels.length >= MAX_GROUP_CHAT_MODELS;
+                    
                     return (
                       <CommandItem
                         key={value}
                         value={`${model.name} ${operator}`}
+                        disabled={isDisabled}
+                        className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
                         onSelect={() => {
-                          setSelectedOperator({
-                            ...config,
-                            selectedModel: model.id
-                          });
-                          setOpen(false);
+                          if (isDisabled) return;
+                          
+                          if (groupChatMode) {
+                            toggleGroupChatModel(operator, model.id);
+                          } else {
+                            setSelectedOperator({
+                              ...config,
+                              selectedModel: model.id
+                            });
+                            setOpen(false);
+                          }
                         }}
                       >
                         <div className="flex items-center gap-2 flex-1 truncate">
@@ -272,12 +355,20 @@ export default function ModelSelect() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-                          <Check
-                            className={cn(
-                              "h-4 w-4 text-primary",
-                              isSelected ? "opacity-100" : "opacity-0"
-                            )}
-                          />
+                          {groupChatMode ? (
+                            <Checkbox
+                              checked={isSelected}
+                              disabled={isDisabled}
+                              className="pointer-events-none"
+                            />
+                          ) : (
+                            <Check
+                              className={cn(
+                                "h-4 w-4 text-primary",
+                                isSelected ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                          )}
                           <button
                             type="button"
                             onClick={(e) => {
@@ -301,6 +392,17 @@ export default function ModelSelect() {
                 
                 if (filteredModels.length === 0) return null;
                 
+                // Сортировка: выбранные модели сверху в групповом режиме
+                const sortedModels = groupChatMode 
+                  ? [...filteredModels].sort((a, b) => {
+                      const aSelected = groupChatModels.some(m => m.operator === config.operator && m.modelId === a.id);
+                      const bSelected = groupChatModels.some(m => m.operator === config.operator && m.modelId === b.id);
+                      if (aSelected && !bSelected) return -1;
+                      if (!aSelected && bSelected) return 1;
+                      return 0;
+                    })
+                  : filteredModels;
+                
                 return (
                 <CommandGroup 
                   key={config.operator} 
@@ -315,20 +417,34 @@ export default function ModelSelect() {
                     </div>
                   }
                 >
-                  {filteredModels.map(model => {
+                  {sortedModels.map(model => {
                     const value = `${config.operator}::${model.id}`;
-                    const isSelected = currentValue === value;
+                    const isSelected = groupChatMode 
+                      ? groupChatModels.some(m => m.operator === config.operator && m.modelId === model.id)
+                      : currentValue === value;
                     const isFav = isFavorite(config.operator, model.id);
+                    const isDisabled = groupChatMode && 
+                      !isSelected && 
+                      groupChatModels.length >= MAX_GROUP_CHAT_MODELS;
+                    
                     return (
                       <CommandItem
                         key={value}
                         value={`${model.name} ${config.operator}`}
+                        disabled={isDisabled}
+                        className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
                         onSelect={() => {
-                          setSelectedOperator({
-                            ...config,
-                            selectedModel: model.id
-                          });
-                          setOpen(false);
+                          if (isDisabled) return;
+                          
+                          if (groupChatMode) {
+                            toggleGroupChatModel(config.operator, model.id);
+                          } else {
+                            setSelectedOperator({
+                              ...config,
+                              selectedModel: model.id
+                            });
+                            setOpen(false);
+                          }
                         }}
                       >
                         <div className="flex items-center gap-2 flex-1 truncate">
@@ -337,12 +453,20 @@ export default function ModelSelect() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-                          <Check
-                            className={cn(
-                              "h-4 w-4 text-primary",
-                              isSelected ? "opacity-100" : "opacity-0"
-                            )}
-                          />
+                          {groupChatMode ? (
+                            <Checkbox
+                              checked={isSelected}
+                              disabled={isDisabled}
+                              className="pointer-events-none"
+                            />
+                          ) : (
+                            <Check
+                              className={cn(
+                                "h-4 w-4 text-primary",
+                                isSelected ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                          )}
                           <button
                             type="button"
                             onClick={(e) => {

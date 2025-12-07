@@ -182,6 +182,12 @@
   "searchModel": {
     "message": "Search model..."
   },
+  "groupChat": {
+    "message": "Group Chat"
+  },
+  "groupChatModelsSelected": {
+    "message": "Selected {{count}} models"
+  },
   "modelNotFound": {
     "message": "Model not found"
   },

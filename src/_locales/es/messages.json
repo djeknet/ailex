@@ -242,6 +242,14 @@
     "message": "Buscar modelo...",
     "description": ""
   },
+  "groupChat": {
+    "message": "Chat grupal",
+    "description": ""
+  },
+  "groupChatModelsSelected": {
+    "message": "Seleccionados {{count}} modelos",
+    "description": ""
+  },
   "modelNotFound": {
     "message": "Modelo no encontrado",
     "description": ""

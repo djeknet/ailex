@@ -120,6 +120,7 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
   const [isSelectingScreenshot, setIsSelectingScreenshot] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
   
   // Autocomplete state
   const [userMessageHistory, setUserMessageHistory] = useState<string[]>([]);
@@ -849,6 +850,7 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
+    dragCounterRef.current = 0; // Сбрасываем счетчик
 
     if (!modelCapabilities.supportsImages) return;
 
@@ -1009,26 +1011,34 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
     
     if (!modelCapabilities.supportsImages) return;
     
-    // Check if dragged items contain images (files or HTML with images)
-    const hasImageFiles = Array.from(e.dataTransfer.items).some(
-      item => item.type.startsWith('image/')
-    );
+    // Увеличиваем счетчик при каждом dragEnter
+    dragCounterRef.current++;
     
-    const hasImageUrl = Array.from(e.dataTransfer.types).some(
-      type => type === 'text/html' || type === 'text/plain'
-    );
+    // Игнорируем внутренние drag операции из самого компонента
+    // Проверяем, что это внешний источник данных (файлы, изображения или HTML)
+    const hasFiles = e.dataTransfer.types.includes('Files');
+    const hasImages = e.dataTransfer.items.length > 0 && 
+      Array.from(e.dataTransfer.items).some(item => item.type.startsWith('image/'));
+    const hasHtml = e.dataTransfer.types.includes('text/html');
     
-    if (hasImageFiles || hasImageUrl) {
-      setIsDragging(true);
+    // Если нет файлов/изображений/HTML - это скорее всего внутренний drag (иконка провайдера)
+    if (!hasFiles && !hasImages && !hasHtml) {
+      dragCounterRef.current--;
+      return;
     }
+    
+    setIsDragging(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Only set dragging to false if leaving the main container
-    if (e.currentTarget === e.target) {
+    // Уменьшаем счетчик при каждом dragLeave
+    dragCounterRef.current--;
+    
+    // Скрываем overlay только когда счетчик достигнет 0 (покинули весь компонент)
+    if (dragCounterRef.current === 0) {
       setIsDragging(false);
     }
   };
@@ -1441,6 +1451,7 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
   return (
     <TooltipProvider>
       <div 
+        data-message-input
         className={`border-t p-4 bg-card relative transition-colors ${
           isDragging ? 'bg-accent/50 border-primary' : ''
         }`}

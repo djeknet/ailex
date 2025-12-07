@@ -246,8 +246,8 @@ export class GrokProvider implements AIProvider {
               // Capture usage info if available
               if (json.usage) {
                 totalTokens = json.usage.total_tokens || 0;
-                inputTokens = json.usage.prompt_tokens || 0;
-                outputTokens = json.usage.completion_tokens || 0;
+                inputTokens = json.usage.prompt_tokens || json.usage.input_tokens || 0;
+                outputTokens = json.usage.completion_tokens || json.usage.output_tokens || 0;
               }
               
               // Extract citations
@@ -263,8 +263,8 @@ export class GrokProvider implements AIProvider {
                 });
               }
               
-              // Check finish reason for saving last tool call
-              if (json.choices[0]?.finish_reason === 'tool_calls') {
+              // Check finish reason for saving last tool call (only for chat/completions format)
+              if (!webSearchEnabled && json.choices?.[0]?.finish_reason === 'tool_calls') {
                 if (currentToolCallIndex >= 0) {
                   toolCalls.push(currentToolCall as ToolCall);
                   console.log('[Grok] Saved final tool call, total:', toolCalls.length);

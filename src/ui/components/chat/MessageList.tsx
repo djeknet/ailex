@@ -61,7 +61,8 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
     clearContextTruncationInfo,
     generatingQuestionsForMessage,
     generateSuggestedQuestions,
-    sendSitePrompt
+    sendSitePrompt,
+    setGroupChatMode
   } = useChatStore();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [messageBranches, setMessageBranches] = useState<Record<string, MessageBranch[]>>({});
@@ -126,6 +127,7 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
           operator: msg.operator!,
           model: msg.model!,
           text: msg.text,
+          tokens: msg.tokens,
           suggestedQuestions: msg.suggestedQuestions,
           citations: msg.citations,
           generatedImages: msg.generatedImages,
@@ -636,7 +638,8 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
                 id: tempBranchId,
                 operator: operator.operator,
                 model: modelId,
-                text: accumulatedContent
+                text: accumulatedContent,
+                tokens: 0
               }];
               return updated;
             });
@@ -722,6 +725,7 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
             operator: operator.operator,
             model: modelId,
             text: finalContent || '',
+            tokens: response.tokens?.total || 0,
             generatedImages: response.images ? JSON.stringify(response.images) : undefined,
             responseId: response.response_id
           }];
@@ -732,6 +736,7 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
             updated[messageId][branchIndex] = {
               ...updated[messageId][branchIndex],
               text: finalContent || '',
+              tokens: response.tokens?.total || 0,
               generatedImages: response.images ? JSON.stringify(response.images) : undefined,
               responseId: response.response_id
             };
@@ -841,6 +846,10 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
     modelId: string
   ) => {
     try {
+      // Автоматически переключаем на одиночный режим, так как консул отвечает от 1 модели
+      setGroupChatMode(false);
+      console.log('[MessageList] Switched to single chat mode for consul summary');
+
       // Find the AI message
       const messageIndex = messages.findIndex(m => m.id === messageId);
       if (messageIndex === -1) {

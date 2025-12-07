@@ -81,10 +81,12 @@ export class GeminiProvider implements AIProvider {
 
     // Convert messages to Gemini format
     const contents = [];
+    let systemInstruction: string | undefined;
     
     for (const msg of messages) {
-      // Skip system messages - Gemini doesn't support them, will use first user message
+      // Extract system message - Gemini uses systemInstruction field
       if (msg.role === 'system') {
+        systemInstruction = typeof msg.content === 'string' ? msg.content : '';
         continue;
       }
       
@@ -198,6 +200,14 @@ export class GeminiProvider implements AIProvider {
         maxOutputTokens: 8192
       }
     };
+    
+    // Add systemInstruction if present
+    if (systemInstruction) {
+      requestBody.systemInstruction = {
+        parts: [{ text: systemInstruction }]
+      };
+      console.log('[Gemini] chat - Added system instruction:', systemInstruction.substring(0, 100));
+    }
     
     // Добавляем response_modalities и image_config для моделей с поддержкой изображений
     if (modelSupportsImageGeneration) {

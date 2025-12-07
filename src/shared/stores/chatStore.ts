@@ -9,7 +9,7 @@ import { AIServiceError, AIErrorCode, detectErrorType } from '@shared/types/erro
 import { getTranslation } from '@shared/i18n/useTranslation';
 import { i18nService } from '@shared/i18n/i18nService';
 import { isSystemPage } from '@shared/utils/pageUtils';
-import { getAILanguageName } from '@shared/constants';
+import { getAILanguageName, MAX_GROUP_CHAT_MODELS } from '@shared/constants';
 import { getAllAvailableTools, toolsToDefinitions } from '@shared/services/toolsService';
 import { executeToolCall } from '@shared/services/toolExecutor';
 import { ToolExecution } from '@shared/types/tools';
@@ -45,6 +45,10 @@ interface ChatStore {
   // Track loading state per chat to prevent cross-tab issues
   loadingChats: Set<string>;
   activeRequestController: AbortController | null;
+  
+  // Group Chat
+  groupChatMode: boolean;
+  groupChatModels: Array<{operator: AIOperator, modelId: string}>;
   
   // Actions
   setCurrentChat: (chat: Chat | null) => void;
@@ -92,6 +96,24 @@ interface ChatStore {
   moveChatToFolder: (chatId: string, folderId?: string) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
   deleteOldChats: (daysOld: number) => Promise<void>;
+  
+  // Group Chat
+  setGroupChatMode: (enabled: boolean) => void;
+  toggleGroupChatModel: (operator: AIOperator, modelId: string) => void;
+  clearGroupChatModels: () => void;
+  sendParallelMessages: (
+    content: string, 
+    pageContext?: string, 
+    replyTo?: string, 
+    actionLabel?: string,
+    attachments?: Array<{type: 'file' | 'image' | 'dom' | 'tab'; name: string; data: string; xpath?: string; mimeType?: string; tabUrl?: string; tabTitle?: string; tabFavicon?: string}>,
+    webSearchEnabled?: boolean,
+    instructionData?: { id: string; content: string },
+    quotedText?: string,
+    previousResponseId?: string,
+    retryMessageId?: string,
+    sourceTabId?: number
+  ) => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -117,6 +139,8 @@ export const useChatStore = create<ChatStore>()(
       activeToolExecutions: [], // Инициализация
       loadingChats: new Set<string>(),
       activeRequestController: null,
+      groupChatMode: false,
+      groupChatModels: [],
 
       setCurrentChat: (chat) => set({ currentChat: chat }),
 
@@ -139,7 +163,13 @@ export const useChatStore = create<ChatStore>()(
   },
 
   sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId) => {
-    const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController, editingImageResponseId } = get();
+    const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController, editingImageResponseId, groupChatMode, groupChatModels } = get();
+    
+    // Проверка группового режима - переадресация на параллельную обработку
+    if (groupChatMode && groupChatModels.length > 0) {
+      console.log('[chatStore] Group chat mode enabled, redirecting to parallel processing');
+      return get().sendParallelMessages(content, pageContext, replyTo, actionLabel, attachments, webSearchEnabled, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId);
+    }
     
     if (!currentChat || !selectedOperator) {
       console.error('No chat or operator selected');
@@ -331,7 +361,9 @@ export const useChatStore = create<ChatStore>()(
           pageContextEnabled: pageContext && effectivePageContextEnabled ? true : undefined,
           pageContextType: pageContext && effectivePageContextEnabled ? pageContextType : undefined,
           pageContextHash: pageContextHash,
-          pageUrl: currentUrl,
+          // ВАЖНО: pageUrl сохраняем только если контекст был действительно использован
+          // Это предотвращает badge на системных страницах и когда контекст отключен
+          pageUrl: (pageContext && effectivePageContextEnabled) ? currentUrl : undefined,
           pageTitle: pageContext && effectivePageContextEnabled ? pageTitle : undefined,
           pageIcon: pageContext && effectivePageContextEnabled ? pageIcon : undefined,
           // Save instruction ID
@@ -1357,10 +1389,19 @@ export const useChatStore = create<ChatStore>()(
       const isTruncated = aiResponse.length > contextLength;
       
       // Create system prompt for generating questions
-      const systemPrompt = `Generate 3 short, relevant follow-up questions based on this AI response. 
-Questions must be in ${languageName} language.
-Return ONLY plain text questions, one per line, without numbering, bullets, or HTML tags.
-Do not use any formatting like <span>, <li>, <p> or markdown.
+      const systemPrompt = `You are a helpful assistant that generates follow-up questions.
+
+Generate exactly 3 short, relevant follow-up questions based on the AI response below.
+
+IMPORTANT RULES:
+- Questions MUST be in ${languageName} language
+- Return ONLY plain text questions, one per line
+- Do NOT use numbering (1., 2., 3.)
+- Do NOT use bullets (-, *, •)
+- Do NOT use HTML tags (<span>, <li>, <p>)
+- Do NOT use markdown formatting
+- Each question should be on a separate line
+- Keep questions concise and relevant
 
 AI Response${isTruncated ? ' (excerpt)' : ''}:
 ${responseContext}`;
@@ -1790,7 +1831,7 @@ ${responseContext}`;
       
       console.log('[chatStore] Loaded folders from DB:', {
         count: folders.length,
-        folderIds: folders.map(f => f.id)
+        folderIds: folders.map((f: ChatFolder) => f.id)
       });
       
       set({ folders });
@@ -1957,6 +1998,352 @@ ${responseContext}`;
     } catch (error) {
       console.error('Error deleting old chats:', error);
     }
+  },
+
+  // Group Chat Methods
+  setGroupChatMode: (enabled) => {
+    const { selectedOperator, groupChatModels } = get();
+    
+    // При включении добавляем текущую модель ТОЛЬКО если список пуст (первый раз)
+    if (enabled && groupChatModels.length === 0 && selectedOperator && selectedOperator.selectedModel) {
+      // Атомарное обновление - и режим, и модели вместе
+      set({ 
+        groupChatMode: enabled,
+        groupChatModels: [{
+          operator: selectedOperator.operator,
+          modelId: selectedOperator.selectedModel
+        }]
+      });
+      console.log('[chatStore] Group chat mode enabled with initial model:', selectedOperator.operator, selectedOperator.selectedModel);
+    } else {
+      // Просто переключаем режим, модели уже есть или режим выключается
+      set({ groupChatMode: enabled });
+      console.log('[chatStore] Group chat mode:', enabled ? 'enabled' : 'disabled', 'with', groupChatModels.length, 'models');
+    }
+  },
+
+  toggleGroupChatModel: (operator, modelId) => {
+    const { groupChatModels } = get();
+    
+    const index = groupChatModels.findIndex(
+      m => m.operator === operator && m.modelId === modelId
+    );
+    
+    if (index !== -1) {
+      // Удаляем модель
+      const newModels = groupChatModels.filter((_, i) => i !== index);
+      set({ groupChatModels: newModels });
+    } else {
+      // Добавляем модель если не достигнут лимит
+      if (groupChatModels.length < MAX_GROUP_CHAT_MODELS) {
+        set({ 
+          groupChatModels: [...groupChatModels, { operator, modelId }]
+        });
+      }
+    }
+  },
+
+  clearGroupChatModels: () => {
+    set({ groupChatModels: [] });
+  },
+
+  // Parallel messages for group chat
+  sendParallelMessages: async (
+    content: string,
+    pageContext?: string,
+    replyTo?: string,
+    actionLabel?: string,
+    attachments: Array<{type: 'file' | 'image' | 'dom' | 'tab'; name: string; data: string; xpath?: string; mimeType?: string; tabUrl?: string; tabTitle?: string; tabFavicon?: string}> = [],
+    webSearchEnabled: boolean = false,
+    instructionData?: { id: string; content: string },
+    quotedText?: string,
+    previousResponseId?: string,
+    retryMessageId?: string,
+    sourceTabId?: number
+  ) => {
+    const { currentChat, groupChatModels, addMessage, pageContextEnabled, pageContextType } = get();
+    const { useSettingsStore } = await import('./settingsStore');
+    const { operators } = useSettingsStore.getState();
+    
+    if (!currentChat || groupChatModels.length === 0) {
+      console.error('[chatStore] No chat or group models selected');
+      return;
+    }
+
+    console.log('[chatStore] Starting parallel message sending to', groupChatModels.length, 'models');
+    
+    set({ isLoading: true, error: null });
+
+    try {
+      // 1. Получить информацию о текущей вкладке
+      let tab;
+      if (sourceTabId) {
+        try {
+          tab = await chrome.tabs.get(sourceTabId);
+        } catch (error) {
+          console.warn('[chatStore] Could not get source tab, falling back to active:', error);
+          [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        }
+      } else {
+        [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      }
+      
+      const currentUrl = tab?.url || '';
+      const pageTitle = tab?.title ? (tab.title.length > 30 ? tab.title.substring(0, 30) + '...' : tab.title) : undefined;
+      const pageIcon = tab?.favIconUrl || undefined;
+
+      // 2. Подготовить пользовательское сообщение
+      const isSystem = isSystemPage(currentUrl);
+      const effectivePageContextEnabled = pageContext ? true : (pageContextEnabled && !isSystem);
+
+      let pageContextHash: string | undefined;
+      if (pageContext && effectivePageContextEnabled) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(pageContext);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        pageContextHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      // Подготовить attachments
+      const binaryFileAttachments = attachments.filter(a => {
+        if (a.type !== 'file') return false;
+        return a.data.match(/^[A-Za-z0-9+/=]+$/);
+      });
+      
+      const allAttachments = attachments.map(att => ({
+        type: att.type,
+        name: att.name,
+        data: att.data,
+        xpath: att.xpath,
+        mimeType: (att as any).mimeType,
+        tabUrl: (att as any).tabUrl,
+        tabTitle: (att as any).tabTitle,
+        tabFavicon: (att as any).tabFavicon
+      }));
+      
+      const firstAttachment = attachments[0];
+      
+      let contentForDatabase = content;
+      if (attachments.length > 0) {
+        for (const attachment of attachments) {
+          if (attachment.type === 'file') {
+            const isTextFile = !attachment.data.match(/^[A-Za-z0-9+/=]+$/);
+            if (isTextFile) {
+              contentForDatabase += `\n\nAttached file (${attachment.name}):\n${attachment.data}`;
+            }
+          }
+        }
+      }
+
+      // Создать пользовательское сообщение
+      const userMessage: ChatMessage = {
+        id: `msg_${Date.now()}_user`,
+        createdAt: Date.now(),
+        chatId: currentChat.id,
+        isUser: true,
+        text: contentForDatabase,
+        tokens: 0,
+        replyTo,
+        actionLabel,
+        quotedText,
+        webSearch: webSearchEnabled,
+        attachments: allAttachments.length > 0 ? JSON.stringify(allAttachments) : undefined,
+        attach_type: firstAttachment?.type !== 'tab' ? firstAttachment?.type : undefined,
+        attach_name: firstAttachment?.type !== 'tab' ? firstAttachment?.name : undefined,
+        xpath: firstAttachment?.type !== 'tab' ? firstAttachment?.xpath : undefined,
+        file_data: firstAttachment?.type === 'image' || (firstAttachment?.type === 'file' && binaryFileAttachments.length > 0) 
+          ? firstAttachment.data 
+          : undefined,
+        pageContextEnabled: pageContext && effectivePageContextEnabled ? true : undefined,
+        pageContextType: pageContext && effectivePageContextEnabled ? pageContextType : undefined,
+        pageContextHash: pageContextHash,
+        pageUrl: currentUrl,
+        pageTitle: pageContext && effectivePageContextEnabled ? pageTitle : undefined,
+        pageIcon: pageContext && effectivePageContextEnabled ? pageIcon : undefined,
+        instructionId: instructionData?.id
+      };
+
+      await addMessage(userMessage);
+
+      // 3. Последовательный streaming для каждой модели
+      const allMessages = get().messages;
+      let firstAiMessageId: string | undefined;
+      
+      // Обрабатываем модели последовательно для streaming эффекта
+      for (let index = 0; index < groupChatModels.length; index++) {
+        const selectedModel = groupChatModels[index];
+        
+        console.log(`[chatStore] Streaming model ${index + 1}/${groupChatModels.length}:`, selectedModel.operator, selectedModel.modelId);
+        
+        try {
+          // Найти конфигурацию оператора
+          const operatorConfig = operators.find(op => op.operator === selectedModel.operator);
+          if (!operatorConfig) {
+            console.error('[chatStore] Operator config not found:', selectedModel.operator);
+            continue;
+          }
+
+          // ВАЖНО: Фильтруем историю - только сообщения пользователя + ответы этой конкретной модели
+          const filteredMessages = allMessages.filter(m => {
+            if (m.chatId !== currentChat.id) return false;
+            if (m.branchId) return false; // Исключаем branch сообщения из истории
+            
+            if (m.isUser) return true; // Все сообщения пользователя
+            
+            // Для AI сообщений - только от текущей модели
+            return m.operator === selectedModel.operator && m.model === selectedModel.modelId;
+          });
+
+          console.log(`[chatStore] Filtered history for ${selectedModel.operator}/${selectedModel.modelId}:`, {
+            total: allMessages.length,
+            filtered: filteredMessages.length,
+            userMessages: filteredMessages.filter(m => m.isUser).length,
+            aiMessages: filteredMessages.filter(m => !m.isUser).length
+          });
+
+          // Подготовить сообщения для AI
+          const aiMessages: AIMessage[] = filteredMessages.map(m => ({
+            role: m.isUser ? 'user' as const : 'assistant' as const,
+            content: m.text
+          }));
+
+          // Добавить system message
+          const userLanguage = i18nService.getCurrentLanguage();
+          const languageInstruction = getAILanguageName(userLanguage);
+          
+          let systemContent = '';
+          if (instructionData?.content) {
+            systemContent = `${instructionData.content}\n\n`;
+          }
+          systemContent += `You are a helpful AI assistant. IMPORTANT: Always respond in ${languageInstruction}, regardless of the language of any provided context or documentation. The user prefers to communicate in ${languageInstruction}.`;
+          
+          aiMessages.unshift({
+            role: 'system' as const,
+            content: systemContent
+          });
+
+          // Создать конфиг с выбранной моделью
+          const modelConfig: AIOperatorConfig = {
+            ...operatorConfig,
+            selectedModel: selectedModel.modelId
+          };
+
+          // Создать уникальный ID для сообщения (используем timestamp + random для уникальности)
+          const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_ai_${index}_${selectedModel.operator}`;
+          
+          // Первое сообщение без branchId (основное), остальные - branches первого
+          if (index === 0) {
+            firstAiMessageId = messageId;
+          }
+
+          // Переменная для накопления контента - используем const для замыкания
+          const currentMessageId = messageId; // Фиксируем ID для замыкания
+          const currentIndex = index; // Фиксируем индекс для замыкания
+          let accumulatedContent = '';
+          
+          // Get web search settings if enabled
+          const webSearchSettings = webSearchEnabled 
+            ? (await import('@shared/stores/webSearchStore')).useWebSearchStore.getState().getSettings(selectedModel.operator)
+            : undefined;
+          
+          // Создать временное сообщение для streaming (чтобы UI знал о branch)
+          if (currentIndex > 0) {
+            const tempMessage: ChatMessage = {
+              id: currentMessageId,
+              createdAt: Date.now(),
+              chatId: currentChat.id,
+              isUser: false,
+              operator: selectedModel.operator,
+              model: selectedModel.modelId,
+              branchId: firstAiMessageId,
+              text: '',
+              tokens: 0
+            };
+            
+            // Добавляем временное сообщение в store (не в базу)
+            set(state => ({ 
+              messages: [...state.messages, tempMessage]
+            }));
+          }
+          
+          // Запустить запрос со streaming
+          const response = await sendAIMessage(
+            aiMessages,
+            modelConfig,
+            // ✅ onChunk - streaming callback с фиксированными переменными
+            (chunk) => {
+              accumulatedContent += chunk;
+              
+              // Обновляем сообщение напрямую в messages для правильного отображения
+              if (currentIndex === 0) {
+                // Для первого сообщения используем streamingContent
+                set({ streamingContent: accumulatedContent });
+              } else {
+                // Для branches обновляем сообщение в списке по зафиксированному ID
+                set(state => ({
+                  messages: state.messages.map(m => 
+                    m.id === currentMessageId 
+                      ? { ...m, text: accumulatedContent }
+                      : m
+                  )
+                }));
+              }
+            },
+            webSearchEnabled, // ✅ webSearchEnabled
+            webSearchSettings, // ✅ webSearchSettings
+            undefined // signal
+          );
+
+          // Обновить/создать финальное сообщение
+          const aiMessage: ChatMessage = {
+            id: messageId,
+            createdAt: Date.now(),
+            chatId: currentChat.id,
+            isUser: false,
+            operator: selectedModel.operator,
+            model: selectedModel.modelId,
+            branchId: index === 0 ? undefined : firstAiMessageId,
+            text: response.content || accumulatedContent,
+            tokens: response.tokens?.total || 0,
+            citations: response.citations,
+            responseId: response.response_id
+          };
+
+          // Для первого сообщения - добавить, для остальных - обновить существующее
+          if (index === 0) {
+            await addMessage(aiMessage);
+          } else {
+            // Обновляем существующее сообщение в базе через historyAPI
+            await historyAPI.addMessage(aiMessage); // Используем addMessage с тем же ID - перезапишет
+            set(state => ({
+              messages: state.messages.map(m => 
+                m.id === messageId ? aiMessage : m
+              )
+            }));
+          }
+          
+          console.log(`[chatStore] Completed streaming ${index + 1}/${groupChatModels.length} from ${selectedModel.operator}/${selectedModel.modelId}${index === 0 ? ' (container)' : ' (branch)'}`);
+          
+          // Очистить streamingContent только для первого сообщения
+          if (index === 0) {
+            set({ streamingContent: '' });
+          }
+          
+        } catch (error: any) {
+          console.error(`[chatStore] Error streaming model ${index + 1}:`, error);
+          // Продолжаем со следующей моделью даже при ошибке
+        }
+      }
+
+      console.log('[chatStore] Group chat parallel processing completed successfully');
+
+    } catch (error: any) {
+      console.error('[chatStore] Error in parallel processing:', error);
+      set({ error: error.message || 'Unknown error occurred' });
+    } finally {
+      set({ isLoading: false });
+    }
   }
     }),
     {
@@ -1966,6 +2353,8 @@ ${responseContext}`;
         selectedOperator: state.selectedOperator,
         pageContextEnabled: state.pageContextEnabled,
         pageContextType: state.pageContextType,
+        groupChatMode: state.groupChatMode,
+        groupChatModels: state.groupChatModels,
       }),
     }
   )

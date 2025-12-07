@@ -19,7 +19,8 @@ import {
   Wand2,
   Languages,
   MessageSquare,
-  WandSparkles
+  WandSparkles,
+  CircleDollarSign
 } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
 import {
@@ -564,17 +565,35 @@ export default function AIMessage({
             <BranchPage />
             <BranchNext />
           </BranchSelector>
-          <span className="text-xs text-muted-foreground ml-2">
-            {/* Show current model name based on active branch */}
+          <div className="flex items-center gap-2 ml-2">
+            <span className="text-xs text-muted-foreground">
+              {/* Show current model name based on active branch */}
+              {(() => {
+                if (activeBranchIndex === 0) {
+                  return message.model || t('unknownModel');
+                } else {
+                  const branch = branches[activeBranchIndex - 1];
+                  return branch?.model || t('unknownModel');
+                }
+              })()}
+            </span>
+            {/* Show tokens count with dollar icon */}
             {(() => {
-              if (activeBranchIndex === 0) {
-                return message.model || t('unknownModel');
-              } else {
-                const branch = branches[activeBranchIndex - 1];
-                return branch?.model || t('unknownModel');
+              const tokens = activeBranchIndex === 0 
+                ? message.tokens 
+                : branches[activeBranchIndex - 1]?.tokens;
+              
+              if (tokens && tokens > 0) {
+                return (
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <CircleDollarSign className="h-3.5 w-3.5" />
+                    <span>{tokens.toLocaleString()}</span>
+                  </div>
+                );
               }
+              return null;
             })()}
-          </span>
+          </div>
           
           {/* Consul Summary Button - показываем только при наведении и если есть 2+ ответа */}
           {hasBranches && (branches.length > 0 || activeBranchIndex > 0) && onConsulSummary && (

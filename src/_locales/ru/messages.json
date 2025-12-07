@@ -191,6 +191,12 @@
   "searchModel": {
     "message": "Поиск модели..."
   },
+  "groupChat": {
+    "message": "Групповой чат"
+  },
+  "groupChatModelsSelected": {
+    "message": "Выбрано {{count}} моделей"
+  },
   "modelNotFound": {
     "message": "Модель не найдена"
   },

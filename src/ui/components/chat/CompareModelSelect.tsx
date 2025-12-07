@@ -56,6 +56,13 @@ export default function CompareModelSelect({
     ? `${currentOperator}::${currentModel}`
     : '';
 
+  // Find current model name
+  const currentModelName = currentOperator && currentModel
+    ? configuredOperators
+        .find(op => op.operator === currentOperator)
+        ?.models?.find(m => m.id === currentModel)?.name
+    : undefined;
+
   // Custom filter function - search by word start
   const filterModels = (model: any, operator: string) => {
     if (!searchQuery) return true;
@@ -112,7 +119,9 @@ export default function CompareModelSelect({
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent>{t('compareResponses')}</TooltipContent>
+          <TooltipContent>
+            {currentModelName ? `${currentModelName} - ${t('compareResponses')}` : t('compareResponses')}
+          </TooltipContent>
         </Tooltip>
         <PopoverContent className="w-[300px] p-0" align="start">
         <Command shouldFilter={false}>

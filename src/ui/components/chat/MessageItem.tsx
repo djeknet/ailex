@@ -9,6 +9,7 @@ export interface MessageBranch {
   operator: AIOperator;
   model: string;
   text: string;
+  tokens?: number;
   suggestedQuestions?: string[];
   citations?: Citation[];
   generatedImages?: string;
