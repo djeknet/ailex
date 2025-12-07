@@ -69,7 +69,7 @@ function createOverlay() {
     z-index: 999999;
     pointer-events: none;
   `;
-  instruction.textContent = 'Выделите область для скриншота. Нажмите Esc для отмены.';
+  instruction.textContent = chrome.i18n.getMessage('screenshotSelectorInstruction');
   
   overlay.appendChild(instruction);
   document.body.appendChild(overlay);

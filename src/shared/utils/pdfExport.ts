@@ -63,6 +63,7 @@ export async function exportChatToPDF(
     }
 
     // Определение документа
+    // Используем только Roboto, так как Courier может отсутствовать в vfs_fonts
     const docDefinition: TDocumentDefinitions = {
       content,
       styles: {
@@ -91,8 +92,8 @@ export async function exportChatToPDF(
         },
         code: {
           fontSize: 9,
-          background: '#f9fafb',
-          font: 'Courier'
+          background: '#f9fafb'
+          // Убираем font: 'Courier', используем Roboto
         }
       },
       defaultStyle: {
@@ -429,10 +430,10 @@ function parseMarkdownForPDF(text: string): any[] {
             widths: ['*'],
             body: [[{
               text: codeLines.join('\n'),
-              font: 'Courier',
               fontSize: 9,
               fillColor: '#f9fafb',
               margin: [6, 4, 6, 4]
+              // Используем Roboto вместо Courier
             }]]
           },
           layout: {
@@ -613,9 +614,9 @@ function parseInlineMarkdown(text: string): any {
       if (endIndex !== -1) {
         parts.push({ 
           text: text.substring(i + 1, endIndex), 
-          font: 'Courier',
           fontSize: 9,
           background: '#f9fafb'
+          // Используем Roboto вместо Courier
         });
         i = endIndex + 1;
         continue;

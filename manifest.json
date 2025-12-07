@@ -35,7 +35,8 @@
         "src/ui/microphone/microphone.js",
         "src/ui/fullscreen/index.html",
         "src/content/siteWidget.css",
-        "icons/icon-48.png"
+        "icons/icon-48.png",
+        "_locales/*/messages.json"
       ],
       "matches": ["<all_urls>"]
     }

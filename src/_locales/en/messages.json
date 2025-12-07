@@ -155,6 +155,24 @@
   "hide": {
     "message": "Hide"
   },
+  "welcomeTitle": {
+    "message": "Welcome!"
+  },
+  "welcomeMessage": {
+    "message": "To get started with the extension, you need to connect any of the operators below. To do this, obtain and paste the API key into the field, click Test and select a model from the list. After connecting, you can go to chat."
+  },
+  "welcomeSuccessTitle": {
+    "message": "Hooray!"
+  },
+  "welcomeSuccessMessage": {
+    "message": "Successfully connected, now everything is ready to go."
+  },
+  "screenshotSelectorInstruction": {
+    "message": "Select an area for screenshot. Press Esc to cancel."
+  },
+  "helpTooltipFirstTime": {
+    "message": "Check out all the features of the extension"
+  },
   "lmstudioDescription": {
     "message": "LM Studio allows you to run local models on your computer. Download and run"
   },
@@ -2429,6 +2447,15 @@
   "confirm": {
     "message": "Confirm"
   },
+  "removeOperator": {
+    "message": "Remove operator"
+  },
+  "removeOperatorConfirmTitle": {
+    "message": "Remove connection?"
+  },
+  "removeOperatorConfirmMessage": {
+    "message": "Do you really want to delete the API key and connected models?"
+  },
   "settingsManagement": {
     "message": "Settings Management"
   },
@@ -3243,10 +3270,19 @@
     "message": "ChatGPT-like interface with sidebar, chat and folder management. Automatic synchronization with sidepanel, chat creation on first message, chat search and folder grouping. All external links open in new tabs, and URL syncs with current chatId."
   },
   "helpTitle_messageEditing": {
-    "message": "Message Editing"
+    "message": "Comparing AI Responses"
+  },
+  "enterNewFolderName": {
+    "message": "Enter new folder name"
   },
   "helpDescription_messageEditing": {
-    "message": "Ability to reuse sent messages with all attachments. Click the Edit button on any message - text, images, files, DOM elements, and tab references will automatically restore to the input field. Perfect for correcting queries without re-attaching files."
+    "message": "Ability to compare answers from different models in one block with pagination."
+  },
+  "helpTitle_messageConsul": {
+    "message": "Consul Summary Response"
+  },
+  "helpDescription_messageConsul": {
+    "message": "Get a summary response from selected model based on all responses"
   },
   "helpTitle_fileAttachments": {
     "message": "File Attachments"

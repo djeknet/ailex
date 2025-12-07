@@ -343,7 +343,6 @@ export default function Tools({ onBack }: { onBack?: () => void } = {}) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">{t('toolsPageTitle')}</h1>
-          <p className="text-muted-foreground">{t('toolsPageDescription')}</p>
         </div>
         <div className="flex gap-2">
           {onBack && (
@@ -379,7 +378,7 @@ export default function Tools({ onBack }: { onBack?: () => void } = {}) {
 
       {/* Custom Tools */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">{t('customTools')}</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('createdTools')}</h2>
         {customTools.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">

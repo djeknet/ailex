@@ -427,6 +427,98 @@ export function getLinks(params: GetLinksParams = {}): Array<{ href: string; tex
   }
 }
 
+export interface GetClickableElementsParams {
+  dataDescription: string;
+  limit?: number;
+}
+
+export function getClickableElements(params: GetClickableElementsParams): Array<{
+  selector: string;
+  index: number;
+  text: string;
+  xpath: string;
+  attributes: Record<string, string>;
+}> {
+  const { dataDescription, limit = 50 } = params;
+  
+  try {
+    // Ищем элементы с различными признаками кликабельности (универсально)
+    const selectors = [
+      '[role="button"]',
+      '[role="link"]',
+      '[onclick]',
+      '[data-action]',
+      'div[style*="cursor: pointer"]',
+      'div[style*="cursor:pointer"]',
+      'li[onclick]',
+      'div[tabindex="0"]', // Часто кликабельные
+      'tr[tabindex]', // Кликабельные строки таблиц
+      '[aria-label][role]', // Элементы с aria-label и role
+    ];
+    
+    const allElements: HTMLElement[] = [];
+    const seen = new Set<HTMLElement>();
+    
+    selectors.forEach(sel => {
+      try {
+        document.querySelectorAll(sel).forEach(el => {
+          if (!seen.has(el as HTMLElement)) {
+            seen.add(el as HTMLElement);
+            allElements.push(el as HTMLElement);
+          }
+        });
+      } catch (e) {
+        console.warn('[getClickableElements] Selector failed:', sel, e);
+      }
+    });
+    
+    // Фильтруем видимые элементы
+    const visible = allElements.filter(el => {
+      const style = window.getComputedStyle(el);
+      return style.display !== 'none' && 
+             style.visibility !== 'hidden' &&
+             style.opacity !== '0';
+    });
+    
+    // Группируем по селектору для удобства
+    const grouped = new Map<string, HTMLElement[]>();
+    visible.forEach(el => {
+      const tag = el.tagName.toLowerCase();
+      const className = el.className ? el.className.split(' ')[0] : '';
+      const key = className ? `${tag}.${className}` : tag;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)!.push(el);
+    });
+    
+    // Возвращаем с индексами
+    const result: Array<{
+      selector: string;
+      index: number;
+      text: string;
+      xpath: string;
+      attributes: Record<string, string>;
+    }> = [];
+    
+    grouped.forEach((elements, baseSelector) => {
+      elements.forEach((el, idx) => {
+        result.push({
+          selector: baseSelector,
+          index: idx,
+          text: el.textContent?.trim().substring(0, 100) || '',
+          xpath: getXPath(el),
+          attributes: getElementAttributes(el)
+        });
+      });
+    });
+    
+    console.log('[getClickableElements] Found', result.length, 'clickable elements');
+    return result.slice(0, limit);
+  } catch (error) {
+    console.error('Error in getClickableElements:', error);
+    return [];
+  }
+}
+
 export function getText(maxLength?: number): string {
   try {
     let text = document.body.innerText || '';

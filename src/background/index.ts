@@ -38,6 +38,23 @@ chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error(error));
 
+// Устанавливаем минимальную ширину для side panel (особенно важно для Edge)
+// Edge по умолчанию открывает side panel с меньшей шириной чем Chrome
+try {
+  // Пытаемся установить минимальную ширину через setOptions (если поддерживается)
+  if (chrome.sidePanel && 'setOptions' in chrome.sidePanel) {
+    (chrome.sidePanel as any).setOptions({
+      enabled: true,
+      // @ts-ignore - эти опции могут быть недокументированы
+      width: 420
+    }).catch((error: Error) => {
+      console.log('[Background] Could not set side panel width (this is OK):', error.message);
+    });
+  }
+} catch (error) {
+  console.log('[Background] Side panel width option not supported');
+}
+
 // Обработка сообщений от UI и content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Received message:', message);

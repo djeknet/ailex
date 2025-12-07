@@ -7,7 +7,7 @@ import { getElementByXPath, getCleanInnerHTML } from '@shared/utils/domSelector'
 import * as domFunctions from './domFunctions';
 import { showFieldLoader, hideFieldLoader, getSavedActiveElement, clearSavedActiveElement } from './fieldLoader';
 import { showToast } from './toast';
-import { showCustomInstructionPrompt, hideCustomInstructionPrompt, getTargetElement } from './customInstructionPrompt';
+import { showCustomInstructionPrompt, hideCustomInstructionPrompt } from './customInstructionPrompt';
 import { initSiteWidget } from './siteWidget';
 
 // Content script entry point
@@ -389,6 +389,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
         case 'INSERT_GENERATED_TEXT':
           try {
+            console.log('[content] INSERT_GENERATED_TEXT received, savedElement:', getSavedActiveElement());
             hideFieldLoader();
             
             const { text, success, error: errorMsg } = message.data || {};
@@ -396,6 +397,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             if (success && text) {
               // Use saved element instead of document.activeElement
               const targetElement = getSavedActiveElement();
+              console.log('[content] Target element for insertion:', targetElement, 'text length:', text.length);
+              
               const inserted = targetElement ? insertTextIntoElement(targetElement, text) : false;
               
               if (inserted) {
@@ -429,12 +432,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
               activeElement.isContentEditable
             )) {
               showCustomInstructionPrompt(activeElement, (instruction) => {
-                // Save the element for later insertion
-                const elementToFill = getTargetElement();
-                if (elementToFill) {
-                  // Manually save it to fieldLoader
-                  showFieldLoader(elementToFill);
-                }
+                // Get the target element from custom instruction prompt
+                // This is the original field where user clicked
+                const targetField = activeElement;
+                
+                // Show loader on the target field
+                showFieldLoader(targetField);
                 
                 // Send custom instruction to background for processing
                 chrome.runtime.sendMessage({
@@ -486,6 +489,8 @@ function insertTextIntoActiveElement(text: string): boolean {
 
 // Helper function to insert text into a specific element
 function insertTextIntoElement(element: HTMLElement, text: string): boolean {
+  console.log('[content] insertTextIntoElement called, element:', element.tagName, element.isContentEditable, 'text length:', text.length);
+  
   if (!element) {
     console.error('[content] No element provided');
     return false;
@@ -520,31 +525,48 @@ function insertTextIntoElement(element: HTMLElement, text: string): boolean {
     
     // For contenteditable elements
     if (element.isContentEditable) {
+      console.log('[content] Inserting into contenteditable, current content:', element.textContent);
+      
       // Focus the element first
       element.focus();
       
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) {
-        // No selection, append to end
-        element.textContent = (element.textContent || '') + text;
-      } else {
-        // Insert at selection
-        const range = selection.getRangeAt(0);
-        range.deleteContents();
-        const textNode = document.createTextNode(text);
-        range.insertNode(textNode);
+      try {
+        // Clear existing content by selecting all
+        const selection = window.getSelection();
+        if (selection) {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
         
-        // Move cursor to end of inserted text
-        range.setStartAfter(textNode);
-        range.setEndAfter(textNode);
-        selection.removeAllRanges();
-        selection.addRange(range);
+        // Create a ClipboardEvent for paste (works with Draft.js)
+        const dataTransfer = new DataTransfer();
+        dataTransfer.setData('text/plain', text);
+        
+        const pasteEvent = new ClipboardEvent('paste', {
+          clipboardData: dataTransfer,
+          bubbles: true,
+          cancelable: true
+        });
+        
+        element.dispatchEvent(pasteEvent);
+        
+        console.log('[content] Text inserted via ClipboardEvent');
+      } catch (error) {
+        console.error('[content] ClipboardEvent failed, using fallback:', error);
+        
+        // Fallback: try to set value directly via React/Draft.js
+        // Clear and type character by character
+        element.textContent = '';
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // Insert text
+        element.textContent = text;
+        element.dispatchEvent(new Event('input', { bubbles: true }));
       }
       
-      // Trigger input event for contenteditable
-      element.dispatchEvent(new Event('input', { bubbles: true }));
-      
-      console.log('[content] Text inserted into contenteditable');
+      console.log('[content] Text inserted into contenteditable, new content:', element.textContent);
       return true;
     }
     

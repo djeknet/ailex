@@ -3,13 +3,21 @@ import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
 import { Button } from '../ui/button';
 import { cn } from '@shared/utils/cn';
 
+// Проверяем, запущено ли в sidepanel (fullscreen API не работает в sidepanel)
+const isSidePanel = () => {
+  // В sidepanel ширина окна обычно фиксированная и узкая
+  return window.innerWidth < 600 || !document.fullscreenEnabled;
+};
+
 interface VideoPlayerProps {
   videoFile: string;
   className?: string;
+  autoPlay?: boolean;
 }
 
-export default function VideoPlayer({ videoFile, className }: VideoPlayerProps) {
+export default function VideoPlayer({ videoFile, className, autoPlay = false }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -17,8 +25,10 @@ export default function VideoPlayer({ videoFile, className }: VideoPlayerProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFullscreenButton] = useState(!isSidePanel());
 
-  const videoUrl = `/help-media/${videoFile}`;
+  const videoUrl = chrome?.runtime?.getURL?.(videoFile) || `/${videoFile}`;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -27,6 +37,16 @@ export default function VideoPlayer({ videoFile, className }: VideoPlayerProps) 
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
       setIsLoading(false);
+      
+      // Автопроигрывание, если включено
+      if (autoPlay) {
+        video.play().then(() => {
+          setIsPlaying(true);
+        }).catch((error) => {
+          console.log('Autoplay prevented:', error);
+          // Autoplay может быть заблокирован браузером
+        });
+      }
     };
 
     const handleTimeUpdate = () => {
@@ -42,18 +62,24 @@ export default function VideoPlayer({ videoFile, className }: VideoPlayerProps) 
       setIsLoading(false);
     };
 
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('ended', handleEnded);
     video.addEventListener('error', handleError);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('ended', handleEnded);
       video.removeEventListener('error', handleError);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [autoPlay]);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -84,14 +110,34 @@ export default function VideoPlayer({ videoFile, className }: VideoPlayerProps) 
     setCurrentTime(newTime);
   };
 
-  const toggleFullscreen = () => {
-    const video = videoRef.current;
-    if (!video) return;
+  const toggleFullscreen = async () => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      video.requestFullscreen();
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        // Пытаемся открыть контейнер в fullscreen
+        await container.requestFullscreen();
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+      // Если не работает, пробуем альтернативные методы для старых браузеров
+      const video = videoRef.current;
+      if (!video) return;
+      
+      try {
+        if ((video as any).webkitRequestFullscreen) {
+          (video as any).webkitRequestFullscreen();
+        } else if ((video as any).mozRequestFullScreen) {
+          (video as any).mozRequestFullScreen();
+        } else if ((video as any).msRequestFullscreen) {
+          (video as any).msRequestFullscreen();
+        }
+      } catch (e) {
+        console.error('Alternative fullscreen failed:', e);
+      }
     }
   };
 
@@ -171,14 +217,16 @@ export default function VideoPlayer({ videoFile, className }: VideoPlayerProps) 
             </span>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-white hover:bg-white/20"
-            onClick={toggleFullscreen}
-          >
-            <Maximize className="h-5 w-5" />
-          </Button>
+          {showFullscreenButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-white hover:bg-white/20"
+              onClick={toggleFullscreen}
+            >
+              <Maximize className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
     </div>

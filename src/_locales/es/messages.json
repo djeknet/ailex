@@ -1,0 +1,4509 @@
+{
+  "extensionName": {
+    "message": "AiLex"
+  },
+  "extensionDescription": {
+    "message": "Asistente de navegación con IA e interfaz de chat",
+    "description": ""
+  },
+  "chat": {
+    "message": "Chat",
+    "description": ""
+  },
+  "settings": {
+    "message": "Ajustes",
+    "description": ""
+  },
+  "history": {
+    "message": "Historia",
+    "description": ""
+  },
+  "help": {
+    "message": "Ayuda",
+    "description": ""
+  },
+  "tools": {
+    "message": "Herramientas",
+    "description": ""
+  },
+  "newChat": {
+    "message": "Nuevo Chat",
+    "description": ""
+  },
+  "closeChat": {
+    "message": "Cerrar Chat",
+    "description": ""
+  },
+  "sendMessage": {
+    "message": "Enviar",
+    "description": ""
+  },
+  "messageInputPlaceholder": {
+    "message": "Escriba su mensaje o seleccione un comando mediante /, para enlazar con pestañas escriba @",
+    "description": "."
+  },
+  "operators": {
+    "message": "Operadores",
+    "description": ""
+  },
+  "general": {
+    "message": "General",
+    "description": ""
+  },
+  "personalInfo": {
+    "message": "Personal Info",
+    "description": ""
+  },
+  "instructions": {
+    "message": "Instrucciones",
+    "description": ""
+  },
+  "theme": {
+    "message": "Tema",
+    "description": ""
+  },
+  "language": {
+    "message": "Idioma",
+    "description": ""
+  },
+  "light": {
+    "message": "Luz",
+    "description": ""
+  },
+  "dark": {
+    "message": "Dark",
+    "description": ""
+  },
+  "system": {
+    "message": "Sistema",
+    "description": ""
+  },
+  "colorScheme": {
+    "message": "Combinación de colores",
+    "description": ""
+  },
+  "colorSchemeGreen": {
+    "message": "Verde",
+    "description": ""
+  },
+  "colorSchemeBlue": {
+    "message": "Azul",
+    "description": ""
+  },
+  "colorSchemeNeutral": {
+    "message": "Neutral",
+    "description": ""
+  },
+  "colorSchemeOrange": {
+    "message": "Naranja",
+    "description": ""
+  },
+  "colorSchemeRed": {
+    "message": "Rojo",
+    "description": ""
+  },
+  "colorSchemeRose": {
+    "message": "Rosa",
+    "description": ""
+  },
+  "colorSchemeViolet": {
+    "message": "Violeta",
+    "description": ""
+  },
+  "colorSchemeYellow": {
+    "message": "Amarillo",
+    "description": ""
+  },
+  "fontFamily": {
+    "message": "Fuente",
+    "description": ""
+  },
+  "fontFamilySystem": {
+    "message": "Sistema por defecto",
+    "description": ""
+  },
+  "fontFamilyUrbanist": {
+    "message": "Urbanista",
+    "description": ""
+  },
+  "fontFamilyJetbrainsMono": {
+    "message": "JetBrains Mono",
+    "description": ""
+  },
+  "fontFamilyIbmPlexSans": {
+    "message": "IBM Plex Sans",
+    "description": ""
+  },
+  "fontFamilyManrope": {
+    "message": "Manrope",
+    "description": ""
+  },
+  "fontFamilyUbuntuSans": {
+    "message": "Ubuntu Sans",
+    "description": ""
+  },
+  "apiKey": {
+    "message": "Clave API",
+    "description": ""
+  },
+  "testConnection": {
+    "message": "Prueba",
+    "description": ""
+  },
+  "selectModel": {
+    "message": "Seleccionar modelo",
+    "description": ""
+  },
+  "save": {
+    "message": "Guardar",
+    "description": ""
+  },
+  "cancel": {
+    "message": "Cancelar",
+    "description": ""
+  },
+  "delete": {
+    "message": "Borrar",
+    "description": ""
+  },
+  "getApiKey": {
+    "message": "Obtener clave API →",
+    "description": ""
+  },
+  "apiKeyOptional": {
+    "message": "Clave API (opcional)",
+    "description": ""
+  },
+  "notRequired": {
+    "message": "No es necesario.",
+    "description": ""
+  },
+  "connectionSuccess": {
+    "message": "✓ Conexión exitosa",
+    "description": ""
+  },
+  "connectionError": {
+    "message": "✗ Error de conexión",
+    "description": ""
+  },
+  "addCustomEndpoint": {
+    "message": "+ Especificar punto final personalizado",
+    "description": ""
+  },
+  "endpoint": {
+    "message": "Punto final",
+    "description": ""
+  },
+  "endpointRequired": {
+    "message": "Punto final (obligatorio)",
+    "description": ""
+  },
+  "endpointOptional": {
+    "message": "Punto final (opcional)",
+    "description": ""
+  },
+  "hide": {
+    "message": "Ocultar",
+    "description": ""
+  },
+  "welcomeTitle": {
+    "message": "Bienvenido.",
+    "description": ""
+  },
+  "welcomeMessage": {
+    "message": "Para empezar a utilizar la extensión, debe conectar cualquiera de los operadores que se indican a continuación. Para ello, obtenga y pegue la clave API en el campo, haga clic en Probar y seleccione un modelo de la lista. Después de conectarse, puede ir al chat.",
+    "description": ""
+  },
+  "welcomeSuccessTitle": {
+    "message": "¡Hurra!",
+    "description": ""
+  },
+  "welcomeSuccessMessage": {
+    "message": "Conectado con éxito, ahora todo está listo para funcionar.",
+    "description": ""
+  },
+  "screenshotSelectorInstruction": {
+    "message": "Seleccione un área para la captura de pantalla. Pulse Esc para cancelar.",
+    "description": ""
+  },
+  "helpTooltipFirstTime": {
+    "message": "Echa un vistazo a todas las características de la extensión",
+    "description": ""
+  },
+  "lmstudioDescription": {
+    "message": "LM Studio le permite ejecutar modelos locales en su ordenador. Descargar y ejecutar",
+    "description": ""
+  },
+  "lmstudioBeforeConnection": {
+    "message": "antes de conectar.",
+    "description": ""
+  },
+  "searchModel": {
+    "message": "Buscar modelo...",
+    "description": ""
+  },
+  "modelNotFound": {
+    "message": "Modelo no encontrado",
+    "description": ""
+  },
+  "historyMode": {
+    "message": "Modo Historia",
+    "description": ""
+  },
+  "historyModeAll": {
+    "message": "Para todos los sitios",
+    "description": ""
+  },
+  "historyModePerSite": {
+    "message": "Por sitio",
+    "description": ""
+  },
+  "historyModeSession": {
+    "message": "Sólo sesión",
+    "description": ""
+  },
+  "historyModeAllDesc": {
+    "message": "El historial se comparte en todos los sitios",
+    "description": ""
+  },
+  "historyModePerSiteDesc": {
+    "message": "El historial se actualiza al cambiar de pestaña",
+    "description": ""
+  },
+  "historyModeSessionDesc": {
+    "message": "El historial se borra tras cerrar la extensión",
+    "description": ""
+  },
+  "autoDeletionDays": {
+    "message": "Borrar chats de más de, días",
+    "description": ""
+  },
+  "autoDeletionDaysDescription": {
+    "message": "Elimina automáticamente los chats que tengan más de un número de días especificado (excepto los chats de las carpetas).",
+    "description": ""
+  },
+  "deleteHistory": {
+    "message": "Eliminar el historial de chat",
+    "description": ""
+  },
+  "deleteHistoryWarning": {
+    "message": "Esta acción borrará todo el historial de chat y no se puede deshacer.",
+    "description": ""
+  },
+  "historyDeleted": {
+    "message": "Historia borrada",
+    "description": ""
+  },
+  "confirmDeletion": {
+    "message": "Confirmar borrado",
+    "description": ""
+  },
+  "deleteDataDescription": {
+    "message": "Está a punto de borrar los siguientes datos:",
+    "description": ""
+  },
+  "chatsToDelete": {
+    "message": "Chats a borrar:",
+    "description": ""
+  },
+  "messagesToDelete": {
+    "message": "Mensajes:",
+    "description": ""
+  },
+  "dataSize": {
+    "message": "Tamaño de los datos:",
+    "description": ""
+  },
+  "deleting": {
+    "message": "Borrar...",
+    "description": ""
+  },
+  "historyDeletedSuccess": {
+    "message": "El historial del chat ha sido borrado.",
+    "description": ""
+  },
+  "close": {
+    "message": "Cerrar",
+    "description": ""
+  },
+  "personalInfoDescription": {
+    "message": "Esta información se utiliza para rellenar automáticamente formularios en sitios web.",
+    "description": ""
+  },
+  "firstName": {
+    "message": "Nombre",
+    "description": ""
+  },
+  "lastName": {
+    "message": "Apellido",
+    "description": ""
+  },
+  "email": {
+    "message": "Correo electrónico",
+    "description": ""
+  },
+  "phone": {
+    "message": "Teléfono",
+    "description": ""
+  },
+  "country": {
+    "message": "País",
+    "description": ""
+  },
+  "state": {
+    "message": "Estado/Provincia",
+    "description": ""
+  },
+  "city": {
+    "message": "Ciudad",
+    "description": ""
+  },
+  "address": {
+    "message": "Dirección",
+    "description": ""
+  },
+  "addressLine2": {
+    "message": "Dirección Línea 2",
+    "description": ""
+  },
+  "zipCode": {
+    "message": "Código postal",
+    "description": ""
+  },
+  "position": {
+    "message": "Posición",
+    "description": ""
+  },
+  "about": {
+    "message": "Acerca de",
+    "description": ""
+  },
+  "firstNamePlaceholder": {
+    "message": "John",
+    "description": ""
+  },
+  "lastNamePlaceholder": {
+    "message": "Doe",
+    "description": ""
+  },
+  "emailPlaceholder": {
+    "message": "john@example.com",
+    "description": ""
+  },
+  "phonePlaceholder": {
+    "message": "+1 555 123-45-67",
+    "description": ""
+  },
+  "countryPlaceholder": {
+    "message": "USA",
+    "description": ""
+  },
+  "statePlaceholder": {
+    "message": "California",
+    "description": ""
+  },
+  "cityPlaceholder": {
+    "message": "Nueva York",
+    "description": ""
+  },
+  "addressPlaceholder": {
+    "message": "123 Main St",
+    "description": ""
+  },
+  "addressLine2Placeholder": {
+    "message": "Apt 5, Piso 2",
+    "description": ""
+  },
+  "zipCodePlaceholder": {
+    "message": "12345",
+    "description": ""
+  },
+  "positionPlaceholder": {
+    "message": "Desarrollador",
+    "description": ""
+  },
+  "aboutPlaceholder": {
+    "message": "Háblenos de usted...",
+    "description": ""
+  },
+  "company": {
+    "message": "Empresa",
+    "description": ""
+  },
+  "workPhone": {
+    "message": "Teléfono de trabajo",
+    "description": ""
+  },
+  "linkedin": {
+    "message": "LinkedIn",
+    "description": ""
+  },
+  "github": {
+    "message": "GitHub",
+    "description": ""
+  },
+  "portfolio": {
+    "message": "Cartera",
+    "description": ""
+  },
+  "resumeUrl": {
+    "message": "URL del currículum",
+    "description": ""
+  },
+  "orcid": {
+    "message": "ORCID",
+    "description": ""
+  },
+  "telegram": {
+    "message": "Telegrama",
+    "description": ""
+  },
+  "twitter": {
+    "message": "Twitter/X",
+    "description": ""
+  },
+  "facebook": {
+    "message": "Facebook",
+    "description": ""
+  },
+  "instagram": {
+    "message": "Instagram",
+    "description": ""
+  },
+  "youtube": {
+    "message": "YouTube",
+    "description": ""
+  },
+  "tiktok": {
+    "message": "TikTok",
+    "description": ""
+  },
+  "website": {
+    "message": "Página web",
+    "description": ""
+  },
+  "dateOfBirth": {
+    "message": "Fecha de nacimiento",
+    "description": ""
+  },
+  "idNumber": {
+    "message": "Pasaporte/Número de identificación",
+    "description": ""
+  },
+  "driverLicense": {
+    "message": "Permiso de conducir",
+    "description": ""
+  },
+  "healthInsurance": {
+    "message": "Seguro de enfermedad",
+    "description": ""
+  },
+  "companyPlaceholder": {
+    "message": "Acme Inc.",
+    "description": ""
+  },
+  "workPhonePlaceholder": {
+    "message": "+1 555 987-65-43",
+    "description": ""
+  },
+  "linkedinPlaceholder": {
+    "message": "https://linkedin.com/in/username",
+    "description": ""
+  },
+  "githubPlaceholder": {
+    "message": "https://github.com/username",
+    "description": ""
+  },
+  "portfolioPlaceholder": {
+    "message": "https://myportfolio.com",
+    "description": ""
+  },
+  "resumeUrlPlaceholder": {
+    "message": "https://example.com/resume.pdf",
+    "description": ""
+  },
+  "orcidPlaceholder": {
+    "message": "0000-0001-2345-6789",
+    "description": ""
+  },
+  "telegramPlaceholder": {
+    "message": "@username",
+    "description": ""
+  },
+  "twitterPlaceholder": {
+    "message": "@username",
+    "description": ""
+  },
+  "facebookPlaceholder": {
+    "message": "https://facebook.com/username",
+    "description": ""
+  },
+  "instagramPlaceholder": {
+    "message": "@username",
+    "description": ""
+  },
+  "youtubePlaceholder": {
+    "message": "https://youtube.com/@canal",
+    "description": ""
+  },
+  "tiktokPlaceholder": {
+    "message": "@username",
+    "description": ""
+  },
+  "websitePlaceholder": {
+    "message": "https://mywebsite.com",
+    "description": ""
+  },
+  "dateOfBirthPlaceholder": {
+    "message": "MM/DD/AAAA",
+    "description": ""
+  },
+  "idNumberPlaceholder": {
+    "message": "123456789",
+    "description": ""
+  },
+  "driverLicensePlaceholder": {
+    "message": "D1234567",
+    "description": ""
+  },
+  "healthInsurancePlaceholder": {
+    "message": "1234567890123456",
+    "description": ""
+  },
+  "professionalInfo": {
+    "message": "Información profesional",
+    "description": ""
+  },
+  "socialNetworks": {
+    "message": "Redes Sociales",
+    "description": ""
+  },
+  "sensitiveData": {
+    "message": "Datos sensibles",
+    "description": ""
+  },
+  "sensitiveDataWarning": {
+    "message": "Estos datos se codificarán para almacenarlos de forma segura.",
+    "description": ""
+  },
+  "generalInstruction": {
+    "message": "Instrucción general",
+    "description": ""
+  },
+  "generalInstructionDescription": {
+    "message": "Instrucción del sistema que se añade al principio de cada diálogo con la IA, si no hay ninguna instrucción para un sitio específico",
+    "description": ""
+  },
+  "generalInstructionPlaceholder": {
+    "message": "Introducir instrucción general para AI...",
+    "description": ""
+  },
+  "customInstructions": {
+    "message": "Instrucciones personalizadas",
+    "description": ""
+  },
+  "customInstructionsDescription": {
+    "message": "Cree instrucciones para sitios específicos. Se aplicarán automáticamente al comunicarse con AI",
+    "description": ""
+  },
+  "addInstruction": {
+    "message": "Añadir Instrucción",
+    "description": ""
+  },
+  "editInstruction": {
+    "message": "Editar Instrucción",
+    "description": ""
+  },
+  "addInstructionDescription": {
+    "message": "Crear una nueva instrucción para un sitio específico",
+    "description": ""
+  },
+  "editInstructionDescription": {
+    "message": "Editar datos de instrucción",
+    "description": ""
+  },
+  "instructionName": {
+    "message": "Nombre",
+    "description": ""
+  },
+  "instructionDomain": {
+    "message": "Dominio",
+    "description": ""
+  },
+  "instructionContent": {
+    "message": "Instrucción",
+    "description": ""
+  },
+  "instructionNamePlaceholder": {
+    "message": "Por ejemplo, Asistente de desarrollador",
+    "description": ""
+  },
+  "instructionDomainPlaceholder": {
+    "message": "ejemplo.com",
+    "description": ""
+  },
+  "domainAlreadyExists": {
+    "message": "Ya existe una instrucción para este dominio",
+    "description": ""
+  },
+  "instructionContentPlaceholder": {
+    "message": "Introducir instrucción para AI...",
+    "description": ""
+  },
+  "noInstructions": {
+    "message": "Aún no se han creado instrucciones",
+    "description": ""
+  },
+  "deleteInstructionConfirm": {
+    "message": "Esta instrucción se borrará permanentemente. ¿Continuar?",
+    "description": ""
+  },
+  "deleteInstruction": {
+    "message": "Borrar Instrucción",
+    "description": ""
+  },
+  "add": {
+    "message": "Añadir",
+    "description": ""
+  },
+  "create": {
+    "message": "Crear",
+    "description": ""
+  },
+  "noInstruction": {
+    "message": "Sin instrucción",
+    "description": ""
+  },
+  "instructionConnected": {
+    "message": "Instrucción conectada a la solicitud",
+    "description": ""
+  },
+  "currentPage": {
+    "message": "Página actual",
+    "description": ""
+  },
+  "currentPageContext": {
+    "message": "Contexto de la página actual",
+    "description": ""
+  },
+  "contextType": {
+    "message": "Tipo de contexto",
+    "description": ""
+  },
+  "textOnly": {
+    "message": "Sólo texto",
+    "description": ""
+  },
+  "domPage": {
+    "message": "DOM página",
+    "description": ""
+  },
+  "htmlPage": {
+    "message": "Página HTML",
+    "description": ""
+  },
+  "search": {
+    "message": "Buscar",
+    "description": ""
+  },
+  "attach": {
+    "message": "Adjuntar",
+    "description": ""
+  },
+  "microphone": {
+    "message": "Micrófono",
+    "description": ""
+  },
+  "webSearch": {
+    "message": "Búsqueda en la Web",
+    "description": ""
+  },
+  "unavailableOnSystemPages": {
+    "message": "No disponible en las páginas del sistema",
+    "description": ""
+  },
+  "copy": {
+    "message": "Copia",
+    "description": ""
+  },
+  "edit": {
+    "message": "Editar",
+    "description": ""
+  },
+  "retryRequest": {
+    "message": "Solicitud de reintento",
+    "description": ""
+  },
+  "pageNeedsRefresh": {
+    "message": "La página necesita actualizarse",
+    "description": ""
+  },
+  "copyWithFormatting": {
+    "message": "Copia con formato",
+    "description": ""
+  },
+  "copyWithoutFormatting": {
+    "message": "Copiar sin formato",
+    "description": ""
+  },
+  "rewrite": {
+    "message": "Reescribir",
+    "description": ""
+  },
+  "rewriteAnswer": {
+    "message": "Reescribir respuesta",
+    "description": ""
+  },
+  "makeLonger": {
+    "message": "Hacer más largo",
+    "description": ""
+  },
+  "improveWriting": {
+    "message": "Mejorar la escritura",
+    "description": ""
+  },
+  "makeShorter": {
+    "message": "Hacer más corto",
+    "description": ""
+  },
+  "simplifyLanguage": {
+    "message": "Simplificar el lenguaje",
+    "description": ""
+  },
+  "rephrase": {
+    "message": "Reformular",
+    "description": ""
+  },
+  "recommended": {
+    "message": "Recomendado",
+    "description": ""
+  },
+  "fixSpelling": {
+    "message": "Corregir ortografía y gramática",
+    "description": ""
+  },
+  "changeTone": {
+    "message": "Cambiar el tono",
+    "description": ""
+  },
+  "toneProfessional": {
+    "message": "Profesional",
+    "description": ""
+  },
+  "toneFriendly": {
+    "message": "Amistoso",
+    "description": ""
+  },
+  "toneDirect": {
+    "message": "Directo",
+    "description": ""
+  },
+  "toneConfident": {
+    "message": "Confianza",
+    "description": ""
+  },
+  "toneCasual": {
+    "message": "Casual",
+    "description": ""
+  },
+  "translateTo": {
+    "message": "Traducir a",
+    "description": ""
+  },
+  "langEnglish": {
+    "message": "Inglés",
+    "description": ""
+  },
+  "langChineseSimplified": {
+    "message": "Chino (simplificado)",
+    "description": ""
+  },
+  "langChineseTraditional": {
+    "message": "Chino (tradicional)",
+    "description": ""
+  },
+  "langPortuguese": {
+    "message": "Portugués",
+    "description": ""
+  },
+  "langSpanish": {
+    "message": "Español",
+    "description": ""
+  },
+  "langFrench": {
+    "message": "Francés",
+    "description": ""
+  },
+  "langKorean": {
+    "message": "Coreano",
+    "description": ""
+  },
+  "langVietnamese": {
+    "message": "Vietnamita",
+    "description": ""
+  },
+  "langJapanese": {
+    "message": "Japonés",
+    "description": ""
+  },
+  "langRussian": {
+    "message": "Ruso",
+    "description": ""
+  },
+  "langGerman": {
+    "message": "Alemán",
+    "description": ""
+  },
+  "langTurkish": {
+    "message": "Turco",
+    "description": ""
+  },
+  "langItalian": {
+    "message": "Italiano",
+    "description": ""
+  },
+  "langMacedonian": {
+    "message": "Macedonio",
+    "description": ""
+  },
+  "langPolish": {
+    "message": "Polaco",
+    "description": ""
+  },
+  "langArabic": {
+    "message": "Árabe",
+    "description": ""
+  },
+  "langHebrew": {
+    "message": "Hebreo",
+    "description": ""
+  },
+  "langIndonesian": {
+    "message": "Indonesia",
+    "description": ""
+  },
+  "langSwedish": {
+    "message": "Sueco",
+    "description": ""
+  },
+  "langFilipino": {
+    "message": "Filipino",
+    "description": ""
+  },
+  "langNorwegian": {
+    "message": "Noruega",
+    "description": ""
+  },
+  "langFinnish": {
+    "message": "Finlandés",
+    "description": ""
+  },
+  "langCzech": {
+    "message": "República Checa",
+    "description": ""
+  },
+  "langDanish": {
+    "message": "Danés",
+    "description": ""
+  },
+  "langUkrainian": {
+    "message": "Ucraniano",
+    "description": ""
+  },
+  "promptMakeLonger": {
+    "message": "Alarga el siguiente texto:",
+    "description": ""
+  },
+  "promptImproveWriting": {
+    "message": "Mejora el siguiente texto:",
+    "description": ""
+  },
+  "promptFixSpelling": {
+    "message": "Corrige la ortografía y la gramática del siguiente texto:",
+    "description": ""
+  },
+  "promptMakeShorter": {
+    "message": "Acorta el siguiente texto:",
+    "description": ""
+  },
+  "promptSimplifyLanguage": {
+    "message": "Simplifica el lenguaje en el siguiente texto:",
+    "description": ""
+  },
+  "promptRephrase": {
+    "message": "Reformule el siguiente texto:",
+    "description": ""
+  },
+  "promptChangeTone": {
+    "message": "Reescribe el siguiente texto con el tono {tone}:",
+    "description": ""
+  },
+  "promptTranslateTo": {
+    "message": "Traduce el siguiente texto a {idioma}:",
+    "description": ""
+  },
+  "compareResponses": {
+    "message": "Comparar respuestas",
+    "description": ""
+  },
+  "consulSummary": {
+    "message": "Cónsul Resumen Respuesta",
+    "description": ""
+  },
+  "consulMessage": {
+    "message": "Analizar todas las respuestas anteriores y enviar el resultado",
+    "description": ""
+  },
+  "consulTooltip": {
+    "message": "Obtener un resumen de la respuesta del modelo seleccionado basado en todas las respuestas",
+    "description": ""
+  },
+  "consulPromptInstruction": {
+    "message": "Compara todas las respuestas a la solicitud del usuario procedentes de diferentes modelos de IA y proporciona una respuesta final, equilibrada y de alta calidad a la solicitud original del usuario.",
+    "description": ""
+  },
+  "consulPromptQuestion": {
+    "message": "Pregunta:",
+    "description": ""
+  },
+  "consulPromptAnswers": {
+    "message": "Respuestas:",
+    "description": ""
+  },
+  "consulPromptAnswer": {
+    "message": "Respuesta $1 ($2 - $3):",
+    "description": ""
+  },
+  "favorites": {
+    "message": "Favoritos",
+    "description": ""
+  },
+  "askQuestion": {
+    "message": "Haz una pregunta o elige lo que quieres hacer",
+    "description": ""
+  },
+  "startConversation": {
+    "message": "Inicia una conversación con el asistente de IA",
+    "description": ""
+  },
+  "error": {
+    "message": "Error",
+    "description": ""
+  },
+  "errorComparingResponses": {
+    "message": "Error al comparar respuestas",
+    "description": ""
+  },
+  "errorMessageNotFound": {
+    "message": "Mensaje no encontrado",
+    "description": ""
+  },
+  "errorOriginalMessageNotFound": {
+    "message": "Mensaje de usuario original no encontrado",
+    "description": ""
+  },
+  "errorChatNotInitialized": {
+    "message": "Chat no inicializado",
+    "description": ""
+  },
+  "errorConnectionFailedCompare": {
+    "message": "No se ha podido conectar con el servicio AI. Compruebe que el servicio se está ejecutando y es accesible.",
+    "description": ""
+  },
+  "errorTimeoutCompare": {
+    "message": "Solicitud de servicio de AI agotada.",
+    "description": ""
+  },
+  "errorAuthCompare": {
+    "message": "Error de autenticación. Por favor, compruebe su clave API.",
+    "description": ""
+  },
+  "errorRateLimitCompare": {
+    "message": "Límite de tarifa superado. Vuelva a intentarlo más tarde.",
+    "description": ""
+  },
+  "errorServerCompare": {
+    "message": "Error del servicio AI. Por favor, inténtelo más tarde.",
+    "description": ""
+  },
+  "errorUnknownCompare": {
+    "message": "Error desconocido",
+    "description": ""
+  },
+  "unknownModel": {
+    "message": "Modelo desconocido",
+    "description": ""
+  },
+  "errorEmptyResponse": {
+    "message": "Recibí una respuesta vacía de AI. Por favor, inténtelo de nuevo o seleccione otro modelo.",
+    "description": ""
+  },
+  "errorConnectionFailed": {
+    "message": "No se ha podido conectar con el servicio AI. Compruebe que el servicio se está ejecutando y es accesible.",
+    "description": ""
+  },
+  "errorTimeout": {
+    "message": "Solicitud de servicio de AI agotada.",
+    "description": ""
+  },
+  "errorAuth": {
+    "message": "Error de autenticación. Por favor, compruebe su clave API.",
+    "description": ""
+  },
+  "errorRateLimit": {
+    "message": "Límite de tarifa superado. Vuelva a intentarlo más tarde.",
+    "description": ""
+  },
+  "errorServer": {
+    "message": "Error del servicio AI. Por favor, inténtelo más tarde.",
+    "description": ""
+  },
+  "errorUnknown": {
+    "message": "Error al enviar el mensaje",
+    "description": ""
+  },
+  "contextTruncatedTitle": {
+    "message": "Se ha truncado el contexto de la página",
+    "description": ""
+  },
+  "contextTruncatedMessage": {
+    "message": "El contexto de la página era demasiado grande para su modelo actual. El contexto se truncó automáticamente para ajustarse.",
+    "description": ""
+  },
+  "suggestedModelsTitle": {
+    "message": "Modelos con contexto suficiente",
+    "description": ""
+  },
+  "contextTruncatedHint": {
+    "message": "Puede utilizar la función Comparar respuesta para obtener un análisis completo con uno de estos modelos.",
+    "description": ""
+  },
+  "tokens": {
+    "message": "fichas",
+    "description": ""
+  },
+  "understood": {
+    "message": "Entendido.",
+    "description": ""
+  },
+  "searchChats": {
+    "message": "Buscar chats...",
+    "description": ""
+  },
+  "newFolder": {
+    "message": "Nueva carpeta",
+    "description": ""
+  },
+  "createFolder": {
+    "message": "Crear carpeta",
+    "description": ""
+  },
+  "folderName": {
+    "message": "Nombre de la carpeta",
+    "description": ""
+  },
+  "unnamedFolder": {
+    "message": "Carpeta sin nombre",
+    "description": ""
+  },
+  "rename": {
+    "message": "Renombrar",
+    "description": ""
+  },
+  "moveTo": {
+    "message": "Mover a",
+    "description": ""
+  },
+  "moveToFolder": {
+    "message": "Mover a carpeta",
+    "description": ""
+  },
+  "selectFolder": {
+    "message": "Seleccionar carpeta",
+    "description": ""
+  },
+  "openSite": {
+    "message": "Sitio abierto",
+    "description": ""
+  },
+  "usedOperators": {
+    "message": "Operadores usados",
+    "description": ""
+  },
+  "usedTokens": {
+    "message": "Fichas usadas",
+    "description": ""
+  },
+  "clickToEdit": {
+    "message": "Haz clic para editar el título del chat",
+    "description": ""
+  },
+  "clickToViewStats": {
+    "message": "Haz clic para ver las estadísticas",
+    "description": ""
+  },
+  "noChats": {
+    "message": "No chats",
+    "description": ""
+  },
+  "noFolders": {
+    "message": "Sin carpetas",
+    "description": ""
+  },
+  "renameChat": {
+    "message": "Renombrar chat",
+    "description": ""
+  },
+  "deleteChat": {
+    "message": "Borrar chat",
+    "description": ""
+  },
+  "deleteChatConfirm": {
+    "message": "¿Estás seguro de que quieres borrar este chat?",
+    "description": ""
+  },
+  "renameFolder": {
+    "message": "Renombrar carpeta",
+    "description": ""
+  },
+  "deleteFolder": {
+    "message": "Eliminar carpeta",
+    "description": ""
+  },
+  "deleteFolderConfirm": {
+    "message": "¿Estás seguro de que quieres borrar esta carpeta? Los chats que contenga no se eliminarán.",
+    "description": ""
+  },
+  "chatHistory": {
+    "message": "Historial del chat",
+    "description": ""
+  },
+  "modelContext": {
+    "message": "Contexto",
+    "description": ""
+  },
+  "modelInputModalities": {
+    "message": "Entrada",
+    "description": ""
+  },
+  "modelOutputModalities": {
+    "message": "Salida",
+    "description": ""
+  },
+  "modelPrice": {
+    "message": "Precio",
+    "description": ""
+  },
+  "relatedQuestions": {
+    "message": "Preguntas relacionadas",
+    "description": ""
+  },
+  "aiSuggestions": {
+    "message": "AI Sugerencias",
+    "description": ""
+  },
+  "aiSuggestionsEnabled": {
+    "message": "Mostrar sugerencias en las respuestas de AI",
+    "description": ""
+  },
+  "aiSuggestionsDisabled": {
+    "message": "No muestres sugerencias",
+    "description": ""
+  },
+  "aiSuggestionsDescription": {
+    "message": "Generar automáticamente preguntas relacionadas bajo respuestas AI. Desactivar para guardar fichas.",
+    "description": ""
+  },
+  "siteWidget": {
+    "message": "Widget de avisos del sitio",
+    "description": ""
+  },
+  "siteWidgetDescription": {
+    "message": "Mostrar indicaciones relevantes para la página actual en sitios web para un procesamiento rápido en modo de pantalla completa",
+    "description": "."
+  },
+  "developerMode": {
+    "message": "Modo Desarrollador",
+    "description": ""
+  },
+  "developerModeDescription": {
+    "message": "Habilite el panel de registro de API para depurar las solicitudes y respuestas de AI sin abrir DevTools del navegador.",
+    "description": ""
+  },
+  "apiLogs": {
+    "message": "Registros API",
+    "description": ""
+  },
+  "clearLogs": {
+    "message": "Borrar Registros",
+    "description": ""
+  },
+  "noLogs": {
+    "message": "Aún no hay registros. Los registros aparecerán cuando se realicen peticiones a la API.",
+    "description": ""
+  },
+  "request": {
+    "message": "Solicitud",
+    "description": ""
+  },
+  "response": {
+    "message": "Respuesta",
+    "description": ""
+  },
+  "requestBody": {
+    "message": "Cuerpo de la solicitud",
+    "description": ""
+  },
+  "responseBody": {
+    "message": "Cuerpo de la respuesta",
+    "description": ""
+  },
+  "headers": {
+    "message": "Encabezados",
+    "description": ""
+  },
+  "duration": {
+    "message": "Duración",
+    "description": ""
+  },
+  "enabled": {
+    "message": "Activado",
+    "description": ""
+  },
+  "disabled": {
+    "message": "Desactivado",
+    "description": ""
+  },
+  "attachFile": {
+    "message": "Adjuntar archivo",
+    "description": ""
+  },
+  "attachPhoto": {
+    "message": "Adjuntar foto",
+    "description": ""
+  },
+  "takeScreenshot": {
+    "message": "Tomar captura de pantalla",
+    "description": ""
+  },
+  "takeFullPageScreenshot": {
+    "message": "Captura de pantalla de página completa",
+    "description": ""
+  },
+  "takePhoto": {
+    "message": "Tomar foto",
+    "description": ""
+  },
+  "selectElement": {
+    "message": "Seleccionar elemento",
+    "description": ""
+  },
+  "attachBrowserTab": {
+    "message": "Pestaña del navegador",
+    "description": ""
+  },
+  "elementSelected": {
+    "message": "Elemento seleccionado",
+    "description": ""
+  },
+  "fileAttached": {
+    "message": "Archivo adjunto",
+    "description": ""
+  },
+  "imageAttached": {
+    "message": "Imagen adjunta",
+    "description": ""
+  },
+  "fileTooLarge": {
+    "message": "El archivo es demasiado grande (max {size})",
+    "description": ""
+  },
+  "invalidFileType": {
+    "message": "Tipo de archivo no válido",
+    "description": ""
+  },
+  "maxFileSize": {
+    "message": "Tamaño máximo del archivo (MB)",
+    "description": ""
+  },
+  "maxImageSize": {
+    "message": "Tamaño máximo de la imagen (MB)",
+    "description": ""
+  },
+  "clickToRemove": {
+    "message": "Haga clic para eliminar",
+    "description": ""
+  },
+  "noCamera": {
+    "message": "No se ha encontrado ninguna cámara",
+    "description": ""
+  },
+  "cameraPermissionDenied": {
+    "message": "Permiso de cámara denegado",
+    "description": ""
+  },
+  "attachedFile": {
+    "message": "Archivo adjunto: {nombre}",
+    "description": ""
+  },
+  "attachedDomElement": {
+    "message": "Código de elemento adjunto: {nombre}",
+    "description": ""
+  },
+  "featureNotAvailableForModel": {
+    "message": "Función no disponible para el modelo seleccionado",
+    "description": ""
+  },
+  "pressEscToCancel": {
+    "message": "Pulse Esc para cancelar",
+    "description": ""
+  },
+  "selectingElement": {
+    "message": "Seleccionando elemento...",
+    "description": ""
+  },
+  "selectingScreenshotArea": {
+    "message": "Seleccione el área de captura de pantalla",
+    "description": ""
+  },
+  "errorReadingFile": {
+    "message": "Error al leer el archivo",
+    "description": ""
+  },
+  "pdfAutoAttached": {
+    "message": "PDF adjunto automáticamente",
+    "description": ""
+  },
+  "pdfTooLarge": {
+    "message": "El archivo PDF es demasiado grande (max {size})",
+    "description": ""
+  },
+  "pdfAccessDenied": {
+    "message": "No se puede acceder al PDF local. Por favor, activa 'Permitir acceso a URLs de archivos' en chrome://extensions para esta extensión.",
+    "description": ""
+  },
+  "dropImagesHere": {
+    "message": "Suelte las imágenes aquí",
+    "description": ""
+  },
+  "modelFilters": {
+    "message": "Modelo Filtros",
+    "description": ""
+  },
+  "minContext": {
+    "message": "Min Contexto",
+    "description": ""
+  },
+  "inputModalities": {
+    "message": "Entrada",
+    "description": ""
+  },
+  "outputModalities": {
+    "message": "Salida",
+    "description": ""
+  },
+  "resetFilters": {
+    "message": "Reiniciar",
+    "description": ""
+  },
+  "filteredModels": {
+    "message": "Modelos filtrados",
+    "description": ""
+  },
+  "errorCapturingScreenshot": {
+    "message": "Error de captura de pantalla",
+    "description": ""
+  },
+  "webSearchSettings": {
+    "message": "Configuración de la búsqueda web",
+    "description": ""
+  },
+  "webSearchSettingsDescription": {
+    "message": "Configurar los ajustes de búsqueda web para",
+    "description": ""
+  },
+  "maxSearchQueries": {
+    "message": "Máximo de consultas de búsqueda",
+    "description": ""
+  },
+  "maxSearchQueriesDescription": {
+    "message": "Número máximo de consultas de búsqueda web por solicitud (1-10)",
+    "description": ""
+  },
+  "allowedDomains": {
+    "message": "Dominios permitidos",
+    "description": ""
+  },
+  "allowedDomainsDescription": {
+    "message": "Sólo se utilizarán estos dominios. Pulse Intro para añadir. No se puede utilizar con dominios bloqueados.",
+    "description": ""
+  },
+  "allowedDomainsDescriptionOpenAI": {
+    "message": "Limitar los resultados de búsqueda a estos dominios. Pulse Intro para añadir.",
+    "description": ""
+  },
+  "liveInternetAccess": {
+    "message": "Acceso a Internet en directo",
+    "description": ""
+  },
+  "liveInternetAccessDescription": {
+    "message": "Habilitar el acceso web en tiempo real. Si se desactiva, sólo se utilizarán los resultados almacenados en caché/indexados.",
+    "description": ""
+  },
+  "blockedDomains": {
+    "message": "Dominios bloqueados",
+    "description": ""
+  },
+  "blockedDomainsDescription": {
+    "message": "Estos dominios quedarán excluidos. Pulse Intro para añadirlos. No puede utilizarse con dominios permitidos.",
+    "description": ""
+  },
+  "cannotUseBothDomainLists": {
+    "message": "No se pueden utilizar simultáneamente dominios permitidos y bloqueados",
+    "description": ""
+  },
+  "location": {
+    "message": "Localización",
+    "description": ""
+  },
+  "locationDescription": {
+    "message": "Localizar resultados de búsqueda. Todos los campos son opcionales.",
+    "description": ""
+  },
+  "region": {
+    "message": "Región",
+    "description": ""
+  },
+  "timezone": {
+    "message": "Zona horaria",
+    "description": ""
+  },
+  "webSearchNotAvailableForOperator": {
+    "message": "La búsqueda web aún no está disponible para este operador.",
+    "description": ""
+  },
+  "comingSoon": {
+    "message": "Próximamente",
+    "description": ""
+  },
+  "allowedHandles": {
+    "message": "Asas X permitidas",
+    "description": ""
+  },
+  "excludedHandles": {
+    "message": "Asas X excluidas",
+    "description": ""
+  },
+  "cannotUseBothHandleLists": {
+    "message": "No se pueden utilizar simultáneamente asas permitidas y excluidas",
+    "description": ""
+  },
+  "imageUnderstanding": {
+    "message": "Comprensión de la imagen",
+    "description": ""
+  },
+  "webImageUnderstandingDesc": {
+    "message": "Activar la herramienta view_image (aumenta el uso de tokens)",
+    "description": ""
+  },
+  "videoUnderstanding": {
+    "message": "Comprensión de vídeo",
+    "description": ""
+  },
+  "fromDate": {
+    "message": "A partir de la fecha",
+    "description": ""
+  },
+  "toDate": {
+    "message": "Hasta la fecha",
+    "description": ""
+  },
+  "xSearchDescription": {
+    "message": "Configurar al menos un parámetro para activar",
+    "description": ""
+  },
+  "webSearchGrokDescription": {
+    "message": "Configurar al menos un parámetro: dominios o comprensión de imágenes",
+    "description": ""
+  },
+  "sources": {
+    "message": "Fuentes",
+    "description": ""
+  },
+  "citationDisplayMode": {
+    "message": "Modo de visualización de citas",
+    "description": ""
+  },
+  "citationsAtEnd": {
+    "message": "Al final",
+    "description": ""
+  },
+  "citationsInline": {
+    "message": "En línea",
+    "description": ""
+  },
+  "citationsBoth": {
+    "message": "Ambos",
+    "description": ""
+  },
+  "geminiCitationModeDescription": {
+    "message": "Gemini admite citas en línea con enlaces markdown en texto",
+    "description": ""
+  },
+  "citationsAtEndDescription": {
+    "message": "Mostrar todas las citas al final de la respuesta",
+    "description": ""
+  },
+  "citationsInlineDescription": {
+    "message": "Insertar enlaces markdown [N](url) directamente en el texto",
+    "description": ""
+  },
+  "citationsBothDescription": {
+    "message": "Mostrar enlaces en línea en texto Y lista al final",
+    "description": ""
+  },
+  "geminiWebSearchNote": {
+    "message": "Gemini utiliza Google Search con conexión automática a tierra. No dispone de filtros adicionales.",
+    "description": ""
+  },
+  "note": {
+    "message": "Nota",
+    "description": ""
+  },
+  "searchEngine": {
+    "message": "Motor de búsqueda",
+    "description": ""
+  },
+  "engineAuto": {
+    "message": "Auto (mejor disponible)",
+    "description": ""
+  },
+  "engineNative": {
+    "message": "Nativo (integrado en el proveedor)",
+    "description": ""
+  },
+  "engineExa": {
+    "message": "Exa (búsqueda especializada)",
+    "description": ""
+  },
+  "searchEngineDescription": {
+    "message": "Auto selecciona el mejor motor, Native usa la búsqueda del proveedor (OpenAI, Anthropic), Exa usa API especializada",
+    "description": ""
+  },
+  "maxSearchResults": {
+    "message": "Resultados de la búsqueda Max",
+    "description": ""
+  },
+  "maxSearchResultsDescription": {
+    "message": "Número de resultados de búsqueda a incluir (1-10)",
+    "description": ""
+  },
+  "searchContextSize": {
+    "message": "Búsqueda Contexto Tamaño",
+    "description": ""
+  },
+  "contextSizeLow": {
+    "message": "Bajo (más barato)",
+    "description": ""
+  },
+  "contextSizeMedium": {
+    "message": "Medio (equilibrado)",
+    "description": ""
+  },
+  "contextSizeHigh": {
+    "message": "Alta (más detallada)",
+    "description": ""
+  },
+  "searchContextSizeDescription": {
+    "message": "Sólo para motor nativo. Afecta al coste y al nivel de detalle de los resultados de búsqueda",
+    "description": ""
+  },
+  "searchPrompt": {
+    "message": "Aviso de búsqueda",
+    "description": ""
+  },
+  "searchPromptPlaceholder": {
+    "message": "Información actual de Internet:",
+    "description": ""
+  },
+  "searchPromptDescription": {
+    "message": "Texto personalizado que se muestra antes de los resultados de búsqueda",
+    "description": ""
+  },
+  "costInformation": {
+    "message": "Información sobre costes",
+    "description": ""
+  },
+  "perRequest": {
+    "message": "por solicitud",
+    "description": ""
+  },
+  "notSupported": {
+    "message": "no compatible",
+    "description": ""
+  },
+  "stopGeneration": {
+    "message": "Detener generación",
+    "description": ""
+  },
+  "speechRecognitionUnavailable": {
+    "message": "Reconocimiento de voz no disponible",
+    "description": ""
+  },
+  "speechRecognitionUnavailableDescription": {
+    "message": "Tu navegador no es compatible con la API de reconocimiento de voz. Por favor, utilice la última versión de Chrome o Edge.",
+    "description": ""
+  },
+  "ok": {
+    "message": "OK",
+    "description": ""
+  },
+  "chatsTab": {
+    "message": "Gatos",
+    "description": ""
+  },
+  "statisticsTab": {
+    "message": "Estadísticas",
+    "description": ""
+  },
+  "today": {
+    "message": "Hoy",
+    "description": ""
+  },
+  "yesterday": {
+    "message": "Ayer",
+    "description": ""
+  },
+  "daysAgo": {
+    "message": "Hace {{count}} días",
+    "description": ""
+  },
+  "totalMessages": {
+    "message": "Total Mensajes",
+    "description": ""
+  },
+  "totalTokens": {
+    "message": "Total Fichas",
+    "description": ""
+  },
+  "messagesPerDay": {
+    "message": "Mensajes por día",
+    "description": ""
+  },
+  "tokensPerDay": {
+    "message": "Fichas por día",
+    "description": ""
+  },
+  "byOperators": {
+    "message": "Por Operadores",
+    "description": ""
+  },
+  "byModels": {
+    "message": "Por Modelos",
+    "description": ""
+  },
+  "currentWeek": {
+    "message": "Semana actual",
+    "description": ""
+  },
+  "currentMonth": {
+    "message": "Mes en curso",
+    "description": ""
+  },
+  "previousWeek": {
+    "message": "Semana anterior",
+    "description": ""
+  },
+  "previousMonth": {
+    "message": "Mes anterior",
+    "description": ""
+  },
+  "dateFrom": {
+    "message": "De",
+    "description": ""
+  },
+  "dateTo": {
+    "message": "To",
+    "description": ""
+  },
+  "allOperators": {
+    "message": "Todos los operadores",
+    "description": ""
+  },
+  "noData": {
+    "message": "No hay datos disponibles.",
+    "description": ""
+  },
+  "loading": {
+    "message": "Cargando",
+    "description": ""
+  },
+  "noChatsYet": {
+    "message": "No hay chats todavía",
+    "description": ""
+  },
+  "previous": {
+    "message": "Anterior",
+    "description": ""
+  },
+  "next": {
+    "message": "Siguiente",
+    "description": ""
+  },
+  "contextMenu_category_analysis": {
+    "message": "Análisis",
+    "description": ""
+  },
+  "contextMenu_category_editing": {
+    "message": "Edición",
+    "description": ""
+  },
+  "contextMenu_category_research": {
+    "message": "Investigación",
+    "description": ""
+  },
+  "contextMenu_category_education": {
+    "message": "Educación",
+    "description": ""
+  },
+  "contextMenu_category_translation": {
+    "message": "Traducción",
+    "description": ""
+  },
+  "contextMenu_category_combined": {
+    "message": "Combinado",
+    "description": ""
+  },
+  "contextMenu_category_instructions": {
+    "message": "Proceso por instrucción",
+    "description": ""
+  },
+  "contextMenu_category_generateResponse": {
+    "message": "Generar respuesta",
+    "description": ""
+  },
+  "contextMenu_category_fillByInstruction": {
+    "message": "Rellenar por Instrucción",
+    "description": ""
+  },
+  "contextMenu_specifyInstruction": {
+    "message": "Especifica...",
+    "description": ""
+  },
+  "customInstructionPlaceholder": {
+    "message": "Introduzca las instrucciones para rellenar este campo...",
+    "description": ""
+  },
+  "contextMenu_category_personalData": {
+    "message": "Datos personales",
+    "description": ""
+  },
+  "tone_professional": {
+    "message": "Profesional",
+    "description": ""
+  },
+  "tone_friendly": {
+    "message": "Amistoso",
+    "description": ""
+  },
+  "tone_direct": {
+    "message": "Directo",
+    "description": ""
+  },
+  "tone_confident": {
+    "message": "Confianza",
+    "description": ""
+  },
+  "tone_casual": {
+    "message": "Casual",
+    "description": ""
+  },
+  "personalInfo_firstName": {
+    "message": "Nombre",
+    "description": ""
+  },
+  "personalInfo_lastName": {
+    "message": "Apellido",
+    "description": ""
+  },
+  "personalInfo_email": {
+    "message": "Correo electrónico",
+    "description": ""
+  },
+  "personalInfo_phone": {
+    "message": "Teléfono",
+    "description": ""
+  },
+  "personalInfo_country": {
+    "message": "País",
+    "description": ""
+  },
+  "personalInfo_state": {
+    "message": "Estado/Provincia",
+    "description": ""
+  },
+  "personalInfo_city": {
+    "message": "Ciudad",
+    "description": ""
+  },
+  "personalInfo_address": {
+    "message": "Dirección",
+    "description": ""
+  },
+  "personalInfo_addressLine2": {
+    "message": "Dirección Línea 2",
+    "description": ""
+  },
+  "personalInfo_zipCode": {
+    "message": "Código postal",
+    "description": ""
+  },
+  "personalInfo_position": {
+    "message": "Posición",
+    "description": ""
+  },
+  "personalInfo_company": {
+    "message": "Empresa",
+    "description": ""
+  },
+  "personalInfo_workPhone": {
+    "message": "Teléfono de trabajo",
+    "description": ""
+  },
+  "personalInfo_linkedin": {
+    "message": "LinkedIn",
+    "description": ""
+  },
+  "personalInfo_github": {
+    "message": "GitHub",
+    "description": ""
+  },
+  "personalInfo_portfolio": {
+    "message": "Cartera",
+    "description": ""
+  },
+  "personalInfo_resumeUrl": {
+    "message": "URL del currículum",
+    "description": ""
+  },
+  "personalInfo_orcid": {
+    "message": "ORCID",
+    "description": ""
+  },
+  "personalInfo_telegram": {
+    "message": "Telegrama",
+    "description": ""
+  },
+  "personalInfo_twitter": {
+    "message": "Twitter",
+    "description": ""
+  },
+  "personalInfo_facebook": {
+    "message": "Facebook",
+    "description": ""
+  },
+  "personalInfo_instagram": {
+    "message": "Instagram",
+    "description": ""
+  },
+  "personalInfo_youtube": {
+    "message": "YouTube",
+    "description": ""
+  },
+  "personalInfo_tiktok": {
+    "message": "TikTok",
+    "description": ""
+  },
+  "personalInfo_website": {
+    "message": "Página web",
+    "description": ""
+  },
+  "personalInfo_about": {
+    "message": "Acerca de",
+    "description": ""
+  },
+  "toast_responseGenerated": {
+    "message": "Respuesta generada",
+    "description": ""
+  },
+  "toast_generationError": {
+    "message": "Error de generación",
+    "description": ""
+  },
+  "contextMenu_instruction_prompt": {
+    "message": "Procesa el siguiente texto según la instrucción:",
+    "description": ""
+  },
+  "contextMenu_checkFacts": {
+    "message": "Comprobar los hechos",
+    "description": ""
+  },
+  "contextMenu_checkFacts_desc": {
+    "message": "Verifica la exactitud del texto seleccionado utilizando fuentes de Internet",
+    "description": ""
+  },
+  "contextMenu_checkFacts_prompt": {
+    "message": "Comprueba la exactitud de la siguiente afirmación utilizando fuentes actuales de la web:",
+    "description": ""
+  },
+  "contextMenu_explainText": {
+    "message": "Explicar el significado",
+    "description": ""
+  },
+  "contextMenu_explainText_desc": {
+    "message": "Explica textos complejos con palabras sencillas",
+    "description": ""
+  },
+  "contextMenu_explainText_prompt": {
+    "message": "Explica este texto de la forma más sencilla posible, como si fuera para un principiante:",
+    "description": ""
+  },
+  "contextMenu_findContext": {
+    "message": "Buscar Contexto",
+    "description": ""
+  },
+  "contextMenu_findContext_desc": {
+    "message": "Busca el origen o la fuente original del fragmento seleccionado",
+    "description": ""
+  },
+  "contextMenu_findContext_prompt": {
+    "message": "Busca de dónde puede haber salido este texto e indica la fuente si la encuentras:",
+    "description": ""
+  },
+  "contextMenu_analyzeTone": {
+    "message": "Analizar el tono",
+    "description": ""
+  },
+  "contextMenu_analyzeTone_desc": {
+    "message": "Determina el tono emocional del texto: positivo, neutro, negativo",
+    "description": ""
+  },
+  "contextMenu_analyzeTone_prompt": {
+    "message": "Determina el tono de este texto y explica brevemente por qué:",
+    "description": ""
+  },
+  "contextMenu_checkPlagiarism": {
+    "message": "Comprobar si hay plagio",
+    "description": ""
+  },
+  "contextMenu_checkPlagiarism_desc": {
+    "message": "Comprueba si el texto aparece en otros sitios web",
+    "description": ""
+  },
+  "contextMenu_checkPlagiarism_prompt": {
+    "message": "Compruebe si este texto aparece en la web. En caso afirmativo, facilite enlaces y porcentajes de coincidencia:",
+    "description": ""
+  },
+  "contextMenu_rewriteText": {
+    "message": "Reformular",
+    "description": ""
+  },
+  "contextMenu_rewriteText_desc": {
+    "message": "Reescribe textos con un estilo más natural y profesional.",
+    "description": ""
+  },
+  "contextMenu_rewriteText_prompt": {
+    "message": "Reescribe el texto, manteniendo el sentido pero haciéndolo más natural y bien escrito:",
+    "description": ""
+  },
+  "contextMenu_simplifyText": {
+    "message": "Simplificar texto",
+    "description": ""
+  },
+  "contextMenu_simplifyText_desc": {
+    "message": "Convierte el texto en un formulario sencillo para un público amplio",
+    "description": "."
+  },
+  "contextMenu_simplifyText_prompt": {
+    "message": "Reescribe el texto para que un niño de 10 años pueda entenderlo:",
+    "description": ""
+  },
+  "contextMenu_improvePersuasion": {
+    "message": "Hacer persuasivo",
+    "description": ""
+  },
+  "contextMenu_improvePersuasion_desc": {
+    "message": "Refuerza la argumentación y añade persuasión",
+    "description": ""
+  },
+  "contextMenu_improvePersuasion_prompt": {
+    "message": "Haz que este texto sea más persuasivo y fuerte manteniendo la estructura:",
+    "description": ""
+  },
+  "contextMenu_fixErrors": {
+    "message": "Corregir errores",
+    "description": ""
+  },
+  "contextMenu_fixErrors_desc": {
+    "message": "Corrige la gramática, la ortografía y la puntuación",
+    "description": ""
+  },
+  "contextMenu_fixErrors_prompt": {
+    "message": "Corrige todos los errores gramaticales, ortográficos y de puntuación del texto:",
+    "description": ""
+  },
+  "contextMenu_summarizeText": {
+    "message": "Acortar texto",
+    "description": ""
+  },
+  "contextMenu_summarizeText_desc": {
+    "message": "Crea un breve resumen sin perder el sentido",
+    "description": ""
+  },
+  "contextMenu_summarizeText_prompt": {
+    "message": "Haz un breve resumen de este texto (2-3 frases):",
+    "description": ""
+  },
+  "contextMenu_expandText": {
+    "message": "Expandir texto",
+    "description": ""
+  },
+  "contextMenu_expandText_desc": {
+    "message": "Amplía la idea, añade ejemplos y detalles",
+    "description": ""
+  },
+  "contextMenu_expandText_prompt": {
+    "message": "Amplía esta idea añadiendo detalles, ejemplos y contexto:",
+    "description": ""
+  },
+  "contextMenu_findSimilar": {
+    "message": "Encontrar materiales similares",
+    "description": ""
+  },
+  "contextMenu_findSimilar_desc": {
+    "message": "Busca artículos y fuentes sobre el tema del texto seleccionado",
+    "description": ""
+  },
+  "contextMenu_findSimilar_prompt": {
+    "message": "Encuentre materiales o artículos similares sobre este texto:",
+    "description": ""
+  },
+  "contextMenu_checkRelevance": {
+    "message": "Comprobar relevancia",
+    "description": ""
+  },
+  "contextMenu_checkRelevance_desc": {
+    "message": "Determina si la información está obsoleta",
+    "description": ""
+  },
+  "contextMenu_checkRelevance_prompt": {
+    "message": "Comprueba si esta información sigue siendo relevante hoy en día:",
+    "description": ""
+  },
+  "contextMenu_updateStats": {
+    "message": "Actualizar Datos",
+    "description": ""
+  },
+  "contextMenu_updateStats_desc": {
+    "message": "Encuentra nuevas cifras y estadísticas en el texto",
+    "description": ""
+  },
+  "contextMenu_updateStats_prompt": {
+    "message": "Encuentre cifras o estadísticas actualizadas de estos datos:",
+    "description": ""
+  },
+  "contextMenu_makeOutline": {
+    "message": "Hacer Esquema",
+    "description": ""
+  },
+  "contextMenu_makeOutline_desc": {
+    "message": "Condensa el texto a los puntos clave",
+    "description": ""
+  },
+  "contextMenu_makeOutline_prompt": {
+    "message": "Elabore un breve esquema de este texto en formato de viñetas:",
+    "description": ""
+  },
+  "contextMenu_generateQuestions": {
+    "message": "Generar preguntas",
+    "description": ""
+  },
+  "contextMenu_generateQuestions_desc": {
+    "message": "Crea preguntas para comprobar la comprensión del texto",
+    "description": ""
+  },
+  "contextMenu_generateQuestions_prompt": {
+    "message": "Crea 5 preguntas sobre el contenido del texto para comprobar su comprensión:",
+    "description": ""
+  },
+  "contextMenu_explainAsTeacher": {
+    "message": "Explicar como Profesor",
+    "description": ""
+  },
+  "contextMenu_explainAsTeacher_desc": {
+    "message": "Explica el material con palabras sencillas en un formato didáctico",
+    "description": ""
+  },
+  "contextMenu_explainAsTeacher_prompt": {
+    "message": "Explica este texto como lo haría un profesor, de forma accesible e interesante:",
+    "description": ""
+  },
+  "contextMenu_makeFlashcards": {
+    "message": "Crear Flashcards",
+    "description": ""
+  },
+  "contextMenu_makeFlashcards_desc": {
+    "message": "Destaca términos y definiciones para memorizar",
+    "description": ""
+  },
+  "contextMenu_makeFlashcards_prompt": {
+    "message": "Crea flashcards a partir de este texto. Devuelve SOLO un array JSON limpio en formato: [{\"término\": \"término\", \"definición\": \"definición\"}]. No añada ningún texto antes o después del JSON:",
+    "description": ""
+  },
+  "flashcard_term": {
+    "message": "Plazo",
+    "description": ""
+  },
+  "flashcard_definition": {
+    "message": "Definición",
+    "description": ""
+  },
+  "flashcard_flipCard": {
+    "message": "Flip card",
+    "description": ""
+  },
+  "flashcard_clickToFlip": {
+    "message": "Haz clic en la tarjeta para darle la vuelta",
+    "description": ""
+  },
+  "contextMenu_translateText": {
+    "message": "Traducir",
+    "description": ""
+  },
+  "contextMenu_translateText_desc": {
+    "message": "Traduce el texto seleccionado al idioma de la interfaz",
+    "description": ""
+  },
+  "contextMenu_translateText_prompt": {
+    "message": "Traducir este texto a",
+    "description": ""
+  },
+  "contextMenu_compareVersions": {
+    "message": "Comparar con la versión actual",
+    "description": ""
+  },
+  "contextMenu_compareVersions_desc": {
+    "message": "Encuentra la versión actualizada de las noticias y muestra las diferencias",
+    "description": ""
+  },
+  "contextMenu_compareVersions_prompt": {
+    "message": "Busca la versión actual de este texto en la web y compara las diferencias:",
+    "description": ""
+  },
+  "contextMenu_continueText": {
+    "message": "Continuar Pensamiento",
+    "description": ""
+  },
+  "contextMenu_continueText_desc": {
+    "message": "Genera una continuación lógica del texto en el mismo estilo",
+    "description": ""
+  },
+  "contextMenu_continueText_prompt": {
+    "message": "Continúa este texto con el mismo estilo:",
+    "description": ""
+  },
+  "contextMenu_findQuoteSource": {
+    "message": "Buscar fuente de cotización",
+    "description": ""
+  },
+  "contextMenu_findQuoteSource_desc": {
+    "message": "Identifica el autor y la fuente de la cita del texto",
+    "description": ""
+  },
+  "contextMenu_findQuoteSource_prompt": {
+    "message": "Encuentra la fuente original o el autor de esta cita:",
+    "description": ""
+  },
+  "toolsPageTitle": {
+    "message": "Herramientas",
+    "description": ""
+  },
+  "toolsPageDescription": {
+    "message": "Gestionar herramientas integradas y personalizadas",
+    "description": ""
+  },
+  "createTool": {
+    "message": "Crear herramienta",
+    "description": ""
+  },
+  "builtInTools": {
+    "message": "Herramientas integradas",
+    "description": ""
+  },
+  "customTools": {
+    "message": "Herramientas personalizadas",
+    "description": ""
+  },
+  "noCustomTools": {
+    "message": "Sin herramientas personalizadas",
+    "description": ""
+  },
+  "createFirstTool": {
+    "message": "Crear la primera herramienta",
+    "description": ""
+  },
+  "editTool": {
+    "message": "Herramienta de edición",
+    "description": ""
+  },
+  "createToolDescription": {
+    "message": "Rellene el formulario para crear una herramienta personalizada",
+    "description": ""
+  },
+  "toolName": {
+    "message": "Nombre",
+    "description": ""
+  },
+  "toolNameRequired": {
+    "message": "Nombre *",
+    "description": ""
+  },
+  "toolNamePlaceholder": {
+    "message": "Nombre de la herramienta",
+    "description": ""
+  },
+  "toolDescription": {
+    "message": "Descripción",
+    "description": ""
+  },
+  "toolDescriptionRequired": {
+    "message": "Descripción",
+    "description": ""
+  },
+  "toolDescriptionPlaceholder": {
+    "message": "Breve descripción de la funcionalidad",
+    "description": ""
+  },
+  "toolIcon": {
+    "message": "Icono",
+    "description": ""
+  },
+  "toolCommand": {
+    "message": "Comando",
+    "description": ""
+  },
+  "toolCommandRequired": {
+    "message": "Comando *",
+    "description": ""
+  },
+  "toolCommandPlaceholder": {
+    "message": "/mycommand",
+    "description": ""
+  },
+  "toolCommandNote": {
+    "message": "Empieza por /",
+    "description": ""
+  },
+  "toolUrlPattern": {
+    "message": "Patrón URL (opcional)",
+    "description": ""
+  },
+  "toolUrlPatternPlaceholder": {
+    "message": "https://example.com/",
+    "description": ""
+  },
+  "toolUrlPatternNote": {
+    "message": "La herramienta sólo estará disponible en las páginas que empiecen por esta URL",
+    "description": ""
+  },
+  "toolPrompt": {
+    "message": "AI Prompt",
+    "description": ""
+  },
+  "toolPromptRequired": {
+    "message": "AI Prompt *",
+    "description": ""
+  },
+  "toolPromptPlaceholder": {
+    "message": "Instrucciones para la IA sobre qué hacer...",
+    "description": ""
+  },
+  "toolPromptNote": {
+    "message": "Este mensaje se enviará a la IA cuando se invoque la herramienta.",
+    "description": ""
+  },
+  "deleteToolConfirm": {
+    "message": "¿Estás seguro de que quieres borrar esta herramienta?",
+    "description": ""
+  },
+  "importTool": {
+    "message": "Importar",
+    "description": ""
+  },
+  "exportTool": {
+    "message": "Exportar",
+    "description": ""
+  },
+  "success": {
+    "message": "Éxito",
+    "description": ""
+  },
+  "invalidJsonApiHeaders": {
+    "message": "Formato JSON no válido para API Headers",
+    "description": ""
+  },
+  "importErrorInvalidJson": {
+    "message": "El archivo no es JSON válido",
+    "description": ""
+  },
+  "importErrorMissingFields": {
+    "message": "Faltan campos obligatorios: {fields}",
+    "description": ""
+  },
+  "importErrorCommandExists": {
+    "message": "La herramienta con el comando \"{command}\" ya existe",
+    "description": ""
+  },
+  "importErrorInvalidCommand": {
+    "message": "El comando debe empezar por \"/\" y contener sólo letras minúsculas, números y guiones",
+    "description": ""
+  },
+  "importSuccess": {
+    "message": "¡Herramienta importada con éxito!",
+    "description": ""
+  },
+  "importErrorGeneric": {
+    "message": "Error al importar la herramienta: {mensaje}",
+    "description": ""
+  },
+  "fillPersonalInfo": {
+    "message": "Rellena la información personal en los ajustes",
+    "description": ""
+  },
+  "fillPersonalInfoTooltip": {
+    "message": "Rellene la información personal en la configuración de la extensión para esta función.",
+    "description": ""
+  },
+  "tool_fillForm": {
+    "message": "Rellenar formulario",
+    "description": ""
+  },
+  "tool_fillForm_desc": {
+    "message": "Rellena automáticamente el formulario en la página. Esta herramienta sirve como punto de entrada para el comando /fillform.",
+    "description": ""
+  },
+  "tool_getFormFields": {
+    "message": "Obtener campos de formulario",
+    "description": ""
+  },
+  "tool_getFormFields_desc": {
+    "message": "Obtiene la lista de todos los campos de formulario de la página con sus metadatos (id, nombre, tipo, etiqueta, marcador de posición, obligatorio). Utilice esta herramienta PRIMERO antes de rellenar el formulario.",
+    "description": ""
+  },
+  "tool_fillFormFields": {
+    "message": "Rellenar campos de formulario",
+    "description": ""
+  },
+  "tool_fillFormFields_desc": {
+    "message": "Rellena campos específicos del formulario con los valores proporcionados. IMPORTANTE: el parámetro fieldsToFill debe contener un objeto donde las claves son el id o el nombre de los campos de get-form-fields, y los valores son los datos a rellenar de availableUserInfo.",
+    "description": ""
+  },
+  "tool_summarize": {
+    "message": "Resumen de la página",
+    "description": ""
+  },
+  "tool_summarize_desc": {
+    "message": "Obtiene el contenido de texto de la página actual para crear un resumen",
+    "description": ""
+  },
+  "tool_collectContacts": {
+    "message": "Recopilar contactos",
+    "description": ""
+  },
+  "tool_collectContacts_desc": {
+    "message": "IMPORTANTE: Primero DEBE preguntar al usuario: 1) ¿Qué tipo de contactos recopilar (todos/email/teléfono/telegrama)? 2) ¿Qué formato devolver (texto/json/csv)? Sólo después de recibir las respuestas llame a esta herramienta con los parámetros especificados.",
+    "description": ""
+  },
+  "formFieldsNotFound": {
+    "message": "No se han encontrado campos de formulario en la página.",
+    "description": ""
+  },
+  "formFieldsNextStep": {
+    "message": "PASO SIGUIENTE: Llamar a fill-form-fields con el parámetro fieldsToFill. Crear un objeto de mapeo de campos y datos de usuario. Ejemplo: {ejemplo}",
+    "description": ""
+  },
+  "formFieldsNotSpecified": {
+    "message": "No hay campos especificados para rellenar",
+    "description": ""
+  },
+  "formFillSuccess": {
+    "message": "Formulario rellenado con éxito. Campos rellenados: {relleno} de {total}",
+    "description": ""
+  },
+  "formFillError": {
+    "message": "Error al rellenar el formulario",
+    "description": ""
+  },
+  "formFillFailed": {
+    "message": "No se ha rellenado el formulario",
+    "description": ""
+  },
+  "unknownError": {
+    "message": "Error desconocido",
+    "description": ""
+  },
+  "createPageSummary": {
+    "message": "Crear un resumen de esta página.",
+    "description": ""
+  },
+  "contactsNotFound": {
+    "message": "No se han encontrado contactos en la página",
+    "description": ""
+  },
+  "contactsFound": {
+    "message": "Contactos encontrados: {count}",
+    "description": ""
+  },
+  "pageContentNotAvailable": {
+    "message": "La página no contiene texto o el contenido no está disponible.",
+    "description": ""
+  },
+  "pageContentForSummary": {
+    "message": "Contenido de la página para el resumen:",
+    "description": ""
+  },
+  "errorGettingPageContent": {
+    "message": "Error al obtener el contenido de la página",
+    "description": ""
+  },
+  "contactsNotFoundType": {
+    "message": "No se han encontrado contactos de tipo {type} en la página. Compruebe que la página contiene información de contacto.",
+    "description": ""
+  },
+  "contactsFoundCount": {
+    "message": "Contactos encontrados: {count}",
+    "description": ""
+  },
+  "errorCollectingContacts": {
+    "message": "Error al recoger los contactos",
+    "description": ""
+  },
+  "tool_setCheckbox": {
+    "message": "Establecer casilla de verificación",
+    "description": ""
+  },
+  "tool_setCheckbox_desc": {
+    "message": "Marcar o desmarcar una casilla en la página",
+    "description": ""
+  },
+  "tool_submitForm": {
+    "message": "Enviar formulario",
+    "description": ""
+  },
+  "tool_submitForm_desc": {
+    "message": "Envíe un formulario haciendo clic en el botón Enviar",
+    "description": ""
+  },
+  "checked": {
+    "message": "comprobado",
+    "description": ""
+  },
+  "unchecked": {
+    "message": "unchecked",
+    "description": ""
+  },
+  "checkboxSuccess": {
+    "message": "Casilla de verificación {acción}: {selector}",
+    "description": ""
+  },
+  "checkboxNotFound": {
+    "message": "Casilla de verificación no encontrada: {selector}",
+    "description": ""
+  },
+  "checkboxError": {
+    "message": "Error al trabajar con checkbox",
+    "description": ""
+  },
+  "formSubmitSuccess": {
+    "message": "Formulario enviado correctamente",
+    "description": ""
+  },
+  "formNotFound": {
+    "message": "Formulario no encontrado en la página",
+    "description": ""
+  },
+  "formSubmitError": {
+    "message": "Error al enviar el formulario",
+    "description": ""
+  },
+  "availableTools": {
+    "message": "Herramientas disponibles",
+    "description": ""
+  },
+  "toolsNavigation": {
+    "message": "↑↓ Navegación",
+    "description": ""
+  },
+  "toolsSelect": {
+    "message": "Enter/Tab Select",
+    "description": ""
+  },
+  "tool_noAvailable": {
+    "message": "No hay herramientas disponibles",
+    "description": ""
+  },
+  "requiresPersonalInfo": {
+    "message": "requiere información personal",
+    "description": ""
+  },
+  "tool_parsePages": {
+    "message": "Parse Pages",
+    "description": ""
+  },
+  "tool_parsePages_desc": {
+    "message": "Recopilar cíclicamente datos de varias páginas",
+    "description": ""
+  },
+  "tool_findElements": {
+    "message": "Encontrar elementos",
+    "description": ""
+  },
+  "tool_findElements_desc": {
+    "message": "Encontrar automáticamente el selector CSS por descripción",
+    "description": ""
+  },
+  "parsingInProgress": {
+    "message": "Análisis en curso...",
+    "description": ""
+  },
+  "parsingPageProgress": {
+    "message": "Página 1 de 2",
+    "description": ""
+  },
+  "parsingCompleted": {
+    "message": "Parsing completado: $1 páginas, $2 elementos",
+    "description": ""
+  },
+  "parsingPaused": {
+    "message": "Análisis pausado. ¿Continuar?",
+    "description": ""
+  },
+  "parsingContinuePrompt": {
+    "message": "Páginas de 1 dólar procesadas. ¿Continuar analizando?",
+    "description": ""
+  },
+  "stopParsing": {
+    "message": "Stop Parsing",
+    "description": ""
+  },
+  "selectorFound": {
+    "message": "Selector encontrado: $1 ($2 elementos)",
+    "description": ""
+  },
+  "errorLoadingTools": {
+    "message": "Fallo al cargar herramientas",
+    "description": ""
+  },
+  "errorLoadingCustomTools": {
+    "message": "Error al cargar herramientas personalizadas",
+    "description": ""
+  },
+  "errorInvalidCommandFormat": {
+    "message": "Formato de comando no válido. El comando debe empezar por / y contener sólo letras minúsculas, números y guiones.",
+    "description": ""
+  },
+  "errorCommandExists": {
+    "message": "El comando {command} ya existe",
+    "description": ""
+  },
+  "errorCreatingCustomTool": {
+    "message": "Error al crear herramienta personalizada",
+    "description": ""
+  },
+  "errorUpdatingCustomTool": {
+    "message": "Error al actualizar la herramienta personalizada",
+    "description": ""
+  },
+  "errorDeletingCustomTool": {
+    "message": "Error al borrar la herramienta personalizada",
+    "description": ""
+  },
+  "availableToolsTitle": {
+    "message": "Herramientas de IA disponibles",
+    "description": ""
+  },
+  "availableToolsDescription": {
+    "message": "Lista de herramientas de IA con ejemplos de uso en prompts",
+    "description": ""
+  },
+  "viewAvailableTools": {
+    "message": "Herramientas disponibles",
+    "description": ""
+  },
+  "examples": {
+    "message": "Ejemplos",
+    "description": ""
+  },
+  "selectElementForPrompt": {
+    "message": "Seleccionar elemento",
+    "description": ""
+  },
+  "selectElementNote": {
+    "message": "Haga clic en el elemento de la página para insertar su selector",
+    "description": ""
+  },
+  "searchDomFunctions": {
+    "message": "Funciones de búsqueda...",
+    "description": ""
+  },
+  "domCategory_navigation": {
+    "message": "Navegación y DOM",
+    "description": ""
+  },
+  "domCategory_getData": {
+    "message": "Obtener datos",
+    "description": ""
+  },
+  "domCategory_manipulation": {
+    "message": "Manipulación DOM",
+    "description": ""
+  },
+  "domCategory_scrolling": {
+    "message": "Desplazamiento",
+    "description": ""
+  },
+  "domCategory_utilities": {
+    "message": "Utilidades",
+    "description": ""
+  },
+  "domFunc_getElements": {
+    "message": "Obtener elementos por selector",
+    "description": ""
+  },
+  "domFunc_clickElement": {
+    "message": "Elemento de clic",
+    "description": ""
+  },
+  "domFunc_setValue": {
+    "message": "Establecer valor de entrada/textarea",
+    "description": ""
+  },
+  "domFunc_selectOption": {
+    "message": "Seleccionar opción en select",
+    "description": ""
+  },
+  "domFunc_focusElement": {
+    "message": "Centrarse en el elemento",
+    "description": ""
+  },
+  "domFunc_setCheckbox": {
+    "message": "Establecer casilla de verificación",
+    "description": ""
+  },
+  "domFunc_submitForm": {
+    "message": "Enviar formulario",
+    "description": ""
+  },
+  "domFunc_hoverElement": {
+    "message": "Hover sobre elemento",
+    "description": ""
+  },
+  "domFunc_scrollToElement": {
+    "message": "Desplácese hasta el elemento",
+    "description": ""
+  },
+  "domFunc_getCurrentUrl": {
+    "message": "Obtener URL actual",
+    "description": ""
+  },
+  "domFunc_getPageMetadata": {
+    "message": "Obtener metadatos de la página",
+    "description": ""
+  },
+  "domFunc_waitForPageLoad": {
+    "message": "Esperar a que se cargue la página",
+    "description": ""
+  },
+  "domFunc_getSimplifiedHTML": {
+    "message": "Obtener HTML simplificado",
+    "description": ""
+  },
+  "domFunc_getLinks": {
+    "message": "Obtener enlaces",
+    "description": ""
+  },
+  "domFunc_getText": {
+    "message": "Obtener texto de página",
+    "description": ""
+  },
+  "domFunc_getHTML": {
+    "message": "Obtener HTML completo",
+    "description": ""
+  },
+  "domFunc_getDOMTree": {
+    "message": "Obtener árbol DOM",
+    "description": ""
+  },
+  "domFunc_getMeta": {
+    "message": "Obtener metaetiquetas",
+    "description": ""
+  },
+  "domFunc_getSelection": {
+    "message": "Obtener texto seleccionado",
+    "description": ""
+  },
+  "domFunc_getTableData": {
+    "message": "Obtener datos de la tabla",
+    "description": ""
+  },
+  "domFunc_getFormData": {
+    "message": "Obtener datos del formulario",
+    "description": ""
+  },
+  "domFunc_getFormFields": {
+    "message": "Obtener campos de formulario",
+    "description": ""
+  },
+  "domFunc_hideElements": {
+    "message": "Ocultar elementos",
+    "description": ""
+  },
+  "domFunc_addStyles": {
+    "message": "Añadir estilos",
+    "description": ""
+  },
+  "domFunc_replaceStyles": {
+    "message": "Sustituir estilos",
+    "description": ""
+  },
+  "domFunc_injectHTML": {
+    "message": "Inyectar HTML",
+    "description": ""
+  },
+  "domFunc_removeElements": {
+    "message": "Eliminar elementos",
+    "description": ""
+  },
+  "domFunc_highlightElements": {
+    "message": "Resaltar elementos",
+    "description": ""
+  },
+  "domFunc_replaceText": {
+    "message": "Sustituir texto",
+    "description": ""
+  },
+  "domFunc_scrollDown": {
+    "message": "Desplácese hacia abajo",
+    "description": ""
+  },
+  "domFunc_scrollUp": {
+    "message": "Desplácese hacia arriba",
+    "description": ""
+  },
+  "domFunc_scrollToTop": {
+    "message": "Desplácese hasta arriba",
+    "description": ""
+  },
+  "domFunc_scrollToBottom": {
+    "message": "Desplácese hasta abajo",
+    "description": ""
+  },
+  "domFunc_isElementVisible": {
+    "message": "Comprobar la visibilidad del elemento",
+    "description": ""
+  },
+  "domFunc_downloadFile": {
+    "message": "Descargar archivo",
+    "description": ""
+  },
+  "domFunc_getImages": {
+    "message": "Obtener imágenes",
+    "description": ""
+  },
+  "domFunc_getElementCode": {
+    "message": "Obtener código de elemento",
+    "description": ""
+  },
+  "domFunc_getElementPosition": {
+    "message": "Obtener la posición del elemento",
+    "description": ""
+  },
+  "domFunc_waitForElement": {
+    "message": "Esperar elemento",
+    "description": ""
+  },
+  "domFunc_executeJS": {
+    "message": "Ejecutar código JS",
+    "description": ""
+  },
+  "domFunc_getViewportInfo": {
+    "message": "Obtener información de la ventana gráfica",
+    "description": ""
+  },
+  "toolCategory_domManipulation": {
+    "message": "Manipulación DOM",
+    "description": ""
+  },
+  "toolCategory_formAutomation": {
+    "message": "Automatización de formularios",
+    "description": ""
+  },
+  "toolCategory_contentAnalysis": {
+    "message": "Análisis de contenido",
+    "description": ""
+  },
+  "toolCategory_dataExtraction": {
+    "message": "Extracción de datos",
+    "description": ""
+  },
+  "toolCategory_elementDiscovery": {
+    "message": "Descubrimiento de elementos",
+    "description": ""
+  },
+  "tool_executeDOMFunction": {
+    "message": "Ejecutar función DOM",
+    "description": ""
+  },
+  "tool_executeDOMFunction_desc": {
+    "message": "Ejecuta cualquier función DOM en la página para la manipulación directa de elementos",
+    "description": ""
+  },
+  "toolExample_setValue_desc": {
+    "message": "Establecer valor en el campo",
+    "description": ""
+  },
+  "toolExample_setValue_prompt": {
+    "message": "Llamar a ejecutar-dom-función con functionName: \"setValue\" y params: {\"selector\": \"#email\", \"value\": \"test@mail.com\"}",
+    "description": ""
+  },
+  "toolExample_clickElement_desc": {
+    "message": "Haga clic en el elemento",
+    "description": ""
+  },
+  "toolExample_clickElement_prompt": {
+    "message": "Llamar a ejecutar-dom-función con functionName: \"clickElement\" y params: {\"selector\": \".submit-button\", \"index\": 0}",
+    "description": ""
+  },
+  "toolExample_getText_desc": {
+    "message": "Obtener texto de elemento",
+    "description": ""
+  },
+  "toolExample_getText_prompt": {
+    "message": "Llamar a ejecutar-dom-función con functionName: \"getText\" y params: {\"selector\": \".resultado\"}",
+    "description": ""
+  },
+  "toolExample_selectOption_desc": {
+    "message": "Seleccionar opción en select",
+    "description": ""
+  },
+  "toolExample_selectOption_prompt": {
+    "message": "Llamar a ejecutar-dom-función con functionName: \"selectOption\" y params: {\"selector\": \"#country\", \"value\": \"USA\"}",
+    "description": ""
+  },
+  "toolExample_fillMultipleFields_desc": {
+    "message": "Rellenar varios campos",
+    "description": ""
+  },
+  "toolExample_fillMultipleFields_prompt": {
+    "message": "Llama a fill-form-fields con fieldsToFill: {\"email\": \"user@mail.com\", \"name\": \"John Doe\", \"phone\": \"+1234567890\"}",
+    "description": ""
+  },
+  "toolExample_fillSingleField_desc": {
+    "message": "Rellenar un solo campo",
+    "description": ""
+  },
+  "toolExample_fillSingleField_prompt": {
+    "message": "Llama a fill-form-fields con fieldsToFill: {\"lastName\": \"Smith\"}",
+    "description": ""
+  },
+  "toolExample_getFormFields_desc": {
+    "message": "Obtener campos de formulario",
+    "description": ""
+  },
+  "toolExample_getFormFields_prompt": {
+    "message": "Llama a get-form-fields para ver todos los campos de formulario de la página",
+    "description": ""
+  },
+  "toolExample_checkCheckbox_desc": {
+    "message": "Casilla de verificación",
+    "description": ""
+  },
+  "toolExample_checkCheckbox_prompt": {
+    "message": "Llamar a set-checkbox con selector: \"#agree\" y checked: true",
+    "description": ""
+  },
+  "toolExample_uncheckCheckbox_desc": {
+    "message": "Desmarque la casilla",
+    "description": ""
+  },
+  "toolExample_uncheckCheckbox_prompt": {
+    "message": "Llama a set-checkbox con selector: \".newsletter\" y checked: false",
+    "description": ""
+  },
+  "toolExample_submitSpecificForm_desc": {
+    "message": "Enviar formulario específico",
+    "description": ""
+  },
+  "toolExample_submitSpecificForm_prompt": {
+    "message": "Llamar submit-form con selector: \"#contact-form\"",
+    "description": ""
+  },
+  "toolExample_submitFirstForm_desc": {
+    "message": "Enviar primer formulario",
+    "description": ""
+  },
+  "toolExample_submitFirstForm_prompt": {
+    "message": "Llama a submit-form sin parámetros para enviar el primer formulario",
+    "description": ""
+  },
+  "toolExample_summarize_desc": {
+    "message": "Crear resumen",
+    "description": ""
+  },
+  "toolExample_summarize_prompt": {
+    "message": "Llame a resumir para crear un resumen de esta página",
+    "description": ""
+  },
+  "toolExample_collectEmails_desc": {
+    "message": "Recoger todos los correos electrónicos",
+    "description": ""
+  },
+  "toolExample_collectEmails_prompt": {
+    "message": "Llama a collect-contacts con contactType: \"email\" y format: \"json\"",
+    "description": ""
+  },
+  "toolExample_collectAllContacts_desc": {
+    "message": "Recoger todos los contactos",
+    "description": ""
+  },
+  "toolExample_collectAllContacts_prompt": {
+    "message": "Llamar a contactos por cobrar con contactType: \"all\" y format: \"text\"",
+    "description": ""
+  },
+  "toolExample_findLoginButton_desc": {
+    "message": "Encontrar botón de inicio de sesión",
+    "description": ""
+  },
+  "toolExample_findLoginButton_prompt": {
+    "message": "Llamar a buscar elementos con descripción: \"botón de inicio de sesión\"",
+    "description": ""
+  },
+  "toolExample_findEmailField_desc": {
+    "message": "Buscar campo email",
+    "description": ""
+  },
+  "toolExample_findEmailField_prompt": {
+    "message": "Llamar a find-elements con description: \"campo de entrada de correo electrónico\"",
+    "description": ""
+  },
+  "toolExample_parsePages_desc": {
+    "message": "Analizar páginas",
+    "description": ""
+  },
+  "toolExample_parsePages_prompt": {
+    "message": "Utilice parse-pages para recopilar datos de varias páginas. Siga el flujo de trabajo: init -> get-links -> filter-links -> navigate -> find-elements -> save-selector -> extract-data -> finish",
+    "description": ""
+  },
+  "imageGenerationSettings": {
+    "message": "Ajustes de generación de imágenes",
+    "description": ""
+  },
+  "imageGenerationSettingsDescription": {
+    "message": "Configurar los parámetros de generación de imágenes para",
+    "description": ""
+  },
+  "aspectRatio": {
+    "message": "Relación de aspecto",
+    "description": ""
+  },
+  "selectAspectRatio": {
+    "message": "Seleccionar relación de aspecto",
+    "description": ""
+  },
+  "aspectRatioDescription": {
+    "message": "Relación de aspecto de las imágenes generadas",
+    "description": ""
+  },
+  "imageGenerationNotAvailable": {
+    "message": "Los ajustes de generación de imágenes aún no están disponibles para este operador.",
+    "description": ""
+  },
+  "aspectRatio_1_1": {
+    "message": "1:1 → 1024×1024 (por defecto)",
+    "description": ""
+  },
+  "aspectRatio_2_3": {
+    "message": "2:3 → 832×1248",
+    "description": ""
+  },
+  "aspectRatio_3_2": {
+    "message": "3:2 → 1248×832",
+    "description": ""
+  },
+  "aspectRatio_3_4": {
+    "message": "3:4 → 864×1184",
+    "description": ""
+  },
+  "aspectRatio_4_3": {
+    "message": "4:3 → 1184×864",
+    "description": ""
+  },
+  "aspectRatio_4_5": {
+    "message": "4:5 → 896×1152",
+    "description": ""
+  },
+  "aspectRatio_5_4": {
+    "message": "5:4 → 1152×896",
+    "description": ""
+  },
+  "aspectRatio_9_16": {
+    "message": "9:16 → 768×1344",
+    "description": ""
+  },
+  "aspectRatio_16_9": {
+    "message": "16:9 → 1344×768",
+    "description": ""
+  },
+  "aspectRatio_21_9": {
+    "message": "21:9 → 1536×672",
+    "description": ""
+  },
+  "imageGenerationSettingsButton": {
+    "message": "Ajustes de generación",
+    "description": ""
+  },
+  "downloadImage": {
+    "message": "Descargar",
+    "description": ""
+  },
+  "editImage": {
+    "message": "Editar",
+    "description": ""
+  },
+  "editImageBadge": {
+    "message": "Editar imagen",
+    "description": ""
+  },
+  "imageSize": {
+    "message": "Tamaño",
+    "description": ""
+  },
+  "imageQuality": {
+    "message": "Calidad",
+    "description": ""
+  },
+  "imageFormat": {
+    "message": "Formato",
+    "description": ""
+  },
+  "imageCompression": {
+    "message": "Compresión",
+    "description": ""
+  },
+  "imageBackground": {
+    "message": "Antecedentes",
+    "description": ""
+  },
+  "imageInputFidelity": {
+    "message": "Fidelidad de entrada",
+    "description": ""
+  },
+  "imageModeration": {
+    "message": "Moderación de contenidos",
+    "description": ""
+  },
+  "tokensEstimate": {
+    "message": "fichas",
+    "description": ""
+  },
+  "imageSizeAuto": {
+    "message": "Coche",
+    "description": ""
+  },
+  "imageSize1024x1024": {
+    "message": "1024×1024 (Cuadrado)",
+    "description": ""
+  },
+  "imageSize1536x1024": {
+    "message": "1536×1024 (apaisado)",
+    "description": ""
+  },
+  "imageSize1024x1536": {
+    "message": "1024×1536 (Retrato)",
+    "description": ""
+  },
+  "imageQualityAuto": {
+    "message": "Coche",
+    "description": ""
+  },
+  "imageQualityLow": {
+    "message": "Baja (~270-400 fichas)",
+    "description": ""
+  },
+  "imageQualityMedium": {
+    "message": "Medio (~1000-1600 fichas)",
+    "description": ""
+  },
+  "imageQualityHigh": {
+    "message": "Alta (~4000-6200 fichas)",
+    "description": ""
+  },
+  "imageQualityDescription": {
+    "message": "Una mayor calidad requiere más fichas y tiempo",
+    "description": ""
+  },
+  "imageFormatDescription": {
+    "message": "PNG admite transparencias, JPEG es más rápido",
+    "description": ""
+  },
+  "imageCompressionDescription": {
+    "message": "Nivel de compresión para los formatos JPEG y WebP",
+    "description": ""
+  },
+  "imageBackgroundOpaque": {
+    "message": "Opaco",
+    "description": ""
+  },
+  "imageBackgroundTransparent": {
+    "message": "Transparente",
+    "description": ""
+  },
+  "imageBackgroundDescription": {
+    "message": "El fondo transparente sólo funciona para PNG y WebP",
+    "description": ""
+  },
+  "imageInputFidelityLow": {
+    "message": "Bajo",
+    "description": ""
+  },
+  "imageInputFidelityHigh": {
+    "message": "Alta (más fichas)",
+    "description": ""
+  },
+  "imageInputFidelityDescription": {
+    "message": "La alta fidelidad conserva más detalles de las imágenes de entrada",
+    "description": ""
+  },
+  "imageModerationAuto": {
+    "message": "Auto (estándar)",
+    "description": ""
+  },
+  "imageModerationLow": {
+    "message": "Baja (menos estricta)",
+    "description": ""
+  },
+  "imageModerationDescription": {
+    "message": "Nivel de filtrado de contenidos según la política de OpenAI",
+    "description": ""
+  },
+  "imageCount": {
+    "message": "Recuento de imágenes",
+    "description": ""
+  },
+  "image": {
+    "message": "imagen",
+    "description": ""
+  },
+  "images": {
+    "message": "imágenes",
+    "description": ""
+  },
+  "imageCountDescription": {
+    "message": "Número de imágenes a generar (1-10)",
+    "description": ""
+  },
+  "responseFormat": {
+    "message": "Formato de respuesta",
+    "description": ""
+  },
+  "responseFormatBase64": {
+    "message": "Base64 (incrustado)",
+    "description": ""
+  },
+  "responseFormatUrl": {
+    "message": "URL (alojada)",
+    "description": ""
+  },
+  "responseFormatDescription": {
+    "message": "Cómo recibir las imágenes generadas: incrustadas (base64) o URL alojada",
+    "description": ""
+  },
+  "imageResolution": {
+    "message": "Resolución de imagen",
+    "description": ""
+  },
+  "geminiImageResolutionDescription": {
+    "message": "Una resolución más alta produce imágenes de mejor calidad, pero tarda más en generarse. 4K disponible sólo para Gemini 3 Pro.",
+    "description": ""
+  },
+  "selectTabs": {
+    "message": "Seleccionar pestañas",
+    "description": ""
+  },
+  "noTabsAvailable": {
+    "message": "No hay fichas disponibles",
+    "description": ""
+  },
+  "selectAll": {
+    "message": "Seleccionar todo",
+    "description": ""
+  },
+  "deselectAll": {
+    "message": "Deseleccionar todo",
+    "description": ""
+  },
+  "tabsSelected": {
+    "message": "{count} pestañas seleccionadas",
+    "description": ""
+  },
+  "tabsNavigation": {
+    "message": "↑↓ Navegar - Intro/Tab Seleccionar",
+    "description": ""
+  },
+  "tabsMaxLimit": {
+    "message": "Max {max} tabs",
+    "description": ""
+  },
+  "tabMention": {
+    "message": "Ficha mención",
+    "description": ""
+  },
+  "confirm": {
+    "message": "Confirmar",
+    "description": ""
+  },
+  "removeOperator": {
+    "message": "Eliminar operador",
+    "description": ""
+  },
+  "removeOperatorConfirmTitle": {
+    "message": "¿Quitar conexión?",
+    "description": ""
+  },
+  "removeOperatorConfirmMessage": {
+    "message": "¿Realmente quieres borrar la clave API y los modelos conectados?",
+    "description": ""
+  },
+  "settingsManagement": {
+    "message": "Gestión de ajustes",
+    "description": ""
+  },
+  "settingsManagementDescription": {
+    "message": "Exportar o importar ajustes de extensión",
+    "description": ""
+  },
+  "exportSettings": {
+    "message": "Exportar ajustes",
+    "description": ""
+  },
+  "exportSettingsDescription": {
+    "message": "Exportar guardará todos los ajustes en un archivo JSON con las claves API descifradas.",
+    "description": ""
+  },
+  "importSettings": {
+    "message": "Importar configuración",
+    "description": ""
+  },
+  "importSettingsDescription": {
+    "message": "Seleccione un archivo JSON con la configuración exportada",
+    "description": ""
+  },
+  "selectFile": {
+    "message": "Seleccionar archivo",
+    "description": ""
+  },
+  "selectImportOptions": {
+    "message": "Seleccione qué importar",
+    "description": ""
+  },
+  "importOperators": {
+    "message": "Operadores (claves API, modelos, puntos finales)",
+    "description": ""
+  },
+  "importGeneralSettings": {
+    "message": "Ajustes generales (tema, idioma, modo historia)",
+    "description": ""
+  },
+  "importPersonalInfo": {
+    "message": "Información personal",
+    "description": ""
+  },
+  "importInstructions": {
+    "message": "Instrucciones (generales y específicas del lugar)",
+    "description": ""
+  },
+  "importSuccessDescription": {
+    "message": "Todos los ajustes seleccionados se han importado correctamente",
+    "description": ""
+  },
+  "importError": {
+    "message": "Error de importación",
+    "description": ""
+  },
+  "invalidFileFormat": {
+    "message": "Formato de archivo no válido. Asegúrese de haber seleccionado un archivo JSON de configuración válido.",
+    "description": ""
+  },
+  "invalidJSON": {
+    "message": "El archivo no es JSON válido",
+    "description": ""
+  },
+  "missingVersion": {
+    "message": "Falta información sobre la versión del archivo",
+    "description": ""
+  },
+  "missingExportDate": {
+    "message": "Falta la fecha de exportación del archivo",
+    "description": ""
+  },
+  "missingEncryptionData": {
+    "message": "Al archivo le faltan datos de encriptación",
+    "description": ""
+  },
+  "invalidOperators": {
+    "message": "Formato de datos de operadores no válido",
+    "description": ""
+  },
+  "invalidGeneralSettings": {
+    "message": "Formato de configuración general no válido",
+    "description": ""
+  },
+  "invalidPersonalInfo": {
+    "message": "Formato de datos personales no válido",
+    "description": ""
+  },
+  "invalidInstructions": {
+    "message": "Formato de instrucciones no válido",
+    "description": ""
+  },
+  "importing": {
+    "message": "Importando...",
+    "description": ""
+  },
+  "import": {
+    "message": "Importar",
+    "description": ""
+  },
+  "version": {
+    "message": "Versión",
+    "description": ""
+  },
+  "exportDate": {
+    "message": "Fecha de exportación",
+    "description": ""
+  },
+  "youtubePlayerResponseNotFound": {
+    "message": "ytInitialPlayerResponse no se encuentra en la página",
+    "description": ""
+  },
+  "youtubeSubtitlesNotFound": {
+    "message": "No se han encontrado subtítulos para este vídeo",
+    "description": ""
+  },
+  "youtubeSubtitlesBaseUrlNotFound": {
+    "message": "Subtitles baseUrl not found",
+    "description": ""
+  },
+  "sitePrompt_amazon_product_0": {
+    "message": "Analiza las opiniones: elimina las falsas y haz una lista honesta de pros y contras.",
+    "description": ""
+  },
+  "sitePrompt_amazon_product_1": {
+    "message": "Comprueba el precio de este producto en otros sitios (Walmart, eBay) y encuentra uno más barato.",
+    "description": ""
+  },
+  "sitePrompt_amazon_product_2": {
+    "message": "Mira las fotos de las reseñas y compáralas con las promocionales. ¿Hay diferencias evidentes?",
+    "description": ""
+  },
+  "sitePrompt_amazon_product_3": {
+    "message": "Encuentra un video review de este producto en YouTube y destaca los principales problemas.",
+    "description": ""
+  },
+  "sitePrompt_amazon_search_0": {
+    "message": "Elija los 3 mejores productos de la página en función de la relación precio/calificación.",
+    "description": ""
+  },
+  "sitePrompt_amazon_search_1": {
+    "message": "¿Hay aquí algún producto con críticas sospechosamente infladas?",
+    "description": ""
+  },
+  "sitePrompt_ebay_product_0": {
+    "message": "Comprueba la reputación del vendedor: ¿ha tenido alguna reseña negativa en el último mes?",
+    "description": ""
+  },
+  "sitePrompt_ebay_product_1": {
+    "message": "Compara el precio con \"Comprar ahora\" y las subastas. ¿Cuál es más rentable?",
+    "description": ""
+  },
+  "sitePrompt_ebay_product_2": {
+    "message": "Compruebe el historial de precios de este producto en Internet: ¿es una buena oferta?",
+    "description": ""
+  },
+  "sitePrompt_walmart_product_0": {
+    "message": "Genera un breve informe: pros, contras y defectos ocultos a partir de las reseñas.",
+    "description": ""
+  },
+  "sitePrompt_walmart_product_1": {
+    "message": "Compara el precio con Amazon ahora mismo.",
+    "description": ""
+  },
+  "sitePrompt_walmart_product_2": {
+    "message": "Encuentre el mismo producto bajo una marca diferente (Marca Blanca) por menos.",
+    "description": ""
+  },
+  "sitePrompt_aliexpress_product_0": {
+    "message": "Encuentre la marca original basándose en la foto del producto. ¿Es una copia o el original?",
+    "description": ""
+  },
+  "sitePrompt_aliexpress_product_1": {
+    "message": "Analice la valoración y las reseñas de la tienda: ¿es seguro comprar aquí?",
+    "description": ""
+  },
+  "sitePrompt_aliexpress_product_2": {
+    "message": "Encuentre este producto en Amazon/Wildberries para entender el margen de beneficio real.",
+    "description": ""
+  },
+  "sitePrompt_etsy_product_0": {
+    "message": "Compruébalo mediante la búsqueda de imágenes: ¿está hecho a mano de verdad o es una reventa de AliExpress?",
+    "description": ""
+  },
+  "sitePrompt_etsy_product_1": {
+    "message": "Resalte las menciones a la calidad del material en las reseñas.",
+    "description": ""
+  },
+  "sitePrompt_youtube_video_0": {
+    "message": "Haz un resumen detallado del vídeo con códigos de tiempo (TL;DR).",
+    "description": ""
+  },
+  "sitePrompt_youtube_video_1": {
+    "message": "Analiza los comentarios: ¿sobre qué discute la gente y cuál es el estado de ánimo general?",
+    "description": ""
+  },
+  "sitePrompt_youtube_video_2": {
+    "message": "Busca vídeos que refuten los hechos de este vídeo.",
+    "description": ""
+  },
+  "sitePrompt_youtube_video_3": {
+    "message": "Si se trata de un tutorial, conviértelo en una guía de texto paso a paso.",
+    "description": ""
+  },
+  "sitePrompt_youtube_channel_0": {
+    "message": "¿De qué trata este canal? Analiza sus temas y su audiencia.",
+    "description": ""
+  },
+  "sitePrompt_youtube_channel_1": {
+    "message": "¿Qué vídeos del canal son los más populares y por qué?",
+    "description": ""
+  },
+  "sitePrompt_netflix_title_0": {
+    "message": "¿Merece la pena verla? Consulta las puntuaciones en IMDb y Rotten Tomatoes.",
+    "description": ""
+  },
+  "sitePrompt_netflix_title_1": {
+    "message": "Recuérdales brevemente la trama de las temporadas anteriores (sin spoilers de ésta).",
+    "description": ""
+  },
+  "sitePrompt_netflix_title_2": {
+    "message": "Encuentra series similares con una valoración superior a 8,0.",
+    "description": ""
+  },
+  "sitePrompt_imdb_title_0": {
+    "message": "Consulta la Guía para padres: ¿hay escenas no aptas para niños?",
+    "description": ""
+  },
+  "sitePrompt_imdb_title_1": {
+    "message": "¿Dónde puedo ver esta película en línea (streaming)?",
+    "description": ""
+  },
+  "sitePrompt_imdb_title_2": {
+    "message": "Explica el final de la película (Advertencia: ¡spoilers!).",
+    "description": ""
+  },
+  "sitePrompt_cnn_article_0": {
+    "message": "Haz viñetas con los datos clave del artículo.",
+    "description": ""
+  },
+  "sitePrompt_cnn_article_1": {
+    "message": "Compruebe los hechos: ¿hay confirmación en otras fuentes fidedignas?",
+    "description": ""
+  },
+  "sitePrompt_cnn_article_2": {
+    "message": "Evalúe el nivel de sesgo político del texto.",
+    "description": ""
+  },
+  "sitePrompt_nytimes_article_0": {
+    "message": "Haz un breve resumen del artículo.",
+    "description": ""
+  },
+  "sitePrompt_nytimes_article_1": {
+    "message": "Encuentre opiniones alternativas sobre este tema.",
+    "description": ""
+  },
+  "sitePrompt_nytimes_article_2": {
+    "message": "Explique el contexto: ¿qué condujo a estos acontecimientos?",
+    "description": ""
+  },
+  "sitePrompt_bbc_article_0": {
+    "message": "Resuma brevemente la esencia de la noticia.",
+    "description": ""
+  },
+  "sitePrompt_bbc_article_1": {
+    "message": "¿Hay alguna información más reciente sobre este tema (Actualización)?",
+    "description": ""
+  },
+  "sitePrompt_airbnb_listing_0": {
+    "message": "Analiza las opiniones: ¿hay quejas sobre la suciedad, el ruido o el anfitrión?",
+    "description": ""
+  },
+  "sitePrompt_airbnb_listing_1": {
+    "message": "Comprueba la ubicación: ¿es seguro caminar por allí de noche?",
+    "description": ""
+  },
+  "sitePrompt_airbnb_listing_2": {
+    "message": "Encuentra cargos ocultos en la descripción (limpieza, impuestos).",
+    "description": ""
+  },
+  "sitePrompt_airbnb_listing_3": {
+    "message": "Mira la vista desde la ventana en la foto y comprueba los mapas: ¿es verdad?",
+    "description": ""
+  },
+  "sitePrompt_booking_hotel_0": {
+    "message": "Escribe los 3 principales pros y los 3 principales contras de los comentarios recientes.",
+    "description": ""
+  },
+  "sitePrompt_booking_hotel_1": {
+    "message": "Compara el precio de este hotel en la web del hotel y en otros agregadores.",
+    "description": ""
+  },
+  "sitePrompt_booking_hotel_2": {
+    "message": "¿A qué distancia se encuentran las principales atracciones?",
+    "description": ""
+  },
+  "sitePrompt_yelp_business_0": {
+    "message": "¿Merece la pena ir? Evalúa la proporción de malas y buenas críticas.",
+    "description": ""
+  },
+  "sitePrompt_yelp_business_1": {
+    "message": "¿Qué platos se mencionan más a menudo como \"deliciosos\"?",
+    "description": ""
+  },
+  "sitePrompt_wikipedia_article_0": {
+    "message": "Explique este tema en términos sencillos (ELI5).",
+    "description": ""
+  },
+  "sitePrompt_wikipedia_article_1": {
+    "message": "Crear una cronología de los acontecimientos clave.",
+    "description": ""
+  },
+  "sitePrompt_wikipedia_article_2": {
+    "message": "Encuentre investigaciones recientes que complementen este artículo.",
+    "description": ""
+  },
+  "sitePrompt_coursera_course_0": {
+    "message": "¿Merece la pena? Evalúe la pertinencia del programa para 2024-25.",
+    "description": ""
+  },
+  "sitePrompt_coursera_course_1": {
+    "message": "¿Me ayudará este certificado a encontrar trabajo? (Opiniones de Reddit).",
+    "description": ""
+  },
+  "sitePrompt_coursera_course_2": {
+    "message": "Encuentre alternativas gratuitas a este curso en YouTube.",
+    "description": ""
+  },
+  "sitePrompt_linkedin_profile_0": {
+    "message": "Escriba una invitación personalizada (Solicitud de Conexión) para esta persona.",
+    "description": ""
+  },
+  "sitePrompt_linkedin_profile_1": {
+    "message": "Crear un resumen del perfil al estilo de los reclutadores: puntos fuertes/debilidades.",
+    "description": ""
+  },
+  "sitePrompt_linkedin_company_0": {
+    "message": "Prepárame para la entrevista: cultura de empresa y preguntas frecuentes.",
+    "description": ""
+  },
+  "sitePrompt_linkedin_company_1": {
+    "message": "Encuentre opiniones de empleados sobre esta empresa.",
+    "description": ""
+  },
+  "sitePrompt_glassdoor_company_0": {
+    "message": "Resalte las \"señales de alarma\" en las evaluaciones de los empleados.",
+    "description": ""
+  },
+  "sitePrompt_glassdoor_company_1": {
+    "message": "Compare el salario ofrecido con el del mercado.",
+    "description": ""
+  },
+  "sitePrompt_github_repo_0": {
+    "message": "Explica qué hace este código y cómo ejecutarlo (del README).",
+    "description": ""
+  },
+  "sitePrompt_github_repo_1": {
+    "message": "Observa la estructura de archivos (árbol) y evalúa la arquitectura.",
+    "description": ""
+  },
+  "sitePrompt_github_repo_2": {
+    "message": "Analizar problemas: ¿qué fallos se producen con más frecuencia?",
+    "description": ""
+  },
+  "sitePrompt_github_repo_3": {
+    "message": "Encuentre alternativas más populares o recientes a esta biblioteca.",
+    "description": ""
+  },
+  "sitePrompt_stackoverflow_question_0": {
+    "message": "Explique la mejor solución en términos sencillos.",
+    "description": ""
+  },
+  "sitePrompt_stackoverflow_question_1": {
+    "message": "Comprueba si este código está obsoleto. Encuentra una alternativa moderna.",
+    "description": ""
+  },
+  "sitePrompt_stackoverflow_question_2": {
+    "message": "Escriba una prueba unitaria para este fragmento de código.",
+    "description": ""
+  },
+  "sitePrompt_producthunt_product_0": {
+    "message": "¿Qué hace que este producto sea único? Compárelo con la competencia.",
+    "description": ""
+  },
+  "sitePrompt_producthunt_product_1": {
+    "message": "¿A quién va dirigido el producto?",
+    "description": ""
+  },
+  "sitePrompt_medium_article_0": {
+    "message": "Escriba un breve resumen del artículo (TL;DR).",
+    "description": ""
+  },
+  "sitePrompt_medium_article_1": {
+    "message": "Destaca las ideas útiles en forma de lista de comprobación.",
+    "description": ""
+  },
+  "sitePrompt_reddit_post_0": {
+    "message": "Recoge los principales argumentos 'A favor' y 'En contra' del debate.",
+    "description": ""
+  },
+  "sitePrompt_reddit_post_1": {
+    "message": "Encuentra los consejos más útiles/apreciados en el hilo.",
+    "description": ""
+  },
+  "sitePrompt_reddit_post_2": {
+    "message": "Determinar el sentimiento general de los comentaristas.",
+    "description": ""
+  },
+  "sitePrompt_twitter_post_0": {
+    "message": "Comprueba los hechos de este tuit: ¿verdaderos o falsos?",
+    "description": ""
+  },
+  "sitePrompt_twitter_post_1": {
+    "message": "Encuentra la fuente de información original del tuit.",
+    "description": ""
+  },
+  "sitePrompt_twitter_post_2": {
+    "message": "Analiza el tono de la discusión en los comentarios.",
+    "description": ""
+  },
+  "sitePrompt_twitter_post_3": {
+    "message": "¿Existen otras opiniones de expertos sobre este tema?",
+    "description": ""
+  },
+  "sitePrompt_x_post_0": {
+    "message": "Comprueba los hechos de este tuit: ¿verdaderos o falsos?",
+    "description": ""
+  },
+  "sitePrompt_x_post_1": {
+    "message": "Encuentra la fuente de información original del tuit.",
+    "description": ""
+  },
+  "sitePrompt_x_post_2": {
+    "message": "Analiza el tono de la discusión en los comentarios.",
+    "description": ""
+  },
+  "sitePrompt_x_post_3": {
+    "message": "¿Existen otras opiniones de expertos sobre este tema?",
+    "description": ""
+  },
+  "sitePrompt_instagram_post_0": {
+    "message": "Encuentra el original de esta foto mediante la búsqueda inversa de imágenes.",
+    "description": ""
+  },
+  "sitePrompt_instagram_post_1": {
+    "message": "Compruebe si esta imagen es falsa (Photoshop).",
+    "description": ""
+  },
+  "sitePrompt_instagram_post_2": {
+    "message": "Buscar contenidos o tendencias similares.",
+    "description": ""
+  },
+  "sitePrompt_wildberries_product_0": {
+    "message": "Analiza las reseñas: pros y contras honestos del producto.",
+    "description": ""
+  },
+  "sitePrompt_wildberries_product_1": {
+    "message": "Compruebe la dinámica de precios: ¿es favorable el precio ahora o es mejor esperar?",
+    "description": ""
+  },
+  "sitePrompt_wildberries_product_2": {
+    "message": "Comparar con productos similares en Ozon y Yandex.Market.",
+    "description": ""
+  },
+  "sitePrompt_wildberries_product_3": {
+    "message": "Compruebe las fotos de los comentarios: ¿coincide el producto con la descripción?",
+    "description": ""
+  },
+  "sitePrompt_ozon_product_0": {
+    "message": "Filtra las opiniones falsas y ofrece una evaluación objetiva.",
+    "description": ""
+  },
+  "sitePrompt_ozon_product_1": {
+    "message": "Encuentra este producto más barato en WB o Yandex.Market.",
+    "description": ""
+  },
+  "sitePrompt_ozon_product_2": {
+    "message": "Compruebe la calificación del vendedor: ¿es de fiar?",
+    "description": ""
+  },
+  "sitePrompt_ozon_product_3": {
+    "message": "Compara las características con fotos en opiniones de compradores reales.",
+    "description": ""
+  },
+  "sitePrompt_avito_listing_0": {
+    "message": "Compruebe si el anuncio presenta signos de fraude.",
+    "description": ""
+  },
+  "sitePrompt_avito_listing_1": {
+    "message": "Evaluar la adecuación del precio: ¿está sobrevalorado o infravalorado?",
+    "description": ""
+  },
+  "sitePrompt_avito_listing_2": {
+    "message": "Analiza las fotos: ¿hay algún defecto oculto?",
+    "description": ""
+  },
+  "sitePrompt_avito_listing_3": {
+    "message": "Buscar ofertas similares para comparar precios.",
+    "description": ""
+  },
+  "sitePrompt_coinmarketcap_coin_0": {
+    "message": "Analice el proyecto: ¿es legítimo o una posible estafa?",
+    "description": ""
+  },
+  "sitePrompt_coinmarketcap_coin_1": {
+    "message": "Encuentre las últimas noticias y actualizaciones sobre esta moneda.",
+    "description": ""
+  },
+  "sitePrompt_coinmarketcap_coin_2": {
+    "message": "Comparar con los competidores en este nicho.",
+    "description": ""
+  },
+  "sitePrompt_coinmarketcap_coin_3": {
+    "message": "¿Qué dicen los expertos sobre las perspectivas del proyecto?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_0": {
+    "message": "Analice el gráfico: ¿cuál es la tendencia y los niveles clave?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_1": {
+    "message": "Conozca las opiniones de los operadores sobre este activo.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_2": {
+    "message": "¿Qué indicadores técnicos están señalando ahora?",
+    "description": ""
+  },
+  "sitePrompt_spotify_track_0": {
+    "message": "Encuentra temas similares con la misma onda.",
+    "description": ""
+  },
+  "sitePrompt_spotify_track_1": {
+    "message": "Traduce y explica la letra (si no está en ruso).",
+    "description": ""
+  },
+  "sitePrompt_spotify_track_2": {
+    "message": "Cuenta la historia que hay detrás de esta canción.",
+    "description": ""
+  },
+  "sitePrompt_spotify_playlist_0": {
+    "message": "Analiza la lista de reproducción y recomienda nuevas canciones.",
+    "description": ""
+  },
+  "sitePrompt_spotify_playlist_1": {
+    "message": "Identifica el género y el ambiente de la lista de reproducción.",
+    "description": ""
+  },
+  "sitePrompt_zillow_listing_0": {
+    "message": "Evalúe el precio: ¿es justo o exagerado para esta zona?",
+    "description": ""
+  },
+  "sitePrompt_zillow_listing_1": {
+    "message": "Compruebe el historial de ventas y los cambios de precio.",
+    "description": ""
+  },
+  "sitePrompt_zillow_listing_2": {
+    "message": "¿Qué problemas ocultos podría tener esta casa?",
+    "description": ""
+  },
+  "sitePrompt_zillow_listing_3": {
+    "message": "Analizar la seguridad y las infraestructuras del barrio.",
+    "description": ""
+  },
+  "sitePrompt_allrecipes_recipe_0": {
+    "message": "Adaptar la receta a los ingredientes que tengo en casa.",
+    "description": ""
+  },
+  "sitePrompt_allrecipes_recipe_1": {
+    "message": "Haz una versión más sana de la receta (menos calorías/azúcar).",
+    "description": ""
+  },
+  "sitePrompt_allrecipes_recipe_2": {
+    "message": "Analiza las reseñas: ¿qué consejos importantes dan los que han cocinado esta receta?",
+    "description": ""
+  },
+  "sitePrompt_allrecipes_recipe_3": {
+    "message": "Convertir la receta al sistema métrico (gramos/ml).",
+    "description": ""
+  },
+  "sitePromptsSectionTitle": {
+    "message": "Quizá le interese:",
+    "description": ""
+  },
+  "sitePrompt_maps_google_place_0": {
+    "message": "Resuma las críticas: ¿qué elogia la gente y qué critica?",
+    "description": ""
+  },
+  "sitePrompt_maps_google_place_1": {
+    "message": "Mira las fotos del menú/comida y recomienda qué pedir.",
+    "description": ""
+  },
+  "sitePrompt_maps_google_place_2": {
+    "message": "Encuentra lugares cercanos con mejores valoraciones.",
+    "description": ""
+  },
+  "sitePrompt_developer_mozilla_article_0": {
+    "message": "Explique este concepto de forma sencilla con un ejemplo.",
+    "description": ""
+  },
+  "sitePrompt_developer_mozilla_article_1": {
+    "message": "Mostrar compatibilidad de navegadores y alternativas.",
+    "description": ""
+  },
+  "sitePrompt_developer_mozilla_article_2": {
+    "message": "Escriba un ejemplo de código funcional para esta API.",
+    "description": ""
+  },
+  "sitePrompt_developer_mozilla_article_3": {
+    "message": "¿Hay formas más modernas de resolver este problema?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_3": {
+    "message": "Encuentre patrones gráficos (hombros-cabeza, triángulos, banderas) y evalúe la probabilidad de ejecución.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_4": {
+    "message": "Identificar niveles clave de soporte y resistencia con precios de entrada/salida.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_5": {
+    "message": "¿Existen divergencias entre el precio y los indicadores (RSI, MACD)? ¿Qué significan?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_6": {
+    "message": "Construir niveles Fibonacci e indicar zonas objetivo de corrección/extensión.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_7": {
+    "message": "Analice los volúmenes: ¿confirman el movimiento actual de los precios?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_8": {
+    "message": "¿Qué noticias o acontecimientos importantes podrían afectar a este activo en los próximos días?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_9": {
+    "message": "Encontrar correlaciones con otros activos (divisas, índices, materias primas).",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_10": {
+    "message": "¿Dónde colocar el stop-loss y el take-profit en función de la situación actual?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_11": {
+    "message": "Calcule la relación riesgo/beneficio de los posibles puntos de entrada.",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_12": {
+    "message": "Compare el marco temporal actual con marcos temporales superiores: ¿coincide la dirección de la tendencia?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_13": {
+    "message": "¿Qué patrones de velas en el gráfico indican inversión o continuación?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_14": {
+    "message": "Compare este gráfico con situaciones históricas similares: ¿cómo se comportó el precio después?",
+    "description": ""
+  },
+  "sitePrompt_tradingview_chart_15": {
+    "message": "Analizar la estacionalidad de los activos: ¿existen patrones característicos de esta época del año?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_0": {
+    "message": "Comprueba los hechos de este hilo: ¿verdaderos o falsos?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_1": {
+    "message": "Encuentra la fuente original de información de este post.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_2": {
+    "message": "¿Es este post parte de una campaña viral de desinformación?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_3": {
+    "message": "Analizar el sentimiento de la discusión en las respuestas.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_4": {
+    "message": "Resuma los principales argumentos de este hilo.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_5": {
+    "message": "¿Cuál es el consenso general en los comentarios: acuerdo o debate?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_6": {
+    "message": "Encuentre otras opiniones de expertos sobre este tema.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_7": {
+    "message": "¿Cuál es el contexto de este post? ¿Qué llevó a esta discusión?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_8": {
+    "message": "Encuentre puntos de vista opuestos sobre este tema.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_9": {
+    "message": "¿Es una tendencia actual? ¿Cuál es la conversación general?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_10": {
+    "message": "¿Quiénes son las voces clave en este debate?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_11": {
+    "message": "Si hay imágenes: verifíquelas mediante la búsqueda inversa de imágenes.",
+    "description": ""
+  },
+  "sitePrompt_threads_post_12": {
+    "message": "Analizar los medios de comunicación adjuntos: ¿son auténticos o están manipulados?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_13": {
+    "message": "¿Por qué este post tiene tanto engagement?",
+    "description": ""
+  },
+  "sitePrompt_threads_post_14": {
+    "message": "Encuentre publicaciones virales similares sobre este tema en el pasado.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_0": {
+    "message": "Escribe una respuesta profesional a este correo electrónico teniendo en cuenta el contexto.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_1": {
+    "message": "Redacta un cortés rechazo a esta oferta.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_2": {
+    "message": "Reformular mi borrador de manera más diplomática/formal.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_3": {
+    "message": "Escribe una rápida respuesta amistosa con agradecimiento.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_4": {
+    "message": "Resuma brevemente la esencia del correo electrónico y los puntos clave que requieren respuesta.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_5": {
+    "message": "Comprueba el tono del correo electrónico: ¿amistoso, neutro o agresivo?",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_6": {
+    "message": "¿Hay amenazas ocultas, plazos o condiciones importantes en el correo electrónico?",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_7": {
+    "message": "Compruebe si el correo electrónico presenta signos de phishing o fraude.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_8": {
+    "message": "Corregir la gramática y mejorar el estilo de mi borrador.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_9": {
+    "message": "Acortar el correo electrónico manteniendo los puntos clave (versión TL;DR).",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_10": {
+    "message": "Resalte todos los plazos, tareas y elementos de acción.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_11": {
+    "message": "Cree una lista de tareas a partir de este correo electrónico.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_12": {
+    "message": "Buscar documentos, enlaces o empresas mencionados en el correo electrónico.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_13": {
+    "message": "Prepara una breve reseña sobre la empresa/persona del correo electrónico.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_14": {
+    "message": "Escribe una respuesta a una queja de un cliente con disculpas y solución.",
+    "description": ""
+  },
+  "sitePrompt_mail_google_email_15": {
+    "message": "Redacta un correo electrónico recordatorio sobre una promesa incumplida (educadamente).",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_0": {
+    "message": "Escribe una respuesta profesional a este correo electrónico teniendo en cuenta el contexto.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_1": {
+    "message": "Redacta un cortés rechazo a esta oferta.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_2": {
+    "message": "Reformular mi borrador de manera más diplomática/formal.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_3": {
+    "message": "Escribe una rápida respuesta amistosa con agradecimiento.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_4": {
+    "message": "Resuma brevemente la esencia del correo electrónico y los puntos clave que requieren respuesta.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_5": {
+    "message": "Comprueba el tono del correo electrónico: ¿amistoso, neutro o agresivo?",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_6": {
+    "message": "¿Hay amenazas ocultas, plazos o condiciones importantes en el correo electrónico?",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_7": {
+    "message": "Compruebe si el correo electrónico presenta signos de phishing o fraude.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_8": {
+    "message": "Corregir la gramática y mejorar el estilo de mi borrador.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_9": {
+    "message": "Acortar el correo electrónico manteniendo los puntos clave (versión TL;DR).",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_10": {
+    "message": "Resalte todos los plazos, tareas y elementos de acción.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_11": {
+    "message": "Cree una lista de tareas a partir de este correo electrónico.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_12": {
+    "message": "Buscar documentos, enlaces o empresas mencionados en el correo electrónico.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_13": {
+    "message": "Prepara una breve reseña sobre la empresa/persona del correo electrónico.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_14": {
+    "message": "Escribe una respuesta a una queja de un cliente con disculpas y solución.",
+    "description": ""
+  },
+  "sitePrompt_outlook_live_email_15": {
+    "message": "Redacta un correo electrónico recordatorio sobre una promesa incumplida (educadamente).",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_0": {
+    "message": "Comprueba los hechos de este hilo: ¿verdaderos o falsos?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_1": {
+    "message": "Encuentra la fuente original de información de este post.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_2": {
+    "message": "¿Es este post parte de una campaña viral de desinformación?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_3": {
+    "message": "Analizar el sentimiento de la discusión en las respuestas.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_4": {
+    "message": "Resuma los principales argumentos de este hilo.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_5": {
+    "message": "¿Cuál es el consenso general en los comentarios: acuerdo o debate?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_6": {
+    "message": "Encuentre otras opiniones de expertos sobre este tema.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_7": {
+    "message": "¿Cuál es el contexto de este post? ¿Qué llevó a esta discusión?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_8": {
+    "message": "Encuentre puntos de vista opuestos sobre este tema.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_9": {
+    "message": "¿Es una tendencia actual? ¿Cuál es la conversación general?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_10": {
+    "message": "¿Quiénes son las voces clave en este debate?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_11": {
+    "message": "Si hay imágenes: verifíquelas mediante la búsqueda inversa de imágenes.",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_12": {
+    "message": "Analizar los medios de comunicación adjuntos: ¿son auténticos o están manipulados?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_13": {
+    "message": "¿Por qué este post tiene tanto engagement?",
+    "description": ""
+  },
+  "sitePrompt_www_threads_post_14": {
+    "message": "Encuentre publicaciones virales similares sobre este tema en el pasado.",
+    "description": ""
+  },
+  "expandChat": {
+    "message": "Ampliar a pantalla completa",
+    "description": ""
+  },
+  "exportToPDF": {
+    "message": "Exportar a PDF",
+    "description": ""
+  },
+  "saveAllMessages": {
+    "message": "Guardar todos los mensajes",
+    "description": ""
+  },
+  "saveAIMessagesOnly": {
+    "message": "Guardar sólo respuestas AI",
+    "description": ""
+  },
+  "exportChat": {
+    "message": "Exportar chat",
+    "description": ""
+  },
+  "exportingPDF": {
+    "message": "Exportar a PDF...",
+    "description": ""
+  },
+  "pdfExportAIOnly": {
+    "message": "Sólo respuestas AI",
+    "description": ""
+  },
+  "pdfExportPage": {
+    "message": "Página",
+    "description": ""
+  },
+  "pdfExportFile": {
+    "message": "Archivo",
+    "description": ""
+  },
+  "pdfExportTab": {
+    "message": "Tab",
+    "description": ""
+  },
+  "pdfExportTool": {
+    "message": "Herramienta",
+    "description": ""
+  },
+  "pdfExportNoResult": {
+    "message": "Sin resultado.",
+    "description": ""
+  },
+  "pdfExportReasoning": {
+    "message": "Razonamiento",
+    "description": ""
+  },
+  "pdfExportSources": {
+    "message": "Fuentes",
+    "description": ""
+  },
+  "pdfExportSuggestedQuestions": {
+    "message": "Preguntas sugeridas",
+    "description": ""
+  },
+  "openFullscreen": {
+    "message": "Abrir en pantalla completa",
+    "description": ""
+  },
+  "collapseSidebar": {
+    "message": "Contraer barra lateral",
+    "description": ""
+  },
+  "expandSidebar": {
+    "message": "Ampliar la barra lateral",
+    "description": ""
+  },
+  "noFolder": {
+    "message": "No Folder",
+    "description": ""
+  },
+  "createNewFolder": {
+    "message": "Crear nueva carpeta",
+    "description": ""
+  },
+  "enterFolderName": {
+    "message": "Introduzca el nombre de la carpeta",
+    "description": ""
+  },
+  "confirmDeleteFolder": {
+    "message": "¿Borrar carpeta?",
+    "description": ""
+  },
+  "confirmDeleteFolderDescription": {
+    "message": "Esta carpeta se eliminará. Los chats que se encuentren dentro no se borrarán.",
+    "description": ""
+  },
+  "confirmDeleteChatDescription": {
+    "message": "Este chat se eliminará permanentemente. Esta acción no se puede deshacer.",
+    "description": ""
+  },
+  "chatTitle": {
+    "message": "Chat Título",
+    "description": ""
+  },
+  "back": {
+    "message": "Volver",
+    "description": ""
+  },
+  "confirmDeleteChat": {
+    "message": "¿Borrar el chat?",
+    "description": ""
+  },
+  "helpPageTitle": {
+    "message": "Ayuda",
+    "description": ""
+  },
+  "helpPageSubtitle": {
+    "message": "Conozca todas las funciones de la extensión AiLex",
+    "description": ""
+  },
+  "noVideoAvailable": {
+    "message": "Vídeo próximamente",
+    "description": ""
+  },
+  "helpCategory_chat": {
+    "message": "Chat y Modelos",
+    "description": ""
+  },
+  "helpCategory_media": {
+    "message": "Medios y archivos adjuntos",
+    "description": ""
+  },
+  "helpCategory_tools": {
+    "message": "Herramientas",
+    "description": ""
+  },
+  "helpCategory_contextMenu": {
+    "message": "Menús contextuales",
+    "description": ""
+  },
+  "helpCategory_history": {
+    "message": "Historia y configuración",
+    "description": ""
+  },
+  "helpTitle_aiProviders": {
+    "message": "Múltiples proveedores de IA",
+    "description": ""
+  },
+  "helpDescription_aiProviders": {
+    "message": "Compatibilidad con varios proveedores de IA: OpenAI, Anthropic, OpenRouter, Grok, Gemini y LM Studio. Puede elegir cualquier proveedor y modelo de una extensa lista. Cada proveedor se configura por separado con su propia clave API y la posibilidad de especificar un punto final personalizado para los modelos autoalojados.",
+    "description": ""
+  },
+  "helpTitle_modelFilters": {
+    "message": "Modelo Filtros",
+    "description": ""
+  },
+  "helpDescription_modelFilters": {
+    "message": "Potente sistema de filtrado de modelos por longitud de contexto, modalidades de entrada y salida (texto, imagen, archivo) y operadores de IA. Los filtros se guardan automáticamente y muestran el número de modelos encontrados. Perfecto para encontrar rápidamente el modelo adecuado entre cientos de opciones disponibles.",
+    "description": ""
+  },
+  "helpTitle_sitePrompts": {
+    "message": "Prompts dependientes del contexto",
+    "description": ""
+  },
+  "helpDescription_sitePrompts": {
+    "message": "Consultas inteligentes preparadas que aparecen automáticamente en función del tipo de página que estés viendo. Para Amazon - análisis de reseñas, para YouTube - resumen de vídeos con marcas de tiempo, para artículos - breve resumen. Cada consulta activa automáticamente las funciones necesarias: contexto de página, búsqueda web o transcripción de vídeo.",
+    "description": ""
+  },
+  "helpTitle_fullscreenMode": {
+    "message": "Modo de chat a pantalla completa",
+    "description": ""
+  },
+  "helpDescription_fullscreenMode": {
+    "message": "Interfaz tipo ChatGPT con barra lateral, chat y gestión de carpetas. Sincronización automática con el panel lateral, creación de chat en el primer mensaje, búsqueda de chat y agrupación de carpetas. Todos los enlaces externos se abren en nuevas pestañas, y la URL se sincroniza con el chatId actual.",
+    "description": ""
+  },
+  "helpTitle_messageEditing": {
+    "message": "Comparación de las respuestas de la IA",
+    "description": ""
+  },
+  "enterNewFolderName": {
+    "message": "Introduzca el nombre de la nueva carpeta",
+    "description": ""
+  },
+  "helpDescription_messageEditing": {
+    "message": "Posibilidad de comparar respuestas de distintos modelos en un bloque con paginación.",
+    "description": ""
+  },
+  "helpTitle_messageConsul": {
+    "message": "Cónsul Resumen Respuesta",
+    "description": ""
+  },
+  "helpDescription_messageConsul": {
+    "message": "Obtener un resumen de la respuesta del modelo seleccionado basado en todas las respuestas",
+    "description": ""
+  },
+  "helpTitle_fileAttachments": {
+    "message": "Archivos adjuntos",
+    "description": ""
+  },
+  "helpDescription_fileAttachments": {
+    "message": "Admite documentos (PDF, DOC, DOCX), código (JS, TS, PY, etc.) y datos (JSON, CSV, XML). Los archivos de texto se leen como texto, los archivos binarios se convierten a Base64. Comprobación automática de la compatibilidad del modelo con vista previa y guardado del historial. Límite de tamaño: 10 MB.",
+    "description": ""
+  },
+  "helpTitle_screenshotCapture": {
+    "message": "Captura de pantalla",
+    "description": ""
+  },
+  "helpDescription_screenshotCapture": {
+    "message": "Selección interactiva del área de la pantalla con oscurecimiento y resaltado de la zona seleccionada. Compresión automática de la imagen cuando se supera el límite. Cancelación de la selección mediante Esc o clic en el campo de entrada. El resultado se guarda como una imagen compatible con modelos multimodales.",
+    "description": ""
+  },
+  "helpTitle_tabMentions": {
+    "message": "Referencias de pestaña mediante @",
+    "description": ""
+  },
+  "helpDescription_tabMentions": {
+    "message": "Potente función para comparar información de varias páginas. Escriba @ en el campo de entrada para seleccionar las pestañas abiertas del navegador (hasta 5). Filtro por nombre, prioridad de dominio actual, insignias visuales con iconos. Perfecto para la comparación de precios, el análisis de la competencia o la comprobación de hechos.",
+    "description": ""
+  },
+  "helpTitle_voiceInput": {
+    "message": "Entrada de voz",
+    "description": ""
+  },
+  "helpDescription_voiceInput": {
+    "message": "Reconocimiento de voz mediante Web Speech API en una ventana emergente independiente con una interfaz de usuario atractiva. Inicio automático de la grabación, compatibilidad con temas claros y oscuros, indicación visual del proceso. Reconocimiento continuo con previsualización de texto en tiempo real y adición automática al campo de entrada.",
+    "description": ""
+  },
+  "helpTitle_webcamCapture": {
+    "message": "Captura de webcam",
+    "description": ""
+  },
+  "helpDescription_webcamCapture": {
+    "message": "Activación de la cámara del dispositivo con vista previa antes de la captura. Gestión de permisos del navegador, compresión automática y guardado de fotos. Compatibilidad con modelos multimodales con capacidad de análisis de imágenes de IA. Las fotos se guardan en el historial y pueden reutilizarse.",
+    "description": ""
+  },
+  "helpTitle_functionCalling": {
+    "message": "Llamada a funciones",
+    "description": ""
+  },
+  "helpDescription_functionCalling": {
+    "message": "Sistema de herramientas con llamada automática a funciones de IA basada en el contexto. Soporte para llamadas recursivas (hasta 5 iteraciones), herramientas integradas y personalizadas, más de 40 funciones DOM. Indicación visual con resaltado verde y botón de parada. Integración completa con OpenRouter y Anthropic.",
+    "description": ""
+  },
+  "helpTitle_summarizeContacts": {
+    "message": "Resumir y recopilar contactos",
+    "description": ""
+  },
+  "helpDescription_summarizeContacts": {
+    "message": "Extracción del contenido del texto de la página para crear un resumen. Recopilación automática de contactos: email, teléfonos, Telegram usando expresiones regulares. Soporte para diferentes formatos de salida: texto, JSON, CSV. Visualización del recuento de contactos encontrados.",
+    "description": ""
+  },
+  "helpTitle_formFilling": {
+    "message": "Autocompletar formularios",
+    "description": ""
+  },
+  "helpDescription_formFilling": {
+    "message": "Proceso en dos pasos: La IA analiza los campos del formulario y los empareja automáticamente con la información personal de la configuración. Soporte para todos los tipos de campos: texto, email, tel, textarea, select. Búsqueda inteligente de campos por id, nombre, marcador de posición con informe de campos rellenados.",
+    "description": ""
+  },
+  "helpTitle_pageParsing": {
+    "message": "Análisis de páginas",
+    "description": ""
+  },
+  "helpDescription_pageParsing": {
+    "message": "Extracción automática de datos de varias páginas. La IA encuentra selectores CSS por descripción, recorre enlaces y recopila datos. Filtrado inteligente de enlaces relevantes, formatos JSON/CSV/texto. Indicación visual con barra de progreso, protección contra cuelgues y pausa después de 20 páginas.",
+    "description": ""
+  },
+  "helpTitle_textContextMenu": {
+    "message": "Menú Texto Seleccionado",
+    "description": ""
+  },
+  "helpDescription_textContextMenu": {
+    "message": "24 comandos en 6 categorías para procesar el texto seleccionado: análisis, edición, investigación, educación, traducción y combinado. Localización automática, algunos comandos activan la búsqueda web. Guarda citas en el historial del chat y adición inteligente al diálogo actual.",
+    "description": ""
+  },
+  "helpTitle_fieldContextMenu": {
+    "message": "Menú Campo de entrada",
+    "description": ""
+  },
+  "helpDescription_fieldContextMenu": {
+    "message": "Relleno inteligente de campos con IA: genera respuestas en distintos tonos (profesional, amistoso, directo), procesa por instrucciones, inserción instantánea de datos personales. La IA analiza el contexto de la página y genera texto en el idioma de la página sin abrir la extensión.",
+    "description": ""
+  },
+  "helpTitle_chatHistory": {
+    "message": "Historia agrupada",
+    "description": ""
+  },
+  "helpDescription_chatHistory": {
+    "message": "Historial de todos los diálogos agrupados por días: Hoy, Ayer, Hace N días. Información del sitio con navegación rápida, iconos de operadores utilizados, recuento de tokens. Paginación de 30 chats por página con navegación. Al hacer clic en un chat, se abre automáticamente el sitio y se carga el historial.",
+    "description": ""
+  },
+  "helpTitle_tokenStatistics": {
+    "message": "Estadísticas de fichas",
+    "description": ""
+  },
+  "helpDescription_tokenStatistics": {
+    "message": "Análisis de uso detallados con filtros por periodos y operadores. Gráficos: dinámica de tokens por día, distribución por operadores de IA, top-10 de modelos. Métricas globales de mensajes y tokens para el periodo. Todos los datos se guardan automáticamente en IndexedDB con cada solicitud.",
+    "description": ""
+  },
+  "helpTitle_exportImport": {
+    "message": "Ajustes de exportación e importación",
+    "description": ""
+  },
+  "helpDescription_exportImport": {
+    "message": "Copia de seguridad de todos los ajustes de la extensión: Claves API (descifradas), modelos, tema, idioma, información personal, instrucciones. Validación de datos, importación selectiva de las secciones necesarias, gestión de errores. Perfecto para transferir entre ordenadores o compartir configuraciones.",
+    "description": ""
+  },
+  "helpTitle_developerMode": {
+    "message": "Modo Desarrollador",
+    "description": ""
+  },
+  "helpDescription_developerMode": {
+    "message": "Panel de depuración de peticiones API sin DevTools. Visualización de todas las llamadas en tiempo real: marcas de tiempo, cabeceras (con enmascaramiento de claves), cuerpo de solicitud y respuesta con formato JSON. Interfaz interactiva con copia de datos, indicación de colores y almacenamiento de hasta 200 entradas en IndexedDB.",
+    "description": ""
+  },
+  "sitePrompt_youtube_video_4": {
+    "message": "Escribe las palabras para repasar del vídeo de lengua con frases de ejemplo.",
+    "description": ""
+  },
+  "toAccept": {
+    "message": "aceptar",
+    "description": ""
+  }
+}

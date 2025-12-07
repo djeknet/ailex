@@ -82,7 +82,7 @@ interface ChatStore {
   
   // Folders
   loadFolders: () => Promise<void>;
-  createFolder: (name: string) => Promise<void>;
+  createFolder: (name: string) => Promise<string>;
   updateFolder: (id: string, name: string) => Promise<void>;
   deleteFolder: (id: string) => Promise<void>;
   
@@ -1768,17 +1768,38 @@ ${responseContext}`;
   },
 
   createFolder: async (name) => {
+    console.log('[chatStore] createFolder called', { name });
+    
     try {
       const folder: ChatFolder = {
         id: `folder_${Date.now()}`,
         createdAt: Date.now(),
         name
       };
+      
+      console.log('[chatStore] Creating folder in DB...', {
+        folderId: folder.id,
+        folderName: folder.name
+      });
+      
       await folderAPI.createFolder(folder);
+      
+      console.log('[chatStore] Folder created in DB, loading all folders...');
+      
       const folders = await folderAPI.getAllFolders();
+      
+      console.log('[chatStore] Loaded folders from DB:', {
+        count: folders.length,
+        folderIds: folders.map(f => f.id)
+      });
+      
       set({ folders });
+      
+      console.log('[chatStore] Returning folder ID:', folder.id);
+      return folder.id; // Возвращаем ID созданной папки
     } catch (error) {
-      console.error('Error creating folder:', error);
+      console.error('[chatStore] Error creating folder:', error);
+      throw error; // Пробрасываем ошибку дальше
     }
   },
 
@@ -1848,12 +1869,33 @@ ${responseContext}`;
   },
 
   moveChatToFolder: async (chatId, folderId) => {
+    console.log('[chatStore] moveChatToFolder called', {
+      chatId,
+      folderId,
+      chatsInStore: get().chats.length
+    });
+    
     try {
       const chats = get().chats;
       const chat = chats.find(c => c.id === chatId);
+      
+      console.log('[chatStore] Found chat:', {
+        found: !!chat,
+        chatTitle: chat?.title,
+        currentFolderId: chat?.folderId
+      });
+      
       if (chat) {
         const updatedChat = { ...chat, folderId, updatedAt: Date.now() };
+        
+        console.log('[chatStore] Updating chat in DB...', {
+          chatId: updatedChat.id,
+          newFolderId: updatedChat.folderId
+        });
+        
         await chatAPI.updateChat(updatedChat);
+        
+        console.log('[chatStore] Chat updated in DB, updating store...');
         
         const updatedChats = chats.map(c => c.id === chatId ? updatedChat : c);
         set({ chats: updatedChats });
@@ -1861,11 +1903,17 @@ ${responseContext}`;
         // Update current chat if it's the same
         const currentChat = get().currentChat;
         if (currentChat?.id === chatId) {
+          console.log('[chatStore] Updating currentChat in store');
           set({ currentChat: updatedChat });
         }
+        
+        console.log('[chatStore] moveChatToFolder completed successfully');
+      } else {
+        console.error('[chatStore] Chat not found in store!', { chatId, availableChats: chats.map(c => c.id) });
       }
     } catch (error) {
-      console.error('Error moving chat to folder:', error);
+      console.error('[chatStore] Error moving chat to folder:', error);
+      throw error; // Пробрасываем ошибку дальше
     }
   },
 

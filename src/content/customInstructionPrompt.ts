@@ -68,6 +68,10 @@ export function showCustomInstructionPrompt(
     resize: vertical;
     outline: none;
     box-sizing: border-box;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
   `;
 
   textarea.addEventListener('focus', () => {

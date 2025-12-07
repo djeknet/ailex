@@ -1,5 +1,6 @@
 import { Tool } from '@shared/types/tools';
 import { getTranslation } from '@shared/i18n/useTranslation';
+import { SPA_URL_PATTERNS } from '@shared/constants';
 
 interface ParsingState {
   sessionId: string;
@@ -14,6 +15,13 @@ interface ParsingState {
   status: 'active' | 'paused' | 'completed';
   lastFoundLinks?: any[]; // Last result from get-links for filtering
   filteredLinks?: any[]; // Links after AI filtering
+  parsingMode?: 'multi-page' | 'single-page'; // Режим парсинга
+  clickableElements?: Array<{ 
+    selector: string; 
+    index: number; 
+    text: string;
+    xpath: string;
+  }>;
 }
 
 export const parsePagesTool: Tool = {
@@ -36,10 +44,16 @@ export const parsePagesTool: Tool = {
 
 2. THEN execute COMPLETE parsing workflow (DO NOT SKIP ANY STEP):
    Step A: parse-pages(action=init, sessionId=session_xxx, maxPages=N, dataDescription=...)
-   Step B: parse-pages(action=get-links, sessionId=session_xxx) - get all links from current page
-   Step C: parse-pages(action=filter-links, sessionId=session_xxx, linkPattern=only product/article pages) - AI filters relevant links
-   Step D: parse-pages(action=navigate, sessionId=session_xxx, url=first_filtered_link) - go to first page
-   Step E: For EACH data type, call find-elements ON THE NAVIGATED PAGE:
+           - System will auto-detect page type (SPA or multi-page) and return parsingMode
+   Step B: parse-pages(action=get-links, sessionId=session_xxx)
+           - For SPA: Returns clickable elements (status=clickable-elements-found)
+           - For multi-page: Returns navigation links (status=links-found)
+   Step C: parse-pages(action=filter-links, sessionId=session_xxx, linkPattern=only product/article pages)
+           - AI filters relevant elements/links based on parsingMode
+   Step D: Navigate to first item:
+           - For SPA: parse-pages(action=click-and-extract, sessionId=xxx, selector=..., index=...)
+           - For multi-page: parse-pages(action=navigate, sessionId=xxx, url=first_filtered_link)
+   Step E: For EACH data type, call find-elements ON THE CURRENT PAGE:
            - If single type: find-elements(description=article titles) returns h1
            - If multiple types: find-elements for EACH (titles, prices, descriptions, etc.)
            - IMPORTANT: You MUST find selectors for ALL requested data types before proceeding
@@ -48,17 +62,21 @@ export const parsePagesTool: Tool = {
    Step F: Save selector(s):
            - Single: parse-pages(action=save-selector, sessionId=s1, dataSelector=h1)
            - Multiple: parse-pages(action=save-selectors, sessionId=s1, dataSelectors={name:h2.name, price:.price})
-   Step G: parse-pages(action=extract-data, sessionId=session_xxx) - extract from current page
-   Step H: For remaining filtered links (until maxPages reached):
-           - parse-pages(action=navigate, sessionId=session_xxx, url=next_link)
-           - parse-pages(action=extract-data, sessionId=session_xxx)
+   Step G: Extract data from current page:
+           - For SPA: Already extracted in Step D (click-and-extract does both click and extract)
+           - For multi-page: parse-pages(action=extract-data, sessionId=session_xxx)
+   Step H: For remaining filtered items (until maxPages reached):
+           - For SPA: parse-pages(action=click-and-extract, sessionId=xxx, selector=..., index=...)
+           - For multi-page: parse-pages(action=navigate, sessionId=xxx, url=next_link) + parse-pages(action=extract-data)
    Step I: parse-pages(action=finish, sessionId=session_xxx) - return ALL collected data in requested format
 
 IMPORTANT RULES:
 - You MUST use the SAME sessionId in ALL calls (generate once, e.g. session_ + timestamp)
-- You MUST call extract-data on EVERY page (including first page before navigation)
+- Check parsingMode from init response to determine workflow (SPA vs multi-page)
+- For SPA: Use click-and-extract instead of navigate+extract-data
+- For multi-page: Use navigate + extract-data separately
 - CRITICAL: ALWAYS call filter-links IMMEDIATELY after get-links - this is NOT optional!
-- You MUST continue loop until maxPages reached or no more links
+- You MUST continue loop until maxPages reached or no more items
 - After 20 iterations, system will pause - user must confirm to continue
 - Return final data ONLY after action=finish
 - For multiple data types, use save-selectors (plural) with object containing field mappings`,
@@ -69,7 +87,7 @@ IMPORTANT RULES:
       action: {
         type: 'string',
         description: 'Action to perform',
-        enum: ['init', 'save-selector', 'save-selectors', 'get-links', 'filter-links', 'extract-data', 'navigate', 'finish', 'resume']
+        enum: ['init', 'save-selector', 'save-selectors', 'get-links', 'filter-links', 'extract-data', 'navigate', 'click-and-extract', 'finish', 'resume']
       },
       sessionId: {
         type: 'string',
@@ -98,6 +116,14 @@ IMPORTANT RULES:
       url: {
         type: 'string',
         description: 'URL to navigate to (for navigate action)'
+      },
+      selector: {
+        type: 'string',
+        description: 'CSS selector for clickable element (for click-and-extract action)'
+      },
+      index: {
+        type: 'number',
+        description: 'Index of element in selector results (for click-and-extract action)'
       }
     },
     required: ['action', 'sessionId']
@@ -113,6 +139,8 @@ IMPORTANT RULES:
     dataSelectors?: { [key: string]: string };
     linkPattern?: string;
     url?: string;
+    selector?: string;
+    index?: number;
   }) {
     const { tabId, action, sessionId } = params;
     
@@ -149,6 +177,10 @@ IMPORTANT RULES:
         const currentUrl = currentUrlResponse.result;
         console.log('[parse-pages] Current URL:', currentUrl);
         
+        // ШАГ 1: Автоопределение типа страницы
+        const pageType = await detectPageType(tabId, currentUrl);
+        console.log('[parse-pages] Detected page type:', pageType);
+        
         const state: ParsingState = {
           sessionId,
           visitedUrls: [currentUrl],
@@ -157,7 +189,8 @@ IMPORTANT RULES:
           currentPage: 0,
           dataDescription,
           startedAt: Date.now(),
-          status: 'active'
+          status: 'active',
+          parsingMode: pageType
         };
         
         await saveState(state);
@@ -168,6 +201,7 @@ IMPORTANT RULES:
           sessionId,
           maxPages,
           dataDescription,
+          parsingMode: pageType,
           message: getTranslation('parsingInProgress')
         };
       }
@@ -240,9 +274,48 @@ IMPORTANT RULES:
       if (action === 'get-links') {
         const { linkPattern } = params;
         
-        console.log('[parse-pages] GET-LINKS:', { linkPattern });
+        console.log('[parse-pages] GET-LINKS:', { linkPattern, parsingMode: state.parsingMode });
         
-        // Получить все ссылки со страницы
+        // ШАГ 2: Если SPA - ищем кликабельные элементы
+        if (state.parsingMode === 'single-page') {
+          const clickableResponse = await chrome.tabs.sendMessage(tabId, {
+            type: 'EXECUTE_DOM_FUNCTION',
+            data: {
+              functionName: 'getClickableElements',
+              params: { 
+                dataDescription: state.dataDescription,
+                limit: state.maxPages * 3 // Больше для фильтрации
+              }
+            }
+          });
+          
+          if (clickableResponse.success && clickableResponse.result?.length > 0) {
+            // Преобразуем в формат "ссылок" для единообразия
+            const clickableAsLinks = clickableResponse.result.map((el: any) => ({
+              href: `clickable://${el.selector}/${el.index}`, // Псевдо-URL для кликабельных
+              text: el.text,
+              selector: el.selector,
+              index: el.index,
+              xpath: el.xpath,
+              isClickable: true
+            }));
+            
+            state.lastFoundLinks = clickableAsLinks;
+            state.clickableElements = clickableResponse.result;
+            
+            await saveState(state);
+            
+            return {
+              status: 'clickable-elements-found',
+              unvisitedLinks: clickableAsLinks,
+              parsingMode: 'single-page',
+              totalUnvisited: clickableAsLinks.length,
+              message: `Found ${clickableAsLinks.length} clickable elements. Use filter-links to select relevant ones, then use click-and-extract instead of navigate.`
+            };
+          }
+        }
+        
+        // Получить все ссылки со страницы (для multi-page режима)
         const linksResponse = await chrome.tabs.sendMessage(tabId, {
           type: 'EXECUTE_DOM_FUNCTION',
           data: {
@@ -349,27 +422,102 @@ IMPORTANT RULES:
           };
         }
         
-        // Подготовить данные для AI
-        const linksText = state.lastFoundLinks
-          .slice(0, 50) // Лимит для токенов
-          .map((link: any, idx: number) => `${idx + 1}. ${link.href}\n   Text: "${link.text}"`)
+        // Универсальный анализ повторяющихся паттернов
+        const selectorFrequency = new Map<string, number>();
+        state.lastFoundLinks.forEach((link: any) => {
+          const sel = link.selector || 'unknown';
+          selectorFrequency.set(sel, (selectorFrequency.get(sel) || 0) + 1);
+        });
+
+        // Найти селекторы, которые повторяются много раз (вероятно списки элементов)
+        const repeatedSelectors = Array.from(selectorFrequency.entries())
+          .filter(([_, count]) => count >= 3) // Минимум 3 повторения
+          .sort((a, b) => b[1] - a[1]) // Сортировка по частоте
+          .slice(0, 5) // Топ-5 самых частых
+          .map(([selector]) => selector);
+
+        // Приоритизировать элементы с повторяющимися селекторами и текстом
+        const prioritizedLinks = state.lastFoundLinks.sort((a: any, b: any) => {
+          const aRepeated = repeatedSelectors.includes(a.selector);
+          const bRepeated = repeatedSelectors.includes(b.selector);
+          if (aRepeated && !bRepeated) return -1;
+          if (!aRepeated && bRepeated) return 1;
+          
+          // Также приоритизировать элементы с текстом
+          const aHasText = a.text && a.text.trim().length > 10;
+          const bHasText = b.text && b.text.trim().length > 10;
+          if (aHasText && !bHasText) return -1;
+          if (!aHasText && bHasText) return 1;
+          
+          return 0;
+        });
+
+        // Подготовить данные для AI с приоритетом
+        const linksText = prioritizedLinks
+          .slice(0, 100) // Увеличить лимит для лучшего анализа
+          .map((link: any) => {
+            const originalIdx = (state.lastFoundLinks?.indexOf(link) ?? -1) + 1;
+            const frequency = selectorFrequency.get(link.selector || '') || 0;
+            const isRepeated = repeatedSelectors.includes(link.selector);
+            return `${originalIdx}. ${link.href}\n   Text: "${link.text}"\n   Selector: ${link.selector}${isRepeated ? ` (repeats ${frequency}x - likely list items)` : ''}`;
+          })
           .join('\n');
+
+        // Статистика по повторяющимся селекторам
+        const statsText = repeatedSelectors.length > 0 
+          ? `\n\nSTATISTICS - Most common selectors (likely list items):\n${repeatedSelectors.map((sel, i) => `${i + 1}. ${sel} (${selectorFrequency.get(sel)} occurrences)`).join('\n')}\n\nKEY INSIGHT: Elements with repeating selectors are usually list items (emails, posts, articles) that should be selected.`
+          : '';
         
-        const prompt = `Task: Filter links to select ONLY relevant pages for: "${linkPattern}"
+        // Получить текущий URL для контекста
+        const currentUrlResponse = await chrome.tabs.sendMessage(tabId, {
+          type: 'EXECUTE_DOM_FUNCTION',
+          data: { functionName: 'getCurrentUrl' }
+        });
+        const currentUrl = currentUrlResponse.result;
+        
+        const isSPA = state.parsingMode === 'single-page';
+        
+        const prompt = `Task: Filter ${isSPA ? 'clickable elements' : 'links'} for parsing: "${linkPattern}"
 
-Context: We are parsing "${state.dataDescription}" from multiple pages.
+Context: 
+- Current page: ${currentUrl}
+- Parsing mode: ${isSPA ? 'Single-Page Application (SPA)' : 'Multi-page navigation'}
+- Data to extract: "${state.dataDescription}"
+- Task description: "${state.dataDescription}"
 
-Links found:
-${linksText}
+${isSPA 
+  ? `IMPORTANT: This is a SPA (like Gmail, Facebook feed, Twitter, LinkedIn). 
+     Elements are clickable (onclick handlers, role="button"), NOT navigation links.
+     Select elements that open individual items (emails, posts, messages, articles) when clicked.
+     
+     KEY INSIGHT: Look for REPEATING PATTERNS - if multiple elements share the same selector/class
+     and contain similar content structure, they are likely list items (emails, posts, etc.).
+     Elements that repeat many times with the same selector are usually the target items.
+     
+     Format: clickable://selector/index`
+  : `These are navigation links. Select only links to pages containing the target data.`
+}
+
+${isSPA ? 'Clickable elements' : 'Links'} found:
+${linksText}${statsText}
 
 Instructions:
-- Return ONLY the numbers of relevant links (comma-separated)
-- Exclude: account pages, navigation, footers, unrelated pages
-- Include: pages matching the description "${linkPattern}"
+- Return ONLY numbers of relevant ${isSPA ? 'elements' : 'links'} (comma-separated)
+- ${isSPA 
+    ? `For SPA: Select clickable elements that open individual content items matching "${state.dataDescription}".
+       PRIORITIZE elements with REPEATING SELECTORS (same selector appears multiple times) - these are usually list items.
+       Look for elements that:
+       1. Share the same CSS selector/class (repeating pattern) - see STATISTICS above
+       2. Contain text content related to "${state.dataDescription}"
+       3. Are likely to open individual items when clicked (not navigation buttons)
+       4. Appear multiple times in the list (check STATISTICS section)`
+    : 'For multi-page: Select links to pages with target data'}
+- Exclude: navigation menus, footers, headers, account pages, single-use buttons (like "Написать", "Search", "Compose"), unrelated items
+- Include: Elements that repeat with same selector AND contain content matching the task
 
-Example: If links 2, 5, and 7 are relevant, return: 2,5,7
+Example: If ${isSPA ? 'elements' : 'links'} 2, 5, and 7 are relevant, return: 2,5,7
 
-Relevant link numbers:`;
+Relevant ${isSPA ? 'element' : 'link'} numbers:`;
         
         // Импортируем функции для работы с AI
         const { useChatStore } = await import('@shared/stores/chatStore');
@@ -573,6 +721,137 @@ Relevant link numbers:`;
         };
       }
       
+      // Клик по элементу и извлечение данных (для SPA)
+      if (action === 'click-and-extract') {
+        const { selector, index } = params;
+        
+        console.log('[parse-pages] CLICK-AND-EXTRACT:', { selector, index });
+        
+        if (!selector || index === undefined) {
+          throw new Error('selector and index required for click-and-extract action');
+        }
+        
+        // Кликаем по элементу
+        const clickResponse = await chrome.tabs.sendMessage(tabId, {
+          type: 'EXECUTE_DOM_FUNCTION',
+          data: {
+            functionName: 'clickElement',
+            params: { selector, index }
+          }
+        });
+        
+        if (!clickResponse.success) {
+          throw new Error('Failed to click element');
+        }
+        
+        // Ждем загрузки контента (для Gmail это открытие письма)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Используем существующую логику extract-data
+        console.log('[parse-pages] EXTRACT-DATA after click:', { 
+          singleSelector: state.dataSelector,
+          multipleSelectors: state.dataSelectors 
+        });
+        
+        // Проверка: есть ли хотя бы один селектор
+        if (!state.dataSelector && !state.dataSelectors) {
+          console.error('[parse-pages] No selector(s) set!');
+          throw new Error('No selectors set. Call save-selector or save-selectors first.');
+        }
+        
+        let extractedData: any;
+        let dataPoints = 0;
+        
+        // Если используются множественные селекторы
+        if (state.dataSelectors) {
+          console.log('[parse-pages] Extracting multiple data types:', Object.keys(state.dataSelectors));
+          
+          const multiData: { [key: string]: any[] } = {};
+          
+          // Извлекаем данные для каждого селектора
+          for (const [fieldName, sel] of Object.entries(state.dataSelectors)) {
+            const dataResponse = await chrome.tabs.sendMessage(tabId, {
+              type: 'EXECUTE_DOM_FUNCTION',
+              data: {
+                functionName: 'getElements',
+                params: { selector: sel, limit: 100 }
+              }
+            });
+            
+            if (!dataResponse.success) {
+              console.error(`[parse-pages] Failed to extract data for ${fieldName}:`, dataResponse);
+              multiData[fieldName] = [];
+            } else {
+              multiData[fieldName] = dataResponse.result || [];
+              dataPoints += multiData[fieldName].length;
+              console.log(`[parse-pages] Extracted ${multiData[fieldName].length} elements for ${fieldName}`);
+            }
+          }
+          
+          extractedData = multiData;
+          
+        } else {
+          // Единичный селектор (обратная совместимость)
+          const dataResponse = await chrome.tabs.sendMessage(tabId, {
+            type: 'EXECUTE_DOM_FUNCTION',
+            data: {
+              functionName: 'getElements',
+              params: { selector: state.dataSelector, limit: 100 }
+            }
+          });
+          
+          if (!dataResponse.success) {
+            console.error('[parse-pages] Failed to extract data:', dataResponse);
+            throw new Error('Failed to extract data');
+          }
+          
+          extractedData = dataResponse.result || [];
+          dataPoints = extractedData.length;
+          console.log('[parse-pages] Elements extracted:', dataPoints);
+        }
+        
+        // Получить текущий URL
+        const currentUrlResponse = await chrome.tabs.sendMessage(tabId, {
+          type: 'EXECUTE_DOM_FUNCTION',
+          data: { functionName: 'getCurrentUrl' }
+        });
+        const currentUrl = currentUrlResponse.result;
+        console.log('[parse-pages] Current URL:', currentUrl);
+        
+        // Добавить данные к коллекции
+        state.collectedData.push({
+          url: currentUrl,
+          data: extractedData,
+          timestamp: Date.now(),
+          clickedElement: { selector, index }
+        });
+        
+        state.currentPage++;
+        
+        // Добавить URL к посещенным
+        if (!state.visitedUrls.includes(currentUrl)) {
+          state.visitedUrls.push(currentUrl);
+        }
+        
+        await saveState(state);
+        console.log('[parse-pages] State updated:', { 
+          currentPage: state.currentPage, 
+          maxPages: state.maxPages,
+          totalCollected: state.collectedData.length 
+        });
+        
+        return {
+          status: 'clicked-and-extracted',
+          currentPage: state.currentPage,
+          maxPages: state.maxPages,
+          dataPoints,
+          message: getTranslation('parsingPageProgress', [
+            state.currentPage.toString(),
+            state.maxPages.toString()
+          ])
+        };
+      }
+      
       // Возобновить парсинг после паузы
       if (action === 'resume') {
         console.log('[parse-pages] RESUME');
@@ -632,4 +911,40 @@ Relevant link numbers:`;
     }
   }
 };
+
+// Вспомогательная функция автоопределения типа страницы (Решение 5)
+async function detectPageType(tabId: number, url: string): Promise<'single-page' | 'multi-page'> {
+  // Известные SPA
+  if (SPA_URL_PATTERNS.some(pattern => pattern.test(url))) {
+    return 'single-page';
+  }
+  
+  // Проверяем соотношение кликабельных элементов к ссылкам
+  try {
+    const linksResponse = await chrome.tabs.sendMessage(tabId, {
+      type: 'EXECUTE_DOM_FUNCTION',
+      data: { functionName: 'getLinks', params: {} }
+    });
+    
+    const clickableResponse = await chrome.tabs.sendMessage(tabId, {
+      type: 'EXECUTE_DOM_FUNCTION',
+      data: { 
+        functionName: 'getClickableElements', 
+        params: { dataDescription: '', limit: 20 } 
+      }
+    });
+    
+    const linksCount = linksResponse.result?.length || 0;
+    const clickableCount = clickableResponse.result?.length || 0;
+    
+    // Если кликабельных элементов в 3+ раза больше - вероятно SPA
+    if (clickableCount > 0 && clickableCount >= linksCount * 3) {
+      return 'single-page';
+    }
+  } catch (e) {
+    console.warn('[detectPageType] Error:', e);
+  }
+  
+  return 'multi-page';
+}
 

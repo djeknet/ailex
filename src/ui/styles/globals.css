@@ -198,6 +198,30 @@
   animation: shimmer 2s infinite;
 }
 
+/* Wave animation for Hand icon */
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30% {
+    transform: rotate(14deg);
+  }
+  20%, 40% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
 /* AI Message List Styles */
 @layer base {
   /* Стили для списков в ответах AI */
@@ -246,6 +270,24 @@
   /* Переопределение цветов span'ов внутри блоков кода для темной темы */
   .dark .rounded-lg pre code span[style*="color"] {
     filter: invert(1) hue-rotate(180deg) brightness(1.2);
+  }
+  
+  /* Переопределение инлайн стилей Shiki для темной темы */
+  .dark pre.shiki.one-light[style*="background-color"],
+  .dark pre.shiki.one-dark-pro[style*="background-color"],
+  .dark pre[class*="shiki"][style*="background-color"] {
+    background-color: hsl(var(--background)) !important;
+  }
+  
+  .dark pre.shiki.one-light[style*="color"],
+  .dark pre.shiki.one-dark-pro[style*="color"],
+  .dark pre[class*="shiki"][style*="color"] {
+    color: hsl(var(--foreground)) !important;
+  }
+  
+  .dark pre.shiki code span[style*="color"],
+  .dark pre[class*="shiki"] code span[style*="color"] {
+    color: inherit !important;
   }
 }
 

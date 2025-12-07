@@ -155,6 +155,11 @@ export const EXTERNAL_URLS = {
   
   // Tools and Resources
   LMSTUDIO_DOWNLOAD: 'https://lmstudio.ai/',
+  
+  // Contact
+  CONTACT_EMAIL: 'ailex@nitiweb.net',
+  CONTACT_WEBSITE: 'https://nitiweb.net',
+  CONTACT_TELEGRAM: 'https://t.me/nitiwebBot',
 } as const;
 
 // =============================================================================
@@ -354,7 +359,7 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageConfig> = {
 } as const;
 
 // UI languages (languages available in the extension interface)
-export const UI_LANGUAGES = ['en', 'ru'] as const;
+export const UI_LANGUAGES = ['en', 'ru', 'es'] as const;
 
 // Helper to get all translation language codes (for translate actions)
 export function getTranslationLanguages(): LanguageConfig[] {
@@ -595,4 +600,21 @@ export const RESPONSE_TONES = [
 ] as const;
 
 export type ResponseTone = typeof RESPONSE_TONES[number];
+
+// =============================================================================
+// 🔄 PARSING CONFIGURATION
+// =============================================================================
+
+/**
+ * URL patterns for Single-Page Applications (SPA)
+ * These patterns are used to detect SPA pages that require click-based navigation
+ * instead of URL-based navigation for parsing
+ */
+export const SPA_URL_PATTERNS: RegExp[] = [
+  /mail\.google\.com/,
+  /gmail\.com/,
+  /facebook\.com\/.*\/posts/,
+  /twitter\.com/,
+  /linkedin\.com\/feed/,
+] as const;
 

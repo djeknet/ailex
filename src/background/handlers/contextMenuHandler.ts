@@ -130,10 +130,12 @@ async function handleAIGeneration(
   customInstruction?: string
 ) {
   try {
-    // Step 1: Show loader on the field
-    await chrome.tabs.sendMessage(tabId, {
-      type: 'START_FIELD_LOADER'
-    });
+    // Step 1: Show loader on the field (skip for custom instruction - already shown)
+    if (!customInstruction) {
+      await chrome.tabs.sendMessage(tabId, {
+        type: 'START_FIELD_LOADER'
+      });
+    }
 
     // Step 2: Get page context
     const contextResponse = await chrome.tabs.sendMessage(tabId, {
@@ -245,6 +247,7 @@ async function handleAIGeneration(
 
 // Handle custom instruction request from content script
 async function handleCustomInstructionRequest(tabId: number, instruction: string) {
+  // Don't call START_FIELD_LOADER here - content script already handles it
   await handleAIGeneration(tabId, undefined, undefined, instruction);
 }
 

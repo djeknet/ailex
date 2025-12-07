@@ -19,8 +19,7 @@ export function showFieldLoader(element: HTMLElement) {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(2px);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,46 +55,19 @@ export function showFieldLoader(element: HTMLElement) {
     document.head.appendChild(styleSheet);
   }
 
-  // Position overlay relative to element
-  const computedStyle = window.getComputedStyle(element);
-  const position = computedStyle.position;
-
-  // If element is not positioned, wrap it
-  if (position === 'static') {
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = `
-      position: relative;
-      display: inline-block;
-      width: 100%;
-    `;
-    
-    if (element.parentNode) {
-      element.parentNode.insertBefore(wrapper, element);
-      wrapper.appendChild(element);
-      wrapper.appendChild(loaderOverlay);
-    }
-  } else {
-    // Element is already positioned, append overlay directly
-    if (element.parentNode) {
-      // Check if we can append to the element itself or need the parent
-      if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-        // For input/textarea, create a wrapper
-        const wrapper = document.createElement('div');
-        wrapper.style.cssText = `
-          position: relative;
-          display: inline-block;
-          width: 100%;
-        `;
-        
-        element.parentNode.insertBefore(wrapper, element);
-        wrapper.appendChild(element);
-        wrapper.appendChild(loaderOverlay);
-      } else {
-        // For contenteditable, append to the element
-        element.style.position = 'relative';
-        element.appendChild(loaderOverlay);
-      }
-    }
+  // Always create a wrapper for consistent behavior
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ailex-field-loader-wrapper';
+  wrapper.style.cssText = `
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  `;
+  
+  if (element.parentNode) {
+    element.parentNode.insertBefore(wrapper, element);
+    wrapper.appendChild(element);
+    wrapper.appendChild(loaderOverlay);
   }
 }
 
@@ -109,7 +81,7 @@ export function hideFieldLoader() {
     }
     
     // Clean up wrapper if we created one
-    if (parent && parent.childElementCount === 1 && parent.style.position === 'relative') {
+    if (parent && parent.classList.contains('ailex-field-loader-wrapper')) {
       const child = parent.firstElementChild;
       if (child && parent.parentNode) {
         parent.parentNode.insertBefore(child, parent);

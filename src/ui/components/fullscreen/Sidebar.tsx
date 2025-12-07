@@ -106,6 +106,28 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
     }
   }, [currentChat?.id, currentChat?.title, currentChat?.updatedAt]);
 
+  // Автоматически раскрывать папку с текущим активным чатом
+  useEffect(() => {
+    if (currentChat?.folderId) {
+      console.log('[Sidebar] Auto-expanding folder for current chat:', {
+        chatId: currentChat.id,
+        chatTitle: currentChat.title,
+        folderId: currentChat.folderId
+      });
+      
+      setExpandedFolders(prev => {
+        // Если папка еще не раскрыта, добавить ее
+        if (!prev.has(currentChat.folderId!)) {
+          const next = new Set(prev);
+          next.add(currentChat.folderId!);
+          console.log('[Sidebar] Folder expanded:', currentChat.folderId);
+          return next;
+        }
+        return prev;
+      });
+    }
+  }, [currentChat?.id, currentChat?.folderId]);
+
   // Обработка скролла для подгрузки чатов
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -143,9 +165,23 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
     setNewName('');
   };
 
-  const handleMove = async (folderId?: string) => {
-    if (!moveDialog) return;
-    await moveChatToFolder(moveDialog, folderId);
+  const handleMove = async (chatId: string, folderId?: string) => {
+    console.log('[Sidebar] handleMove called', {
+      chatId: chatId,
+      targetFolderId: folderId,
+      currentChatId: currentChat?.id,
+      foldersCount: folders.length
+    });
+    
+    if (!chatId) {
+      console.error('[Sidebar] No chat ID provided for moving!');
+      return;
+    }
+    
+    console.log('[Sidebar] Calling moveChatToFolder...');
+    await moveChatToFolder(chatId, folderId);
+    console.log('[Sidebar] moveChatToFolder completed');
+    
     setMoveDialog(null);
   };
 
@@ -371,14 +407,14 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
                                 {t('moveToFolder')}
                               </DropdownMenuSubTrigger>
                               <DropdownMenuSubContent>
-                                <DropdownMenuItem onClick={() => handleMove(undefined)}>
+                                <DropdownMenuItem onClick={() => handleMove(chat.id, undefined)}>
                                   {t('noFolder')}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {folders.map(f => (
                                   <DropdownMenuItem
                                     key={f.id}
-                                    onClick={() => handleMove(f.id)}
+                                    onClick={() => handleMove(chat.id, f.id)}
                                   >
                                     {f.name}
                                   </DropdownMenuItem>
@@ -459,18 +495,30 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
                             {folders.map(f => (
                               <DropdownMenuItem
                                 key={f.id}
-                                onClick={() => handleMove(f.id)}
+                                onClick={() => handleMove(chat.id, f.id)}
                               >
                                 {f.name}
                               </DropdownMenuItem>
                             ))}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={async () => {
                                 const folderName = prompt(t('enterFolderName'));
+                                console.log('[Sidebar] Creating new folder and moving', {
+                                  folderName,
+                                  chatId: chat.id
+                                });
+                                
                                 if (folderName) {
-                                  const folderId = `folder_${Date.now()}`;
-                                  createFolder(folderName).then(() => handleMove(folderId));
+                                  try {
+                                    console.log('[Sidebar] Calling createFolder...');
+                                    const folderId = await createFolder(folderName);
+                                    console.log('[Sidebar] Folder created with ID:', folderId);
+                                    console.log('[Sidebar] Calling handleMove with chatId:', chat.id);
+                                    handleMove(chat.id, folderId);
+                                  } catch (error) {
+                                    console.error('[Sidebar] Error creating folder:', error);
+                                  }
                                 }
                               }}
                             >

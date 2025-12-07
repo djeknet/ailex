@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuSub,
@@ -22,21 +23,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/components/ui/dialog';
-import { Moon, Sun, MoreHorizontal, Trash2, FolderInput, Plus } from 'lucide-react';
+import { Moon, Sun, MoreHorizontal, Trash2, FolderInput, Plus, Upload } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/components/ui/tooltip';
 import Sidebar from '@/ui/components/fullscreen/Sidebar';
 import MessageList from '@/ui/components/chat/MessageList';
 import MessageInput from '@/ui/components/chat/MessageInput';
+import ApiLogsPanel from '@/ui/components/developer/ApiLogsPanel';
 import Settings from './Settings';
 import History from './History';
 import Help from './Help';
 import Tools from './Tools';
+import { exportChatToPDF } from '@shared/utils/pdfExport';
 
 // Context для передачи флага fullscreen в дочерние компоненты
 export const FullscreenContext = createContext({ isFullscreen: true });
 
 export default function FullscreenChat() {
   const { t } = useTranslation();
-  const { theme, setTheme } = useSettingsStore();
+  const { theme, setTheme, developerMode } = useSettingsStore();
   const { 
     currentChat,
     setCurrentChat,
@@ -44,7 +48,8 @@ export default function FullscreenChat() {
     moveChatToFolder,
     folders,
     loadFolders,
-    loadAllChats
+    loadAllChats,
+    messages
   } = useChatStore();
   
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -260,21 +265,69 @@ export default function FullscreenChat() {
   };
 
   const handleMoveToFolder = async (folderId?: string) => {
-    if (!currentChat) return;
+    console.log('[FullscreenChat] handleMoveToFolder called', {
+      currentChatId: currentChat?.id,
+      currentChatTitle: currentChat?.title,
+      currentFolderId: currentChat?.folderId,
+      targetFolderId: folderId,
+      folders: folders.length
+    });
+    
+    if (!currentChat) {
+      console.error('[FullscreenChat] No current chat to move!');
+      return;
+    }
+    
+    console.log('[FullscreenChat] Calling moveChatToFolder...');
     await moveChatToFolder(currentChat.id, folderId);
+    console.log('[FullscreenChat] moveChatToFolder completed');
+    
     setMoveDialogOpen(false);
   };
 
   const handleCreateFolderAndMove = async () => {
-    if (!currentChat || !newFolderName.trim()) return;
+    console.log('[FullscreenChat] handleCreateFolderAndMove called', {
+      currentChatId: currentChat?.id,
+      newFolderName: newFolderName,
+      hasTrimmedName: !!newFolderName.trim()
+    });
     
-    const { createFolder } = useChatStore.getState();
-    const folderId = `folder_${Date.now()}`;
-    await createFolder(newFolderName.trim());
-    await moveChatToFolder(currentChat.id, folderId);
+    if (!currentChat || !newFolderName.trim()) {
+      console.error('[FullscreenChat] Missing chat or folder name', {
+        hasCurrentChat: !!currentChat,
+        folderName: newFolderName
+      });
+      return;
+    }
     
-    setNewFolderName('');
-    setMoveDialogOpen(false);
+    try {
+      console.log('[FullscreenChat] Creating folder...');
+      const { createFolder } = useChatStore.getState();
+      const folderId = await createFolder(newFolderName.trim());
+      
+      console.log('[FullscreenChat] Folder created with ID:', folderId);
+      console.log('[FullscreenChat] Moving chat to folder...');
+      
+      await moveChatToFolder(currentChat.id, folderId);
+      
+      console.log('[FullscreenChat] Chat moved successfully');
+      
+      setNewFolderName('');
+      setMoveDialogOpen(false);
+    } catch (error) {
+      console.error('[FullscreenChat] Error creating folder and moving chat:', error);
+    }
+  };
+
+  // Handle PDF export
+  const handleExportPDF = async (type: 'all' | 'ai-only') => {
+    if (currentChat && messages.length > 0) {
+      try {
+        await exportChatToPDF(messages, currentChat.title, type);
+      } catch (error) {
+        console.error('Error exporting to PDF:', error);
+      }
+    }
   };
 
   if (!initialized) {
@@ -319,7 +372,10 @@ export default function FullscreenChat() {
 
   return (
     <FullscreenContext.Provider value={{ isFullscreen: true }}>
-      <div className="flex h-screen bg-background text-foreground">
+      <div 
+        className="flex h-screen bg-background text-foreground"
+        style={{ paddingBottom: developerMode ? '40px' : '0' }}
+      >
         {/* Sidebar */}
         <Sidebar
           collapsed={isSidebarCollapsed}
@@ -348,6 +404,34 @@ export default function FullscreenChat() {
                 />
                 <Moon className="h-4 w-4" />
               </div>
+
+              {/* PDF Export - только если есть текущий чат */}
+              {currentChat && messages.length > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <Upload className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>{t('exportToPDF')}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleExportPDF('all')}>
+                            {t('saveAllMessages')}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleExportPDF('ai-only')}>
+                            {t('saveAIMessagesOnly')}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('exportChat')}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
 
               {/* Chat menu - только если есть текущий чат */}
               {currentChat && (
@@ -455,6 +539,9 @@ export default function FullscreenChat() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* API Logs Panel - Developer Mode */}
+      {developerMode && <ApiLogsPanel />}
     </FullscreenContext.Provider>
   );
 }

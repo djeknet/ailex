@@ -9,7 +9,7 @@ import { testConnection, listModels, getOperatorName } from '@shared/services/ai
 import { storageAPI } from '@shared/utils/messaging';
 import { ModelCombobox } from './ModelCombobox';
 import { AI_OPERATOR_LINKS, EXTERNAL_URLS } from '@shared/constants';
-import { RefreshCw, Trash2 } from 'lucide-react';
+import { RefreshCw, Trash2, Hand, PartyPopper } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,8 @@ import {
 } from '@/ui/components/ui/alert-dialog';
 
 const operators: AIOperator[] = ['openai', 'anthropic', 'openrouter', 'grok', 'gemini', 'lmstudio', 'deepseek'];
+
+const WELCOME_BANNER_DISMISSED_KEY = 'ailex-welcome-banner-dismissed';
 
 export default function OperatorsTab() {
   const { t } = useTranslation();
@@ -43,6 +45,9 @@ export default function OperatorsTab() {
   const [testResults, setTestResults] = useState<Partial<Record<AIOperator, boolean | null>>>({});
   const [showEndpoint, setShowEndpoint] = useState<Partial<Record<AIOperator, boolean>>>({});
   const [operatorToRemove, setOperatorToRemove] = useState<AIOperator | null>(null);
+  const [hasConnectedOperator, setHasConnectedOperator] = useState(false);
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
+  const [wasConnectedBefore, setWasConnectedBefore] = useState(false);
 
   // Update configs when savedOperators changes
   useEffect(() => {
@@ -79,6 +84,28 @@ export default function OperatorsTab() {
       }
     });
     setShowEndpoint(prev => ({ ...prev, ...endpointStates }));
+    
+    // Check if any operator is connected
+    const hasConnected = Object.values(newConfigs).some(
+      config => config.models && config.models.length > 0
+    );
+    
+    // Проверяем, был ли баннер уже закрыт
+    const bannerDismissed = localStorage.getItem(WELCOME_BANNER_DISMISSED_KEY);
+    
+    // Если есть подключенный оператор и это первый раз
+    if (hasConnected && !wasConnectedBefore && !bannerDismissed) {
+      // Сохраняем флаг, что баннер был показан
+      localStorage.setItem(WELCOME_BANNER_DISMISSED_KEY, 'true');
+    }
+    
+    // Если баннер был закрыт ранее, не показываем
+    if (bannerDismissed) {
+      setShowWelcomeBanner(false);
+    }
+    
+    setWasConnectedBefore(hasConnected);
+    setHasConnectedOperator(hasConnected);
   }, [savedOperators]);
 
   const handleApiKeyChange = (operator: AIOperator, apiKey: string) => {
@@ -183,6 +210,29 @@ export default function OperatorsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Welcome/Success Banner */}
+      {showWelcomeBanner && (
+        <div className={`border rounded-lg p-6 ${hasConnectedOperator ? 'bg-accent' : 'bg-muted'}`}>
+          <div className="flex items-start gap-4">
+            <div className={hasConnectedOperator ? 'animate-bounce' : 'animate-wave'}>
+              {hasConnectedOperator ? (
+                <PartyPopper className="h-12 w-12 text-primary" />
+              ) : (
+                <Hand className="h-12 w-12 text-primary" />
+              )}
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold mb-2">
+                {hasConnectedOperator ? t('welcomeSuccessTitle') : t('welcomeTitle')}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {hasConnectedOperator ? t('welcomeSuccessMessage') : t('welcomeMessage')}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {operators.map(operator => (
         <div key={operator} className="border rounded-lg p-4 space-y-4">
           <div className="flex items-center gap-3">
