@@ -518,6 +518,34 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
     }
   }, [editingMessage, setEditingMessage]);
 
+  // Restore pending fullscreen text (only in fullscreen mode)
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    const checkPendingText = async () => {
+      try {
+        const result = await chrome.storage.local.get('pendingFullscreenText');
+        
+        if (result.pendingFullscreenText) {
+          const { text: pendingText, timestamp } = result.pendingFullscreenText;
+          
+          // Check that text is not older than 10 seconds
+          if (timestamp && Date.now() - timestamp < 10000 && pendingText) {
+            console.log('[MessageInput] Restoring pending fullscreen text:', pendingText.length, 'chars');
+            setText(pendingText);
+          }
+          
+          // Clear pending text
+          await chrome.storage.local.remove('pendingFullscreenText');
+        }
+      } catch (error) {
+        console.error('[MessageInput] Error checking pending fullscreen text:', error);
+      }
+    };
+
+    checkPendingText();
+  }, [isFullscreen]);
+
   const handleCancelSelection = async () => {
     if (isSelectingElement) {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

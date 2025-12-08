@@ -19,7 +19,8 @@ export class LMStudioProvider implements AIProvider {
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
     previousResponseId?: string,
     _editingImageBase64?: string,
-    _onReasoningChunk?: (chunk: string) => void
+    _onReasoningChunk?: (chunk: string) => void,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     console.log('[LMStudio] chat - Starting');
     console.log('[LMStudio] chat - Model:', model);
@@ -46,7 +47,7 @@ export class LMStudioProvider implements AIProvider {
     
     // Use Responses API for image generation or image editing
     if (modelSupportsImageGeneration || previousResponseId) {
-      return this.chatWithResponses(messages, model, baseUrl, onChunk, signal, tools, _onToolCall, previousResponseId);
+      return this.chatWithResponses(messages, model, baseUrl, onChunk, signal, tools, _onToolCall, previousResponseId, skipCustomGenerationSettings);
     }
     const url = `${baseUrl}/chat/completions`;
 
@@ -88,14 +89,49 @@ export class LMStudioProvider implements AIProvider {
           ...(msg.name ? { name: msg.name } : {})
         };
       }),
-      stream: !!onChunk,
-      temperature: 0.7
+      stream: !!onChunk
     };
 
     // Add tools if provided
     if (tools && tools.length > 0) {
       requestBody.tools = tools;
       console.log('[LMStudio] chat - Added tools:', tools.length);
+    }
+
+    // Add generation settings (LM Studio supports OpenAI-compatible parameters)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('lmstudio', model);
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[LMStudio] Applying generation settings:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          requestBody.temperature = generationSettings.temperature;
+        }
+        if (generationSettings.top_p !== undefined) {
+          requestBody.top_p = generationSettings.top_p;
+        }
+        if (generationSettings.frequency_penalty !== undefined) {
+          requestBody.frequency_penalty = generationSettings.frequency_penalty;
+        }
+        if (generationSettings.presence_penalty !== undefined) {
+          requestBody.presence_penalty = generationSettings.presence_penalty;
+        }
+        if (generationSettings.seed !== undefined) {
+          requestBody.seed = generationSettings.seed;
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.max_tokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.stop = generationSettings.stop;
+        }
+        if (generationSettings.response_format) {
+          requestBody.response_format = generationSettings.response_format;
+        }
+        // Skip OpenRouter-specific parameters: top_k, repetition_penalty, min_p, top_a, verbosity
+      }
+    } else {
+      console.log('[LMStudio] Skipping custom generation settings (internal request)');
     }
 
     console.log('[LMStudio] chat - Request body:', JSON.stringify(requestBody, null, 2));
@@ -269,7 +305,8 @@ export class LMStudioProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    previousResponseId?: string
+    previousResponseId?: string,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const url = `${baseUrl}/responses`;
     
@@ -368,6 +405,47 @@ export class LMStudioProvider implements AIProvider {
     if (responsesTools.length > 0) {
       requestBody.tools = responsesTools;
       requestBody.tool_choice = 'auto';
+    }
+
+    // Add generation settings (LM Studio Responses API supports OpenAI-compatible parameters)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('lmstudio', model);
+      const modelInfo = getModelInfo(model, 'lmstudio');
+      const hasImageGeneration = modelInfo?.architecture?.output_modalities?.includes('image') || false;
+      
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[LMStudio] Applying generation settings to Responses API:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          requestBody.temperature = generationSettings.temperature;
+        }
+        if (generationSettings.top_p !== undefined) {
+          requestBody.top_p = generationSettings.top_p;
+        }
+        if (generationSettings.frequency_penalty !== undefined) {
+          requestBody.frequency_penalty = generationSettings.frequency_penalty;
+        }
+        if (generationSettings.presence_penalty !== undefined) {
+          requestBody.presence_penalty = generationSettings.presence_penalty;
+        }
+        if (generationSettings.seed !== undefined) {
+          requestBody.seed = generationSettings.seed;
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.max_tokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.stop = generationSettings.stop;
+        }
+        // response_format conflicts with image generation
+        if (generationSettings.response_format && !hasImageGeneration) {
+          requestBody.response_format = generationSettings.response_format;
+        } else if (generationSettings.response_format && hasImageGeneration) {
+          console.warn('[LMStudio] Skipping response_format because image generation is enabled');
+        }
+      }
+    } else {
+      console.log('[LMStudio] Skipping custom generation settings (internal request)');
     }
 
     console.log('[LMStudio] Request body:', JSON.stringify(requestBody, null, 2));

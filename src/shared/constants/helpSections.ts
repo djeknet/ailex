@@ -50,7 +50,20 @@ export const HELP_SECTIONS: HelpSection[] = [
     videoFile: "videos/consul.mp4",
     category: 'chat',
   },
-
+  {
+    id: 'group-chat',
+    titleKey: 'helpTitle_groupChat',
+    descriptionKey: 'helpDescription_groupChat',
+    videoFile: "videos/group-chat.mp4",
+    category: 'chat',
+  },
+  {
+    id: 'chat-instructions',
+    titleKey: 'helpTitle_chatInstructions',
+    descriptionKey: 'helpDescription_chatInstructions',
+    videoFile: "videos/chat-instructions.mp4",
+    category: 'chat',
+  },
   // Медиа и прикрепления
   {
     id: 'file-attachments',

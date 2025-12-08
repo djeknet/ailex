@@ -30,7 +30,8 @@ export async function sendMessage(
   onToolCall?: (toolCall: ToolCall) => Promise<any>,
   previousResponseId?: string,
   editingImageBase64?: string,
-  onReasoningChunk?: (chunk: string) => void
+  onReasoningChunk?: (chunk: string) => void,
+  skipCustomGenerationSettings?: boolean
 ): Promise<AIResponse> {
   console.log('[aiService] sendMessage - Starting');
   console.log('[aiService] sendMessage - Operator:', config.operator);
@@ -71,7 +72,8 @@ export async function sendMessage(
     onToolCall,
     previousResponseId,
     editingImageBase64,
-    onReasoningChunk
+    onReasoningChunk,
+    skipCustomGenerationSettings
   );
 }
 

@@ -3,6 +3,7 @@ import { AIMessage, AIResponse } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 import { ToolCall } from '@shared/types/ai';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
 
 export class DeepSeekProvider implements AIProvider {
   async chat(
@@ -18,7 +19,8 @@ export class DeepSeekProvider implements AIProvider {
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
     _previousResponseId?: string,
     _editingImageBase64?: string,
-    onReasoningChunk?: (chunk: string) => void // Callback для reasoning chunks
+    onReasoningChunk?: (chunk: string) => void, // Callback для reasoning chunks
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.deepseek.com';
     const url = `${baseUrl}/chat/completions`;
@@ -58,6 +60,22 @@ export class DeepSeekProvider implements AIProvider {
     if (tools && tools.length > 0) {
       requestBody.tools = tools;
       console.log('[DeepSeek] Added tools:', tools.length);
+    }
+
+    // Add generation settings (DeepSeek supports only temperature)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('deepseek', model);
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[DeepSeek] Applying generation settings:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          requestBody.temperature = generationSettings.temperature;
+        }
+        // DeepSeek API documentation indicates limited parameter support
+        // Other parameters are not officially supported or documented
+      }
+    } else {
+      console.log('[DeepSeek] Skipping custom generation settings (internal request)');
     }
 
     console.log('[DeepSeek] Request body:', JSON.stringify(requestBody, null, 2));

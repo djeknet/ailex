@@ -206,8 +206,17 @@ export const useChatStore = create<ChatStore>()(
     });
     
     // Auto-generate chat title from first user message
-    if (currentChat.title === 'New Chat' && !replyTo) {
-      console.log('[chatStore] Auto-generating chat title from first message:', { currentTitle: currentChat.title, content: content.substring(0, 50) });
+    // Check if this is the first user message (no previous user messages in this chat)
+    const existingUserMessages = get().messages.filter(m => m.chatId === currentChat.id && m.isUser);
+    const isFirstUserMessage = existingUserMessages.length === 0 && !replyTo;
+    
+    if ((currentChat.title === 'New Chat' || isFirstUserMessage) && !replyTo) {
+      console.log('[chatStore] Auto-generating chat title from first message:', { 
+        currentTitle: currentChat.title, 
+        content: content.substring(0, 50),
+        isFirstUserMessage,
+        existingUserMessagesCount: existingUserMessages.length
+      });
       const newTitle = content.length > 50 ? content.substring(0, 50) + '...' : content;
       const updatedChat = {
         ...currentChat,
@@ -313,7 +322,7 @@ export const useChatStore = create<ChatStore>()(
             // Check if it's a text file (not base64)
             const isTextFile = !attachment.data.match(/^[A-Za-z0-9+/=]+$/);
             if (isTextFile) {
-              contentForDatabase += `\n\nAttached file (${attachment.name}):\n${attachment.data}`;
+            //  contentForDatabase += `\n\nAttached file (${attachment.name}):\n${attachment.data}`;
             }
           }
           // Note: DOM and tab attachments are displayed as badges, no need to add text
@@ -454,6 +463,30 @@ export const useChatStore = create<ChatStore>()(
               });
               
               console.log('[chatStore] Final message content length with tabs:', messageContent.length);
+            }
+            
+            // Add text file contents to message content (for AI, not for display)
+            if (files.length > 0) {
+              console.log('[chatStore] Processing file attachments for AI:', {
+                fileCount: files.length,
+                files: files.map(f => ({
+                  name: f.name,
+                  dataLength: f.data?.length || 0,
+                  isBinary: f.data.match(/^[A-Za-z0-9+/=]+$/)
+                }))
+              });
+              
+              // Process text files
+              const textFiles = files.filter(f => !f.data.match(/^[A-Za-z0-9+/=]+$/));
+              if (textFiles.length > 0) {
+                messageContent += '\n\n--- Attached Files ---';
+                textFiles.forEach((file, index) => {
+                  messageContent += `\n\nFile ${index + 1}: ${file.name}`;
+                  messageContent += `\nContent:\n${file.data}`;
+                });
+                
+                console.log('[chatStore] Final message content length with files:', messageContent.length);
+              }
             }
             
             // Build content parts array for multimodal
@@ -1440,7 +1473,17 @@ ${responseContext}`;
       // Send request using the specific operator and model (for branches)
       const response = await sendAIMessage(
         messages,
-        operatorConfig
+        operatorConfig,
+        undefined, // no streaming
+        undefined, // no web search
+        undefined, // no web search settings
+        undefined, // no signal
+        undefined, // no tools
+        undefined, // no tool callback
+        undefined, // no previousResponseId
+        undefined, // no editingImageBase64
+        undefined, // no onReasoningChunk
+        true // skipCustomGenerationSettings - важно для внутренних запросов!
       );
 
       if (response && response.content) {
@@ -2061,7 +2104,7 @@ ${responseContext}`;
     retryMessageId?: string,
     sourceTabId?: number
   ) => {
-    const { currentChat, groupChatModels, addMessage, pageContextEnabled, pageContextType } = get();
+    let { currentChat, groupChatModels, addMessage, pageContextEnabled, pageContextType } = get();
     const { useSettingsStore } = await import('./settingsStore');
     const { operators } = useSettingsStore.getState();
     
@@ -2130,10 +2173,49 @@ ${responseContext}`;
           if (attachment.type === 'file') {
             const isTextFile = !attachment.data.match(/^[A-Za-z0-9+/=]+$/);
             if (isTextFile) {
-              contentForDatabase += `\n\nAttached file (${attachment.name}):\n${attachment.data}`;
+             // contentForDatabase += `\n\nAttached file (${attachment.name}):\n${attachment.data}`;
             }
           }
         }
+      }
+
+      // Auto-generate chat title from first user message
+      // Check if this is the first user message (no previous user messages in this chat)
+      if (!currentChat) {
+        console.error('[chatStore] currentChat is null, cannot update title');
+        return;
+      }
+      
+      const existingUserMessages = get().messages.filter(m => m.chatId === currentChat!.id && m.isUser);
+      const isFirstUserMessage = existingUserMessages.length === 0 && !replyTo;
+      
+      if ((currentChat.title === 'New Chat' || isFirstUserMessage) && !replyTo) {
+        console.log('[chatStore] Auto-generating chat title from first message (group chat):', { 
+          currentTitle: currentChat.title, 
+          content: content.substring(0, 50),
+          isFirstUserMessage,
+          existingUserMessagesCount: existingUserMessages.length
+        });
+        const newTitle = content.length > 50 ? content.substring(0, 50) + '...' : content;
+        const updatedChat = {
+          ...currentChat,
+          title: newTitle,
+          updatedAt: Date.now()
+        };
+        console.log('[chatStore] Updating chat in database (group chat):', { chatId: updatedChat.id, newTitle: updatedChat.title });
+        const { chatAPI } = await import('@shared/utils/messaging');
+        await chatAPI.updateChat(updatedChat);
+        console.log('[chatStore] Chat updated successfully in database (group chat)');
+        
+        // Update both currentChat and chats array
+        set(state => ({ 
+          currentChat: updatedChat,
+          chats: state.chats.map(c => c.id === updatedChat.id ? updatedChat : c)
+        }));
+        console.log('[chatStore] Chat title updated in state (group chat)');
+        
+        // Update currentChat reference for use below
+        currentChat = updatedChat;
       }
 
       // Создать пользовательское сообщение
@@ -2167,6 +2249,14 @@ ${responseContext}`;
       await addMessage(userMessage);
 
       // 3. Последовательный streaming для каждой модели
+      // Ensure currentChat is still valid
+      const latestCurrentChat = get().currentChat;
+      if (!latestCurrentChat) {
+        console.error('[chatStore] currentChat is null after adding message');
+        return;
+      }
+      currentChat = latestCurrentChat;
+      
       const allMessages = get().messages;
       let firstAiMessageId: string | undefined;
       
@@ -2186,7 +2276,7 @@ ${responseContext}`;
 
           // ВАЖНО: Фильтруем историю - только сообщения пользователя + ответы этой конкретной модели
           const filteredMessages = allMessages.filter(m => {
-            if (m.chatId !== currentChat.id) return false;
+            if (m.chatId !== currentChat!.id) return false;
             if (m.branchId) return false; // Исключаем branch сообщения из истории
             
             if (m.isUser) return true; // Все сообщения пользователя
@@ -2203,9 +2293,108 @@ ${responseContext}`;
           });
 
           // Подготовить сообщения для AI
-          const aiMessages: AIMessage[] = filteredMessages.map(m => ({
-            role: m.isUser ? 'user' as const : 'assistant' as const,
-            content: m.text
+          const aiMessages: AIMessage[] = await Promise.all(filteredMessages.map(async (m) => {
+            let messageContent = m.text;
+            
+            // Add attachments content for AI (text files and tabs)
+            if (m.isUser && m.attachments) {
+              try {
+                const atts: MessageAttachment[] = JSON.parse(m.attachments);
+                const images = atts.filter(a => a.type === 'image');
+                const files = atts.filter(a => a.type === 'file');
+                const tabs = atts.filter(a => a.type === 'tab');
+                
+                // Add tab contents
+                if (tabs.length > 0) {
+                  messageContent += '\n\n--- Referenced Tabs ---';
+                  tabs.forEach((tab, index) => {
+                    messageContent += `\n\nTab ${index + 1}: ${tab.tabTitle || tab.name}`;
+                    if (tab.tabUrl) {
+                      messageContent += ` (${tab.tabUrl})`;
+                    }
+                    if (tab.data) {
+                      messageContent += `\nContent:\n${tab.data}`;
+                    }
+                  });
+                }
+                
+                // Add text file contents
+                const textFiles = files.filter(f => !f.data.match(/^[A-Za-z0-9+/=]+$/));
+                if (textFiles.length > 0) {
+                  messageContent += '\n\n--- Attached Files ---';
+                  textFiles.forEach((file, index) => {
+                    messageContent += `\n\nFile ${index + 1}: ${file.name}`;
+                    messageContent += `\nContent:\n${file.data}`;
+                  });
+                }
+                
+                // Build multimodal content if there are images or binary files
+                if (images.length > 0 || files.some(f => f.data.match(/^[A-Za-z0-9+/=]+$/))) {
+                  const contentParts: any[] = [{ type: 'text', text: messageContent }];
+                  
+                  // Add all images
+                  for (const img of images) {
+                    const mimeType = img.mimeType || 'image/png';
+                    const imageUrl = `data:${mimeType};base64,${img.data}`;
+                    
+                    contentParts.push({
+                      type: 'image_url',
+                      image_url: {
+                        url: imageUrl
+                      }
+                    });
+                  }
+                  
+                  // Add binary files (PDFs, etc.)
+                  for (const file of files) {
+                    const isBinary = file.data.match(/^[A-Za-z0-9+/=]+$/);
+                    if (isBinary) {
+                      const ext = file.name.split('.').pop()?.toLowerCase();
+                      let mimeType = 'application/octet-stream';
+                      if (ext === 'pdf') mimeType = 'application/pdf';
+                      else if (ext === 'doc') mimeType = 'application/msword';
+                      else if (ext === 'docx') mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                      
+                      contentParts.push({
+                        type: 'document',
+                        document: {
+                          url: `data:${mimeType};base64,${file.data}`,
+                          filename: file.name
+                        }
+                      });
+                    }
+                  }
+                  
+                  return {
+                    role: 'user' as const,
+                    content: contentParts
+                  };
+                }
+              } catch (error) {
+                console.error('[chatStore] Failed to parse attachments in group chat:', error);
+              }
+            }
+            
+            // Fallback: Handle old format (single image attachment)
+            if (m.isUser && m.attach_type === 'image' && m.file_data) {
+              return {
+                role: 'user' as const,
+                content: [
+                  { type: 'text', text: messageContent },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:image/png;base64,${m.file_data}`
+                    }
+                  }
+                ]
+              };
+            }
+            
+            return {
+              role: m.isUser ? 'user' as const : 'assistant' as const,
+              content: messageContent
+            };
           }));
 
           // Добавить system message

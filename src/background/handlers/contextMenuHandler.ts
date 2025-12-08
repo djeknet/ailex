@@ -32,6 +32,18 @@ export async function handleContextMenuClick(
     // ========== HANDLE FULLSCREEN OPEN ==========
     if (commandId === 'open_fullscreen' || commandId === 'open_fullscreen_action') {
       console.log('[ContextMenu] Opening fullscreen chat');
+      
+      // Save selected text if available
+      if (selectedText) {
+        await chrome.storage.local.set({
+          pendingFullscreenText: {
+            text: selectedText,
+            timestamp: Date.now()
+          }
+        });
+        console.log('[ContextMenu] Saved selected text for fullscreen:', selectedText.length, 'chars');
+      }
+      
       const url = chrome.runtime.getURL('src/ui/fullscreen/index.html');
       await chrome.tabs.create({ url });
       return;

@@ -52,12 +52,31 @@ export async function exportChatToPDF(
       }
     );
 
-    // Добавляем сообщения
-    for (const message of filteredMessages) {
+    // Добавляем сообщения (с учетом бранчей)
+    for (let i = 0; i < filteredMessages.length; i++) {
+      const message = filteredMessages[i];
+      
       if (message.isUser) {
         content.push(...createUserMessageContent(message));
       } else {
-        content.push(...createAIMessageContent(message));
+        // Для AI-сообщений проверяем, есть ли бранчи
+        const branches = getBranchesForMessage(filteredMessages, message.id);
+        
+        if (branches.length > 0) {
+          // Есть бранчи - выводим основное + все бранчи
+          content.push(...createAIMessageContent(message));
+          branches.forEach(branch => {
+            content.push({ text: '', margin: [0, 5, 0, 5] }); // Меньший отступ между бранчами
+            content.push(...createAIMessageContent(branch));
+          });
+        } else if (!message.branchId) {
+          // Нет бранчей и само не является бранчем - обычный вывод
+          content.push(...createAIMessageContent(message));
+        }
+        // Если это бранч без основного сообщения, просто выводим его
+        else if (message.branchId && !filteredMessages.find(m => m.id === message.branchId)) {
+          content.push(...createAIMessageContent(message));
+        }
       }
       content.push({ text: '', margin: [0, 10, 0, 10] }); // Отступ между сообщениями
     }
@@ -117,8 +136,8 @@ export async function exportChatToPDF(
  * Фильтрует сообщения по типу экспорта
  */
 function filterMessages(messages: ChatMessage[], exportType: ExportType): ChatMessage[] {
-  // Убираем branch сообщения
-  let filtered = messages.filter(msg => !msg.branchId);
+  // НЕ фильтруем branch сообщения - оставляем их для группировки
+  let filtered = messages;
   
   // Если только AI сообщения
   if (exportType === 'ai-only') {
@@ -126,6 +145,13 @@ function filterMessages(messages: ChatMessage[], exportType: ExportType): ChatMe
   }
   
   return filtered;
+}
+
+/**
+ * Находит все бранчи для конкретного сообщения
+ */
+function getBranchesForMessage(messages: ChatMessage[], messageId: string): ChatMessage[] {
+  return messages.filter(m => m.branchId === messageId);
 }
 
 /**

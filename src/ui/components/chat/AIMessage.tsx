@@ -12,15 +12,16 @@ import { useState, useRef } from 'react';
 import {
   Copy,
   Check,
-  RefreshCw,
   ChevronsUpDown,
-  Sparkles,
-  BadgeCheck,
-  Wand2,
+  ChevronsDownUp,
   Languages,
-  MessageSquare,
   WandSparkles,
-  CircleDollarSign
+  CircleDollarSign,
+  Feather,
+  BookA,
+  Speech,
+  Baby,
+  RedoDot,
 } from 'lucide-react';
 import { Button } from '@/ui/components/ui/button';
 import {
@@ -407,23 +408,23 @@ export default function AIMessage({
             </DropdownMenuItem>
             
             <DropdownMenuItem onClick={() => onRewrite && onRewrite(msgId, 'improve')}>
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Feather className="h-4 w-4 mr-2" />
               {t('improveWriting')}
             </DropdownMenuItem>
             
             <DropdownMenuItem onClick={() => onRewrite && onRewrite(msgId, 'fix-spelling')}>
-              <BadgeCheck className="h-4 w-4 mr-2" />
+              <BookA className="h-4 w-4 mr-2" />
               {t('fixSpelling')}
             </DropdownMenuItem>
             
             <DropdownMenuItem onClick={() => onRewrite && onRewrite(msgId, 'shorter')}>
-              <ChevronsUpDown className="h-4 w-4 mr-2" />
+              <ChevronsDownUp className="h-4 w-4 mr-2" />
               {t('makeShorter')}
             </DropdownMenuItem>
 
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <MessageSquare className="h-4 w-4 mr-2" />
+                <Speech className="h-4 w-4 mr-2" />
                 {t('changeTone')}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
@@ -446,12 +447,12 @@ export default function AIMessage({
             </DropdownMenuSub>
 
             <DropdownMenuItem onClick={() => onRewrite && onRewrite(msgId, 'simplify')}>
-              <Wand2 className="h-4 w-4 mr-2" />
+              <Baby className="h-4 w-4 mr-2" />
               {t('simplifyLanguage')}
             </DropdownMenuItem>
             
             <DropdownMenuItem onClick={() => onRewrite && onRewrite(msgId, 'rephrase')}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <RedoDot className="h-4 w-4 mr-2" />
               {t('rephrase')}
             </DropdownMenuItem>
 

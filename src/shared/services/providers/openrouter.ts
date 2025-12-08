@@ -3,6 +3,7 @@ import { AIMessage, AIResponse, WebSearchSettings, OpenRouterWebSearchSettings, 
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
+import { getModelInfo } from '@shared/constants';
 
 export class OpenRouterProvider implements AIProvider {
   /**
@@ -38,7 +39,8 @@ export class OpenRouterProvider implements AIProvider {
     onToolCall?: (toolCall: ToolCall) => Promise<any>,
     _previousResponseId?: string,
     _editingImageBase64?: string,
-    _onReasoningChunk?: (chunk: string) => void
+    _onReasoningChunk?: (chunk: string) => void,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://openrouter.ai/api/v1';
     const url = `${baseUrl}/chat/completions`;
@@ -134,17 +136,81 @@ export class OpenRouterProvider implements AIProvider {
             ...(msg.name ? { name: msg.name } : {})
           };
         }),
-        stream: !!onChunk,
-        modalities: ['image', 'text'] // Always enable image generation support
+        stream: !!onChunk
       };
     
     // Add image generation config
+    // Check if model supports image generation AND user has configured it
     const imageSettings = useOperatorSettingsStore.getState().getImageSettings('openrouter');
-    if (imageSettings.imageAspectRatio) {
+    const modelInfo = getModelInfo(model, 'openrouter');
+    const modelSupportsImageGeneration = modelInfo?.architecture?.output_modalities?.includes('image') || false;
+    const hasImageGeneration = imageSettings.imageAspectRatio !== undefined && modelSupportsImageGeneration;
+    
+    // Only add modalities if model supports image generation
+    if (modelSupportsImageGeneration) {
+      requestBody.modalities = ['image', 'text'];
+    }
+    
+    if (hasImageGeneration) {
       requestBody.image_config = {
         aspect_ratio: imageSettings.imageAspectRatio
       };
       console.log('[OpenRouter] Image generation enabled with aspect ratio:', imageSettings.imageAspectRatio);
+    }
+    
+    // Add generation settings (temperature, top_p, etc.)
+    // Skip if this is an internal request (like generating suggested questions)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('openrouter', model);
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[OpenRouter] Applying generation settings:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          requestBody.temperature = generationSettings.temperature;
+        }
+        if (generationSettings.top_p !== undefined) {
+          requestBody.top_p = generationSettings.top_p;
+        }
+        if (generationSettings.top_k !== undefined) {
+          requestBody.top_k = generationSettings.top_k;
+        }
+        if (generationSettings.verbosity !== undefined) {
+          requestBody.verbosity = generationSettings.verbosity;
+        }
+        if (generationSettings.frequency_penalty !== undefined) {
+          requestBody.frequency_penalty = generationSettings.frequency_penalty;
+        }
+        if (generationSettings.presence_penalty !== undefined) {
+          requestBody.presence_penalty = generationSettings.presence_penalty;
+        }
+        if (generationSettings.repetition_penalty !== undefined) {
+          requestBody.repetition_penalty = generationSettings.repetition_penalty;
+        }
+        if (generationSettings.min_p !== undefined) {
+          requestBody.min_p = generationSettings.min_p;
+        }
+        if (generationSettings.top_a !== undefined) {
+          requestBody.top_a = generationSettings.top_a;
+        }
+        if (generationSettings.seed !== undefined) {
+          requestBody.seed = generationSettings.seed;
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.max_tokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.stop = generationSettings.stop;
+        }
+        // IMPORTANT: response_format conflicts with image generation
+        // Only add if image generation is NOT enabled for this specific model
+        if (generationSettings.response_format && !hasImageGeneration) {
+          requestBody.response_format = generationSettings.response_format;
+        } else if (generationSettings.response_format && hasImageGeneration) {
+          console.warn('[OpenRouter] Skipping response_format because image generation is enabled for this model (incompatible parameters)');
+        }
+      }
+    } else {
+      console.log('[OpenRouter] Skipping custom generation settings (internal request)');
     }
     
     // Add tools if provided
@@ -183,8 +249,19 @@ export class OpenRouterProvider implements AIProvider {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'OpenRouter API error');
+      const errorText = await response.text();
+      let errorMessage = 'OpenRouter API error';
+      
+      try {
+        const error = JSON.parse(errorText);
+        errorMessage = error.error?.message || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      console.error('[OpenRouter] API Error:', errorMessage);
+      console.error('[OpenRouter] Request that caused error:', JSON.stringify(requestBody, null, 2));
+      throw new Error(errorMessage);
     }
 
     if (onChunk && response.body) {

@@ -17,7 +17,8 @@ export class GrokProvider implements AIProvider {
     _onToolCall?: (toolCall: ToolCall) => Promise<any>, // Not used: Grok returns all tool_calls at once
     _previousResponseId?: string,
     _editingImageBase64?: string,
-    _onReasoningChunk?: (chunk: string) => void
+    _onReasoningChunk?: (chunk: string) => void,
+    _skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.x.ai/v1';
     

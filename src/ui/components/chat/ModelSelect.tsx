@@ -12,7 +12,9 @@ import { Switch } from '@/ui/components/ui/switch';
 import { Badge } from '@/ui/components/ui/badge';
 import { Checkbox } from '@/ui/components/ui/checkbox';
 import ImageGenerationSettingsDialog from './ImageGenerationSettingsDialog';
+import GenerationSettingsDialog from './GenerationSettingsDialog';
 import ModelFiltersDialog from './ModelFiltersDialog';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
 import {
   Command,
   CommandEmpty,
@@ -51,7 +53,9 @@ export default function ModelSelect() {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [generationSettingsDialogOpen, setGenerationSettingsDialogOpen] = useState(false);
   const [filtersDialogOpen, setFiltersDialogOpen] = useState(false);
+  const { hasGenerationSettings } = useOperatorSettingsStore();
 
   const configuredOperators = operators.filter(op => op.selectedModel && op.models && op.models.length > 0);
 
@@ -245,19 +249,41 @@ export default function ModelSelect() {
                     </div>
                   )}
                   
-                  {/* Show image generation settings button if model supports image output */}
-                  {modelInfo.architecture?.output_modalities?.includes('image') && selectedOperator && (
-                    <div className="pt-2 mt-2 border-t border-border">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSettingsDialogOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
-                      >
-                        <Settings className="w-3 h-3" />
-                        <span>{t('imageGenerationSettingsButton')}</span>
-                      </button>
+                  {/* Show settings buttons */}
+                  {selectedOperator && (modelInfo.architecture?.output_modalities?.includes('image') || (modelInfo.supported_parameters && modelInfo.supported_parameters.length > 0)) && (
+                    <div className="pt-2 mt-2 border-t border-border space-y-2">
+                      {/* Image generation settings */}
+                      {modelInfo.architecture?.output_modalities?.includes('image') && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSettingsDialogOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+                        >
+                          <Settings className="w-3 h-3" />
+                          <span>{t('imageGenerationSettingsButton')}</span>
+                        </button>
+                      )}
+                      
+                      {/* Generation settings */}
+                      {modelInfo.supported_parameters && modelInfo.supported_parameters.length > 0 && selectedOperator.selectedModel && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setGenerationSettingsDialogOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-full relative"
+                        >
+                          <div className="relative">
+                            <Settings className="w-3 h-3" />
+                            {hasGenerationSettings(selectedOperator.operator, selectedOperator.selectedModel) && (
+                              <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-green-500" />
+                            )}
+                          </div>
+                          <span>{t('generationSettingsButton')}</span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -498,6 +524,16 @@ export default function ModelSelect() {
           open={settingsDialogOpen}
           onOpenChange={setSettingsDialogOpen}
           operator={selectedOperator.operator}
+        />
+      )}
+      
+      {/* Generation Settings Dialog */}
+      {selectedOperator && selectedOperator.selectedModel && (
+        <GenerationSettingsDialog
+          open={generationSettingsDialogOpen}
+          onOpenChange={setGenerationSettingsDialogOpen}
+          operator={selectedOperator.operator}
+          modelId={selectedOperator.selectedModel}
         />
       )}
       

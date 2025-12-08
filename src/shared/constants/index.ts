@@ -21,6 +21,7 @@ interface ModelData {
     prompt: string;
     completion: string;
   };
+  supported_parameters?: string[];
 }
 
 // Parse models from JSON
@@ -160,6 +161,11 @@ export const EXTERNAL_URLS = {
   CONTACT_EMAIL: 'ailex@nitiweb.net',
   CONTACT_WEBSITE: 'https://nitiweb.net',
   CONTACT_TELEGRAM: 'https://t.me/nitiwebBot',
+  
+  // Other Extensions
+  SALESPILOT_CHROME: 'https://fffem.com/sales_pilot_chrome',
+  N8N_CHROME: 'https://fffem.com/n8n_chrome',
+  FONTDETECTOR_PRO: 'https://fffem.com/fd',
 } as const;
 
 // =============================================================================

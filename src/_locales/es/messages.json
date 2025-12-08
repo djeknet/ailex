@@ -4513,5 +4513,271 @@
   "toAccept": {
     "message": "aceptar",
     "description": ""
+  },
+  "generationSettingsButton": {
+    "message": "Ajustes de respuestas",
+    "description": ""
+  },
+  "generationSettings": {
+    "message": "Configuración de la generación de respuestas",
+    "description": ""
+  },
+  "generationSettingsDescription": {
+    "message": "Configurar los parámetros de generación de respuesta de texto para el modelo seleccionado",
+    "description": ""
+  },
+  "generationSettingsNotAvailable": {
+    "message": "Ajustes de generación no disponibles para este modelo",
+    "description": ""
+  },
+  "resetGenerationSettings": {
+    "message": "Restablecer ajustes",
+    "description": ""
+  },
+  "generationGroup_basic": {
+    "message": "Parámetros básicos (Control de la creatividad)",
+    "description": ""
+  },
+  "generationGroup_repetition": {
+    "message": "Control de repetición",
+    "description": ""
+  },
+  "generationGroup_advanced": {
+    "message": "Parámetros avanzados",
+    "description": ""
+  },
+  "generationGroup_technical": {
+    "message": "Parámetros técnicos",
+    "description": ""
+  },
+  "generationParam_temperature": {
+    "message": "Temperatura",
+    "description": ""
+  },
+  "generationParam_temperature_desc": {
+    "message": "Controla la aleatoriedad de las respuestas. Los valores bajos (0,2) hacen que las respuestas sean más predecibles, mientras que los valores altos (1,5+) las hacen más creativas.",
+    "description": ""
+  },
+  "generationParam_top_p": {
+    "message": "Top P (muestreo de núcleos)",
+    "description": ""
+  },
+  "generationParam_top_p_desc": {
+    "message": "El modelo selecciona palabras del top-X% por probabilidad. Por ejemplo, 0,9 = top-90%. Se recomienda utilizar Temperatura o Top P",
+    "description": ""
+  },
+  "generationParam_top_k": {
+    "message": "Top K Sampling",
+    "description": ""
+  },
+  "generationParam_top_k_desc": {
+    "message": "Limita la elección a las K palabras más probables. El valor 0 desactiva este parámetro",
+    "description": ""
+  },
+  "generationParam_verbosity": {
+    "message": "Verbosidad",
+    "description": ""
+  },
+  "generationParam_verbosity_desc": {
+    "message": "Controla la longitud de la respuesta",
+    "description": ""
+  },
+  "generationParam_verbosity_low": {
+    "message": "Baja (respuestas breves)",
+    "description": ""
+  },
+  "generationParam_verbosity_medium": {
+    "message": "Medio",
+    "description": ""
+  },
+  "generationParam_verbosity_high": {
+    "message": "Alta (respuestas detalladas)",
+    "description": ""
+  },
+  "generationParam_frequency_penalty": {
+    "message": "Frecuencia Penalización",
+    "description": ""
+  },
+  "generationParam_frequency_penalty_desc": {
+    "message": "Reduce la probabilidad de seleccionar una palabra en función de la frecuencia con la que ya se ha utilizado. Ayuda a evitar la repetición",
+    "description": ""
+  },
+  "generationParam_presence_penalty": {
+    "message": "Penalidad por presencia",
+    "description": ""
+  },
+  "generationParam_presence_penalty_desc": {
+    "message": "Penaliza las palabras simplemente por estar en el texto. Fomenta un vocabulario más diverso",
+    "description": ""
+  },
+  "generationParam_repetition_penalty": {
+    "message": "Sanción por reincidencia",
+    "description": ""
+  },
+  "generationParam_repetition_penalty_desc": {
+    "message": "Parámetro general para reducir las repeticiones. El valor 1.0 no cambia nada, por encima de 1.0 reduce las repeticiones",
+    "description": ""
+  },
+  "generationParam_min_p": {
+    "message": "Min P",
+    "description": ""
+  },
+  "generationParam_min_p_desc": {
+    "message": "Establece el umbral mínimo de probabilidad de las fichas en relación con la ficha más probable",
+    "description": ""
+  },
+  "generationParam_top_a": {
+    "message": "Top A",
+    "description": ""
+  },
+  "generationParam_top_a_desc": {
+    "message": "Método de muestreo avanzado que filtra dinámicamente los tokens con probabilidad insuficientemente alta",
+    "description": ""
+  },
+  "generationParam_seed": {
+    "message": "Semilla",
+    "description": ""
+  },
+  "generationParam_seed_desc": {
+    "message": "Para generar respuestas deterministas. La misma semilla dará el mismo resultado (no garantizado para todos los modelos)",
+    "description": ""
+  },
+  "generationParam_seed_placeholder": {
+    "message": "Dejar vacío para aleatoriedad",
+    "description": ""
+  },
+  "generationParam_max_tokens": {
+    "message": "Max Tokens",
+    "description": ""
+  },
+  "generationParam_max_tokens_desc": {
+    "message": "Número máximo de tokens a generar. Ayuda a controlar la longitud de la respuesta",
+    "description": ""
+  },
+  "generationParam_max_tokens_placeholder": {
+    "message": "Por defecto",
+    "description": ""
+  },
+  "generationParam_stop": {
+    "message": "Secuencias de parada",
+    "description": ""
+  },
+  "generationParam_stop_desc": {
+    "message": "Lista de cadenas separadas por comas. La generación se detendrá cuando se encuentre alguna",
+    "description": ""
+  },
+  "generationParam_stop_placeholder": {
+    "message": "Por ejemplo: END, ###, STOP",
+    "description": ""
+  },
+  "generationParam_response_format": {
+    "message": "Formato de respuesta",
+    "description": ""
+  },
+  "generationParam_response_format_desc": {
+    "message": "Permite forzar el formato de salida. JSON requiere mención en prompt",
+    "description": ""
+  },
+  "generationParam_response_format_placeholder": {
+    "message": "Seleccionar formato",
+    "description": ""
+  },
+  "generationParam_response_format_none": {
+    "message": "No especificado",
+    "description": ""
+  },
+  "generationParam_response_format_json": {
+    "message": "JSON",
+    "description": ""
+  },
+  "helpTitle_groupChat": {
+    "message": "Chat en grupo",
+    "description": ""
+  },
+  "helpDescription_groupChat": {
+    "message": "Chat en grupo con varias modelos. Puede seleccionar los modelos que desea utilizar para el chat.",
+    "description": ""
+  },
+  "helpTitle_chatInstructions": {
+    "message": "Instrucciones de chat",
+    "description": ""
+  },
+  "helpDescription_chatInstructions": {
+    "message": "En la configuración de la extensión, puede especificar instrucciones generales, así como instrucciones de complemento que se añadirán cuando lo solicite la IA. En las instrucciones, puedes establecer roles, tono y formato de respuesta, y otras condiciones adicionales.\n\nTambién puede especificar instrucciones para sitios concretos, a los que se aplicarán automáticamente.",
+    "description": ""
+  },
+  "tryOurExtensions": {
+    "message": "Prueba nuestras otras extensiones",
+    "description": ""
+  },
+  "salespilotName": {
+    "message": "SalesPilot AI",
+    "description": ""
+  },
+  "salespilotDesc": {
+    "message": "Asistente de IA para analizar métricas importantes del sitio web para promoción SEO.",
+    "description": ""
+  },
+  "n8nMasterName": {
+    "message": "n8n Master",
+    "description": ""
+  },
+  "n8nMasterDesc": {
+    "message": "Extensión de IA para el servicio de automatización n8n con más de 3000 flujos de trabajo integrados.",
+    "description": ""
+  },
+  "fontDetectorName": {
+    "message": "FontDetector Pro",
+    "description": ""
+  },
+  "fontDetectorDesc": {
+    "message": "Herramienta indispensable para diseñadores para seleccionar y descargar fuentes para sitios web.",
+    "description": ""
+  },
+  "createdTools": {
+    "message": "Herramientas creadas",
+    "description": ""
+  },
+  "viewDomFunctions": {
+    "message": "Ver funciones DOM",
+    "description": ""
+  },
+  "toolEnabled": {
+    "message": "Habilitado",
+    "description": ""
+  },
+  "toolEnabledNote": {
+    "message": "Habilitar o deshabilitar esta herramienta",
+    "description": ""
+  },
+  "toolApiUrl": {
+    "message": "URL de API (opcional)",
+    "description": ""
+  },
+  "toolApiUrlPlaceholder": {
+    "message": "https://api.example.com/endpoint",
+    "description": ""
+  },
+  "toolApiNote": {
+    "message": "Opcional: especificar punto final de API para integración externa",
+    "description": ""
+  },
+  "toolApiMethod": {
+    "message": "Método de API",
+    "description": ""
+  },
+  "toolApiHeaders": {
+    "message": "Encabezados de API (JSON)",
+    "description": ""
+  },
+  "toolApiHeadersPlaceholder": {
+    "message": "{\"Authorization\": \"Bearer YOUR_TOKEN\"}",
+    "description": ""
+  },
+  "domFunctionsTitle": {
+    "message": "Funciones DOM integradas"
+  },
+  "domFunctionsDescription": {
+    "message": "Lista de funciones para usar en el prompt del instrumento"
   }
 }

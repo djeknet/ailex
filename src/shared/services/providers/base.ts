@@ -15,7 +15,8 @@ export interface AIProvider {
     onToolCall?: (toolCall: ToolCall) => Promise<any>, // Callback при вызове инструмента
     previousResponseId?: string, // ID предыдущего ответа для редактирования (OpenAI)
     editingImageBase64?: string, // base64 изображения для редактирования (Gemini)
-    onReasoningChunk?: (chunk: string) => void // Callback для reasoning chunks (DeepSeek)
+    onReasoningChunk?: (chunk: string) => void, // Callback для reasoning chunks (DeepSeek)
+    skipCustomGenerationSettings?: boolean // Пропустить пользовательские настройки генерации (для внутренних запросов)
   ): Promise<AIResponse>;
   listModels(apiKey: string, endpoint?: string): Promise<any[]>;
   testConnection(apiKey: string, endpoint?: string): Promise<boolean>;

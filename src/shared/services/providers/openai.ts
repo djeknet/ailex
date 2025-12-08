@@ -3,6 +3,7 @@ import { AIMessage, AIResponse, OpenAIWebSearchSettings, Citation, ToolCall, Gen
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
 import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
+import { getModelInfo } from '@shared/constants';
 
 export class OpenAIProvider implements AIProvider {
   async chat(
@@ -18,7 +19,8 @@ export class OpenAIProvider implements AIProvider {
     onToolCall?: (toolCall: ToolCall) => Promise<any>,
     previousResponseId?: string,
     _editingImageBase64?: string,
-    _onReasoningChunk?: (chunk: string) => void
+    _onReasoningChunk?: (chunk: string) => void,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const baseUrl = endpoint || 'https://api.openai.com/v1';
     
@@ -38,9 +40,9 @@ export class OpenAIProvider implements AIProvider {
     // - Image generation (previousResponseId)
     // - Models that only support Responses API (like gpt-image-1)
     if (hasDocuments || webSearchEnabled || previousResponseId || isResponsesOnlyModel) {
-      return this.chatWithResponses(messages, model, apiKey, baseUrl, onChunk, webSearchEnabled, webSearchSettings, signal, tools, onToolCall, previousResponseId);
+      return this.chatWithResponses(messages, model, apiKey, baseUrl, onChunk, webSearchEnabled, webSearchSettings, signal, tools, onToolCall, previousResponseId, skipCustomGenerationSettings);
     } else {
-      return this.chatStandard(messages, model, apiKey, baseUrl, onChunk, signal, tools, onToolCall);
+      return this.chatStandard(messages, model, apiKey, baseUrl, onChunk, signal, tools, onToolCall, skipCustomGenerationSettings);
     }
   }
 
@@ -53,7 +55,8 @@ export class OpenAIProvider implements AIProvider {
     onChunk?: (chunk: string) => void,
     signal?: AbortSignal,
     tools?: ToolDefinition[],
-    _onToolCall?: (toolCall: ToolCall) => Promise<any>
+    _onToolCall?: (toolCall: ToolCall) => Promise<any>,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const url = `${baseUrl}/chat/completions`;
 
@@ -95,6 +98,42 @@ export class OpenAIProvider implements AIProvider {
     if (tools && tools.length > 0) {
       requestBody.tools = tools;
       console.log('[OpenAI] Added tools:', tools.length);
+    }
+
+    // Add generation settings (only compatible OpenAI parameters)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('openai', model);
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[OpenAI] Applying generation settings:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          requestBody.temperature = generationSettings.temperature;
+        }
+        if (generationSettings.top_p !== undefined) {
+          requestBody.top_p = generationSettings.top_p;
+        }
+        if (generationSettings.frequency_penalty !== undefined) {
+          requestBody.frequency_penalty = generationSettings.frequency_penalty;
+        }
+        if (generationSettings.presence_penalty !== undefined) {
+          requestBody.presence_penalty = generationSettings.presence_penalty;
+        }
+        if (generationSettings.seed !== undefined) {
+          requestBody.seed = generationSettings.seed;
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.max_completion_tokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.stop = generationSettings.stop;
+        }
+        if (generationSettings.response_format) {
+          requestBody.response_format = generationSettings.response_format;
+        }
+        // Skip OpenRouter-specific parameters: top_k, repetition_penalty, min_p, top_a
+      }
+    } else {
+      console.log('[OpenAI] Skipping custom generation settings (internal request)');
     }
 
     console.log('[OpenAI] Request body:', JSON.stringify(requestBody, null, 2));
@@ -266,7 +305,8 @@ export class OpenAIProvider implements AIProvider {
     signal?: AbortSignal,
     tools?: ToolDefinition[],
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
-    previousResponseId?: string
+    previousResponseId?: string,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     const url = `${baseUrl}/responses`;
     
@@ -424,6 +464,48 @@ export class OpenAIProvider implements AIProvider {
       requestBody.tool_choice = 'auto';
       // Include sources in response
       requestBody.include = ['web_search_call.action.sources'];
+    }
+
+    // Add generation settings (only compatible OpenAI parameters)
+    // Note: Responses API supports limited set of parameters
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('openai', model);
+      const modelInfo = getModelInfo(model, 'openai');
+      const hasImageGeneration = modelInfo?.architecture?.output_modalities?.includes('image') || false;
+      
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[OpenAI] Applying generation settings to Responses API:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          requestBody.temperature = generationSettings.temperature;
+        }
+        if (generationSettings.top_p !== undefined) {
+          requestBody.top_p = generationSettings.top_p;
+        }
+        if (generationSettings.frequency_penalty !== undefined) {
+          requestBody.frequency_penalty = generationSettings.frequency_penalty;
+        }
+        if (generationSettings.presence_penalty !== undefined) {
+          requestBody.presence_penalty = generationSettings.presence_penalty;
+        }
+        if (generationSettings.seed !== undefined) {
+          requestBody.seed = generationSettings.seed;
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.max_completion_tokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.stop = generationSettings.stop;
+        }
+        // response_format conflicts with image generation
+        if (generationSettings.response_format && !hasImageGeneration) {
+          requestBody.response_format = generationSettings.response_format;
+        } else if (generationSettings.response_format && hasImageGeneration) {
+          console.warn('[OpenAI] Skipping response_format because image generation is enabled');
+        }
+      }
+    } else {
+      console.log('[OpenAI] Skipping custom generation settings (internal request)');
     }
 
     console.log('[OpenAI] Request body:', JSON.stringify(requestBody, null, 2));

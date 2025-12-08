@@ -8,7 +8,7 @@ import { Input } from '@/ui/components/ui/input';
 import { Label } from '@/ui/components/ui/label';
 import { Textarea } from '@/ui/components/ui/textarea';
 import { Switch } from '@/ui/components/ui/switch';
-import { Import } from 'lucide-react';
+import { Import, ExternalLink } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -44,6 +44,7 @@ import { Plus, Edit, Trash2, Save, X, BookOpen, MousePointer2, Lightbulb, Downlo
 import { Alert, AlertDescription } from '@/ui/components/ui/alert';
 import DOMFunctionsModal from '@/ui/components/tools/DOMFunctionsModal';
 import AvailableToolsModal from '@/ui/components/tools/AvailableToolsModal';
+import { EXTERNAL_URLS } from '@shared/constants';
 
 export default function Tools({ onBack }: { onBack?: () => void } = {}) {
   const { t } = useTranslation();
@@ -444,6 +445,87 @@ export default function Tools({ onBack }: { onBack?: () => void } = {}) {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Other Extensions Section */}
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">{t('tryOurExtensions')}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* SalesPilot AI */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => window.open(EXTERNAL_URLS.SALESPILOT_CHROME, '_blank')}
+          >
+            <CardHeader>
+              <div className="flex items-start gap-3">
+                <img 
+                  src="/icons/tools/sp.png" 
+                  alt="SalesPilot AI" 
+                  className="w-12 h-12 rounded-lg"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">{t('salespilotName')}</CardTitle>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <CardDescription className="mt-2">
+                    {t('salespilotDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          {/* n8n Master */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => window.open(EXTERNAL_URLS.N8N_CHROME, '_blank')}
+          >
+            <CardHeader>
+              <div className="flex items-start gap-3">
+                <img 
+                  src="/icons/tools/n8n.png" 
+                  alt="n8n Master" 
+                  className="w-12 h-12 rounded-lg"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">{t('n8nMasterName')}</CardTitle>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <CardDescription className="mt-2">
+                    {t('n8nMasterDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          {/* FontDetector Pro */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => window.open(EXTERNAL_URLS.FONTDETECTOR_PRO, '_blank')}
+          >
+            <CardHeader>
+              <div className="flex items-start gap-3">
+                <img 
+                  src="/icons/tools/fd.png" 
+                  alt="FontDetector Pro" 
+                  className="w-12 h-12 rounded-lg"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">{t('fontDetectorName')}</CardTitle>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <CardDescription className="mt-2">
+                    {t('fontDetectorDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+        </div>
       </section>
 
       {/* Dialog for creating/editing tools */}

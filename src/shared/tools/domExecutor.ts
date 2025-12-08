@@ -29,7 +29,15 @@ export const executeDOMFunctionTool: Tool = {
           'replaceHTML', 'submitForm', 'resetForm', 'uploadFile',
           'downloadFile', 'printPage', 'copyToClipboard', 'pasteFromClipboard',
           'selectText', 'getSelection', 'executeScript', 'waitForCondition',
-          'observeElement', 'dispatchEvent', 'createToast', 'showNotification'
+          'observeElement', 'dispatchEvent', 'createToast', 'showNotification',
+          'getLinks', 'getClickableElements', 'getCurrentUrl', 'getPageMetadata',
+          'waitForPageLoad', 'getSimplifiedHTML', 'getDOMTree', 'getMeta',
+          'getTableData', 'getFormData', 'getFormFields', 'hideElements',
+          'addStyles', 'replaceStyles', 'injectHTML', 'removeElements',
+          'highlightElements', 'replaceText', 'scrollDown', 'scrollUp',
+          'scrollToTop', 'scrollToBottom', 'isElementVisible', 'fetchResource',
+          'getImages', 'youtubeTranscribe', 'getElementCode', 'getElementPosition',
+          'executeJS', 'getViewportInfo', 'hoverElement', 'focusElement'
         ]
       },
       params: {

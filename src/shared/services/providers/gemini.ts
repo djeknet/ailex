@@ -65,7 +65,8 @@ export class GeminiProvider implements AIProvider {
     _onToolCall?: (toolCall: ToolCall) => Promise<any>,
     _previousResponseId?: string,
     editingImageBase64?: string,
-    _onReasoningChunk?: (chunk: string) => void
+    _onReasoningChunk?: (chunk: string) => void,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     console.log('[Gemini] chat - Starting');
     console.log('[Gemini] chat - Model:', model);
@@ -200,6 +201,37 @@ export class GeminiProvider implements AIProvider {
         maxOutputTokens: 8192
       }
     };
+    
+    // Add generation settings (only compatible Gemini parameters)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('gemini', model);
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[Gemini] Applying generation settings:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          // Gemini supports 0-1, cap at 1.0
+          requestBody.generationConfig.temperature = Math.min(generationSettings.temperature, 1.0);
+        }
+        if (generationSettings.top_p !== undefined) {
+          requestBody.generationConfig.topP = generationSettings.top_p;
+        }
+        if (generationSettings.top_k !== undefined) {
+          requestBody.generationConfig.topK = generationSettings.top_k;
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.generationConfig.maxOutputTokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.generationConfig.stopSequences = generationSettings.stop;
+        }
+        if (generationSettings.response_format?.type === 'json_object') {
+          requestBody.generationConfig.responseMimeType = 'application/json';
+        }
+        // Skip incompatible parameters: frequency_penalty, presence_penalty, repetition_penalty, min_p, top_a, seed, verbosity
+      }
+    } else {
+      console.log('[Gemini] Skipping custom generation settings (internal request)');
+    }
     
     // Add systemInstruction if present
     if (systemInstruction) {

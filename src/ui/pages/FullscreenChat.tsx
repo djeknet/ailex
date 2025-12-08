@@ -41,15 +41,15 @@ export const FullscreenContext = createContext({ isFullscreen: true });
 export default function FullscreenChat() {
   const { t } = useTranslation();
   const { theme, setTheme, developerMode } = useSettingsStore();
+  const currentChat = useChatStore(state => state.currentChat);
+  const messages = useChatStore(state => state.messages);
   const { 
-    currentChat,
     setCurrentChat,
     deleteChat, 
     moveChatToFolder,
     folders,
     loadFolders,
-    loadAllChats,
-    messages
+    loadAllChats
   } = useChatStore();
   
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);

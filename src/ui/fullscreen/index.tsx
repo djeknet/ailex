@@ -2,17 +2,28 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import FullscreenChat from '../pages/FullscreenChat';
 import { useSettingsStore } from '@shared/stores/settingsStore';
+import { useChatStore } from '@shared/stores/chatStore';
 import { applyColorScheme } from '@shared/utils/colorScheme';
 import { applyFontFamily } from '@shared/utils/fontFamily';
 import '../styles/globals.css';
 
 function FullscreenApp() {
   const { theme, colorScheme, fontFamily, initializeSettings } = useSettingsStore();
+  const currentChat = useChatStore(state => state.currentChat);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     initializeSettings().then(() => setIsReady(true));
   }, [initializeSettings]);
+
+  // Обновляем document.title при изменении текущего чата
+  useEffect(() => {
+    if (currentChat?.title) {
+      document.title = currentChat.title + ' - AiLex';
+    } else {
+      document.title = 'Fullscreen Chat - AiLex';
+    }
+  }, [currentChat?.title]);
 
   useEffect(() => {
     // Применяем тему

@@ -157,7 +157,8 @@ export default function VideoPlayer({ videoFile, className, autoPlay = false }: 
 
   return (
     <div 
-      className={cn('relative w-full bg-black rounded-lg overflow-hidden group', className)}
+      ref={containerRef}
+      className={cn('relative w-full max-w-4xl mx-auto bg-black rounded-lg overflow-hidden group', className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

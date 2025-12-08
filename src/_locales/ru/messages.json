@@ -2430,7 +2430,139 @@
     "message": "21:9 → 1536×672"
   },
   "imageGenerationSettingsButton": {
-    "message": "Настройки генерации"
+    "message": "Настройки генерации изображений"
+  },
+  "generationSettingsButton": {
+    "message": "Настройки ответов"
+  },
+  "generationSettings": {
+    "message": "Настройки генерации ответов"
+  },
+  "generationSettingsDescription": {
+    "message": "Настройте параметры генерации текстовых ответов для выбранной модели"
+  },
+  "generationSettingsNotAvailable": {
+    "message": "Для данной модели настройки генерации недоступны"
+  },
+  "resetGenerationSettings": {
+    "message": "Сбросить настройки"
+  },
+  "generationGroup_basic": {
+    "message": "Основные параметры (контроль креативности)"
+  },
+  "generationGroup_repetition": {
+    "message": "Контроль повторений"
+  },
+  "generationGroup_advanced": {
+    "message": "Расширенные параметры"
+  },
+  "generationGroup_technical": {
+    "message": "Технические параметры"
+  },
+  "generationParam_temperature": {
+    "message": "Температура (Temperature)"
+  },
+  "generationParam_temperature_desc": {
+    "message": "Контролирует случайность ответа. Низкие значения (0.2) делают ответы более предсказуемыми, высокие (1.5+) — более креативными"
+  },
+  "generationParam_top_p": {
+    "message": "Ядерное сэмплирование (Top P)"
+  },
+  "generationParam_top_p_desc": {
+    "message": "Модель выбирает слова из топ-X% по вероятности. Например, 0.9 = топ-90%. Рекомендуется использовать либо Temperature, либо Top P"
+  },
+  "generationParam_top_k": {
+    "message": "Топ-K сэмплирование (Top K)"
+  },
+  "generationParam_top_k_desc": {
+    "message": "Ограничивает выбор K наиболее вероятными словами. Значение 0 отключает этот параметр"
+  },
+  "generationParam_verbosity": {
+    "message": "Многословность (Verbosity)"
+  },
+  "generationParam_verbosity_desc": {
+    "message": "Управляет объемом ответа модели"
+  },
+  "generationParam_verbosity_low": {
+    "message": "Низкий (краткие ответы)"
+  },
+  "generationParam_verbosity_medium": {
+    "message": "Средний"
+  },
+  "generationParam_verbosity_high": {
+    "message": "Высокий (подробные ответы)"
+  },
+  "generationParam_frequency_penalty": {
+    "message": "Штраф за частоту (Frequency Penalty)"
+  },
+  "generationParam_frequency_penalty_desc": {
+    "message": "Снижает вероятность выбора слова в зависимости от того, как часто оно уже использовалось. Помогает избежать повторений"
+  },
+  "generationParam_presence_penalty": {
+    "message": "Штраф за присутствие (Presence Penalty)"
+  },
+  "generationParam_presence_penalty_desc": {
+    "message": "Штрафует слова просто за то, что они уже есть в тексте. Побуждает использовать более разнообразную лексику"
+  },
+  "generationParam_repetition_penalty": {
+    "message": "Штраф за повторение (Repetition Penalty)"
+  },
+  "generationParam_repetition_penalty_desc": {
+    "message": "Общий параметр для снижения повторений. Значение 1.0 ничего не меняет, выше 1.0 уменьшают повторы"
+  },
+  "generationParam_min_p": {
+    "message": "Минимальный P (Min P)"
+  },
+  "generationParam_min_p_desc": {
+    "message": "Устанавливает минимальный порог вероятности для токенов относительно самого вероятного токена"
+  },
+  "generationParam_top_a": {
+    "message": "Топ-A (Top A)"
+  },
+  "generationParam_top_a_desc": {
+    "message": "Продвинутый метод сэмплирования, динамически фильтрующий токены с недостаточно высокой вероятностью"
+  },
+  "generationParam_seed": {
+    "message": "Начальное значение (Seed)"
+  },
+  "generationParam_seed_desc": {
+    "message": "Для генерации детерминированных ответов. Одинаковый seed даст одинаковый результат (не гарантируется для всех моделей)"
+  },
+  "generationParam_seed_placeholder": {
+    "message": "Оставьте пустым для случайности"
+  },
+  "generationParam_max_tokens": {
+    "message": "Максимум токенов (Max Tokens)"
+  },
+  "generationParam_max_tokens_desc": {
+    "message": "Максимальное количество токенов для генерации. Помогает контролировать длину ответа"
+  },
+  "generationParam_max_tokens_placeholder": {
+    "message": "По умолчанию"
+  },
+  "generationParam_stop": {
+    "message": "Стоп-последовательности (Stop)"
+  },
+  "generationParam_stop_desc": {
+    "message": "Список строк через запятую. Генерация прекратится при встрече любой из них"
+  },
+  "generationParam_stop_placeholder": {
+    "message": "Например: END, ###, STOP"
+  },
+  "generationParam_response_format": {
+    "message": "Формат ответа (Response Format)"
+  },
+  "generationParam_response_format_desc": {
+    "message": "Позволяет принудительно задать формат вывода. JSON требует упоминания в промпте"
+  },
+  "generationParam_response_format_placeholder": {
+    "message": "Выберите формат"
+  },
+  "generationParam_response_format_none": {
+    "message": "Не указан"
+  },
+  "generationParam_response_format_json": {
+    "message": "JSON"
   },
   "downloadImage": {
     "message": "Скачать"
@@ -3660,6 +3792,50 @@
   },
   "helpDescription_messageConsul": {
     "message": "Получение суммарного ответа от выбранной модели на основе всех ответов",
+    "description": ""
+  },
+  "helpTitle_groupChat": {
+    "message": "Групповой чат",
+    "description": ""
+  },
+  "helpDescription_groupChat": {
+    "message": "Групповой чат с несколькими моделями. Вы можете выбрать модели, которые хотите использовать в чате.",
+    "description": ""
+  },
+  "helpTitle_chatInstructions": {
+    "message": "Инструкции к чату",
+    "description": ""
+  },
+  "helpDescription_chatInstructions": {
+    "message": "В настройках расширения можно указать общие инструкции, а также инструкции для плагинов, которые будут добавляться по запросу AI. В инструкциях можно задать роли, тон и формат ответа, а также другие дополнительные условия.\n\nМожно также указать инструкции для определенных сайтов, к которым эти инструкции будут применяться автоматически.",
+    "description": ""
+  },
+  "tryOurExtensions": {
+    "message": "Попробуйте наши другие расширения",
+    "description": ""
+  },
+  "salespilotName": {
+    "message": "SalesPilot AI",
+    "description": ""
+  },
+  "salespilotDesc": {
+    "message": "ИИ ассистент помощник по анализу важных метрик сайта для SEO продвижения.",
+    "description": ""
+  },
+  "n8nMasterName": {
+    "message": "n8n Master",
+    "description": ""
+  },
+  "n8nMasterDesc": {
+    "message": "ИИ расширение для сервиса автоматизации n8n с более чем 3000 встроенных рабочих процессов.",
+    "description": ""
+  },
+  "fontDetectorName": {
+    "message": "FontDetector Pro",
+    "description": ""
+  },
+  "fontDetectorDesc": {
+    "message": "Незаменимый инструмент для дизайнеров по подбору и скачиванию шрифтов для сайтов.",
     "description": ""
   }
 }

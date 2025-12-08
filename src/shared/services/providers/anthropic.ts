@@ -2,6 +2,7 @@ import { AIProvider } from './base';
 import { AIMessage, AIResponse, ClaudeWebSearchSettings, Citation, ToolCall } from '@shared/types/ai';
 import { ToolDefinition } from '@shared/types/tools';
 import { loggedFetch } from '@shared/utils/apiLogger';
+import { useOperatorSettingsStore } from '@shared/stores/operatorSettingsStore';
 
 export class AnthropicProvider implements AIProvider {
   async chat(
@@ -17,7 +18,8 @@ export class AnthropicProvider implements AIProvider {
     onToolCall?: (toolCall: ToolCall) => Promise<any>,
     _previousResponseId?: string,
     _editingImageBase64?: string,
-    _onReasoningChunk?: (chunk: string) => void
+    _onReasoningChunk?: (chunk: string) => void,
+    skipCustomGenerationSettings?: boolean
   ): Promise<AIResponse> {
     console.log('[Anthropic] Starting chat request');
     console.log('[Anthropic] Model:', model);
@@ -200,9 +202,9 @@ export class AnthropicProvider implements AIProvider {
       input_schema: tool.function.parameters
     }));
 
-    const requestBody = {
+    const requestBody: any = {
       model,
-      max_tokens: 4096,
+      max_tokens: 4096, // default, will be overridden by generation settings if set
       system: typeof systemMessage?.content === 'string' ? systemMessage.content : undefined,
       messages: anthropicMessages,
       stream: !!onChunk,
@@ -239,6 +241,28 @@ export class AnthropicProvider implements AIProvider {
         ]
       } : {})
     };
+
+    // Add generation settings (only compatible Anthropic parameters)
+    if (!skipCustomGenerationSettings) {
+      const generationSettings = useOperatorSettingsStore.getState().getGenerationSettings('anthropic', model);
+      if (Object.keys(generationSettings).length > 0) {
+        console.log('[Anthropic] Applying generation settings:', generationSettings);
+        
+        if (generationSettings.temperature !== undefined) {
+          // Anthropic supports 0-1, cap at 1.0
+          requestBody.temperature = Math.min(generationSettings.temperature, 1.0);
+        }
+        if (generationSettings.max_tokens !== undefined) {
+          requestBody.max_tokens = generationSettings.max_tokens;
+        }
+        if (generationSettings.stop && generationSettings.stop.length > 0) {
+          requestBody.stop_sequences = generationSettings.stop;
+        }
+        // Skip incompatible parameters: top_p, top_k, penalties, seed, response_format, verbosity
+      }
+    } else {
+      console.log('[Anthropic] Skipping custom generation settings (internal request)');
+    }
 
     console.log('[Anthropic] Request body:', JSON.stringify(requestBody, null, 2));
     if (anthropicTools && anthropicTools.length > 0) {

@@ -2048,6 +2048,9 @@
   "domFunc_getLinks": {
     "message": "Get links"
   },
+  "domFunc_getClickableElements": {
+    "message": "Get clickable elements"
+  },
   "domFunc_getText": {
     "message": "Get page text"
   },
@@ -2108,11 +2111,20 @@
   "domFunc_isElementVisible": {
     "message": "Check element visibility"
   },
+  "domFunc_fetchResource": {
+    "message": "Fetch resource"
+  },
   "domFunc_downloadFile": {
     "message": "Download file"
   },
+  "domFunc_copyToClipboard": {
+    "message": "Copy to clipboard"
+  },
   "domFunc_getImages": {
     "message": "Get images"
+  },
+  "domFunc_youtubeTranscribe": {
+    "message": "Get YouTube transcript"
   },
   "domFunc_getElementCode": {
     "message": "Get element code"
@@ -2301,7 +2313,139 @@
     "message": "21:9 → 1536×672"
   },
   "imageGenerationSettingsButton": {
-    "message": "Generation Settings"
+    "message": "Image Generation Settings"
+  },
+  "generationSettingsButton": {
+    "message": "Response Generation Settings"
+  },
+  "generationSettings": {
+    "message": "Response Generation Settings"
+  },
+  "generationSettingsDescription": {
+    "message": "Configure text response generation parameters for selected model"
+  },
+  "generationSettingsNotAvailable": {
+    "message": "Generation settings not available for this model"
+  },
+  "resetGenerationSettings": {
+    "message": "Reset Settings"
+  },
+  "generationGroup_basic": {
+    "message": "Basic Parameters (Creativity Control)"
+  },
+  "generationGroup_repetition": {
+    "message": "Repetition Control"
+  },
+  "generationGroup_advanced": {
+    "message": "Advanced Parameters"
+  },
+  "generationGroup_technical": {
+    "message": "Technical Parameters"
+  },
+  "generationParam_temperature": {
+    "message": "Temperature"
+  },
+  "generationParam_temperature_desc": {
+    "message": "Controls response randomness. Low values (0.2) make responses more predictable, high values (1.5+) make them more creative"
+  },
+  "generationParam_top_p": {
+    "message": "Top P (Nucleus Sampling)"
+  },
+  "generationParam_top_p_desc": {
+    "message": "Model selects words from top-X% by probability. For example, 0.9 = top-90%. Recommended to use either Temperature or Top P"
+  },
+  "generationParam_top_k": {
+    "message": "Top K Sampling"
+  },
+  "generationParam_top_k_desc": {
+    "message": "Limits choice to K most probable words. Value 0 disables this parameter"
+  },
+  "generationParam_verbosity": {
+    "message": "Verbosity"
+  },
+  "generationParam_verbosity_desc": {
+    "message": "Controls response length"
+  },
+  "generationParam_verbosity_low": {
+    "message": "Low (brief responses)"
+  },
+  "generationParam_verbosity_medium": {
+    "message": "Medium"
+  },
+  "generationParam_verbosity_high": {
+    "message": "High (detailed responses)"
+  },
+  "generationParam_frequency_penalty": {
+    "message": "Frequency Penalty"
+  },
+  "generationParam_frequency_penalty_desc": {
+    "message": "Reduces probability of selecting a word based on how often it's already been used. Helps avoid repetition"
+  },
+  "generationParam_presence_penalty": {
+    "message": "Presence Penalty"
+  },
+  "generationParam_presence_penalty_desc": {
+    "message": "Penalizes words simply for being in the text. Encourages more diverse vocabulary"
+  },
+  "generationParam_repetition_penalty": {
+    "message": "Repetition Penalty"
+  },
+  "generationParam_repetition_penalty_desc": {
+    "message": "General parameter for reducing repetitions. Value 1.0 changes nothing, above 1.0 reduces repetition"
+  },
+  "generationParam_min_p": {
+    "message": "Min P"
+  },
+  "generationParam_min_p_desc": {
+    "message": "Sets minimum probability threshold for tokens relative to most probable token"
+  },
+  "generationParam_top_a": {
+    "message": "Top A"
+  },
+  "generationParam_top_a_desc": {
+    "message": "Advanced sampling method that dynamically filters tokens with insufficiently high probability"
+  },
+  "generationParam_seed": {
+    "message": "Seed"
+  },
+  "generationParam_seed_desc": {
+    "message": "For generating deterministic responses. Same seed will give same result (not guaranteed for all models)"
+  },
+  "generationParam_seed_placeholder": {
+    "message": "Leave empty for randomness"
+  },
+  "generationParam_max_tokens": {
+    "message": "Max Tokens"
+  },
+  "generationParam_max_tokens_desc": {
+    "message": "Maximum number of tokens to generate. Helps control response length"
+  },
+  "generationParam_max_tokens_placeholder": {
+    "message": "Default"
+  },
+  "generationParam_stop": {
+    "message": "Stop Sequences"
+  },
+  "generationParam_stop_desc": {
+    "message": "Comma-separated list of strings. Generation will stop when any is encountered"
+  },
+  "generationParam_stop_placeholder": {
+    "message": "For example: END, ###, STOP"
+  },
+  "generationParam_response_format": {
+    "message": "Response Format"
+  },
+  "generationParam_response_format_desc": {
+    "message": "Allows forcing output format. JSON requires mention in prompt"
+  },
+  "generationParam_response_format_placeholder": {
+    "message": "Select format"
+  },
+  "generationParam_response_format_none": {
+    "message": "Not specified"
+  },
+  "generationParam_response_format_json": {
+    "message": "JSON"
   },
   "downloadImage": {
     "message": "Download"
@@ -3385,5 +3529,74 @@
   },
   "toAccept": {
     "message": "to accept"
+  },
+  "helpTitle_groupChat": {
+    "message": "Group Chat"
+  },
+  "helpDescription_groupChat": {
+    "message": "Group chat with multiple models. You can select the models you want to use for the chat."
+  },
+  "helpTitle_chatInstructions": {
+    "message": "Chat Instructions"
+  },
+  "helpDescription_chatInstructions": {
+    "message": "In the extension settings, you can specify general instructions, as well as plug-in instructions that will be added when requested by AI. In the instructions, you can set roles, tone and format of response, and other additional conditions. \n\nYou can also specify instructions for specific sites, to which these instructions will be automatically applied."
+  },
+  "tryOurExtensions": {
+    "message": "Try Our Other Extensions"
+  },
+  "salespilotName": {
+    "message": "SalesPilot AI"
+  },
+  "salespilotDesc": {
+    "message": "AI assistant for analyzing important website metrics for SEO promotion."
+  },
+  "n8nMasterName": {
+    "message": "n8n Master"
+  },
+  "n8nMasterDesc": {
+    "message": "AI extension for n8n automation service with over 3000 built-in workflows."
+  },
+  "fontDetectorName": {
+    "message": "FontDetector Pro"
+  },
+  "fontDetectorDesc": {
+    "message": "Indispensable tool for designers to select and download fonts for websites."
+  },
+  "createdTools": {
+    "message": "Created Tools"
+  },
+  "viewDomFunctions": {
+    "message": "View DOM Functions"
+  },
+  "toolEnabled": {
+    "message": "Enabled"
+  },
+  "toolEnabledNote": {
+    "message": "Enable or disable this tool"
+  },
+  "toolApiUrl": {
+    "message": "API URL (optional)"
+  },
+  "toolApiUrlPlaceholder": {
+    "message": "https://api.example.com/endpoint"
+  },
+  "toolApiNote": {
+    "message": "Optional: specify API endpoint for external integration"
+  },
+  "toolApiMethod": {
+    "message": "API Method"
+  },
+  "toolApiHeaders": {
+    "message": "API Headers (JSON)"
+  },
+  "toolApiHeadersPlaceholder": {
+    "message": "{\"Authorization\": \"Bearer YOUR_TOKEN\"}"
+  },
+  "domFunctionsTitle": {
+    "message": "Built-in DOM functions"
+  },
+  "domFunctionsDescription": {
+    "message": "List of functions for use in the tool prompt"
   }
 }

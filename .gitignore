@@ -33,3 +33,6 @@ storybook-static
 
 # Claude extension
 claude
+
+# Scripts
+update-models.js

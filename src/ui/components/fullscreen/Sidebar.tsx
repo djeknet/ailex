@@ -62,10 +62,10 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, onOpenHistory, onOpenHelp, onOpenTools }: SidebarProps) {
   const { t } = useTranslation();
+  const currentChat = useChatStore(state => state.currentChat);
   const {
     chats,
     folders,
-    currentChat,
     loadAllChats,
     loadFolders,
     createNewChat,
@@ -78,7 +78,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
   } = useChatStore();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [displayedChatsCount, setDisplayedChatsCount] = useState(10);
+  const [displayedChatsCount, setDisplayedChatsCount] = useState(20);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [hoveredChatId, setHoveredChatId] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -246,7 +246,7 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
 
   return (
     <>
-      <div className="w-80 border-r bg-card flex flex-col">
+      <div className="w-80 border-r bg-card flex flex-col h-full">
         {/* Header */}
         <div className="p-4 border-b flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -281,7 +281,11 @@ export default function Sidebar({ collapsed, onToggleCollapse, onOpenSettings, o
         </div>
 
         {/* Scrollable chats area */}
-        <div className="flex-1 overflow-auto" onScroll={handleScroll}>
+        <div 
+          className="flex-1 overflow-y-auto min-h-0" 
+          style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}
+          onScroll={handleScroll}
+        >
           <div className="p-3 space-y-1">
             {/* Folders */}
             {folders.map(folder => (
