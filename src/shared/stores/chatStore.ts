@@ -2090,7 +2090,6 @@ ${responseContext}`;
     set({ groupChatModels: [] });
   },
 
-  // Parallel messages for group chat
   sendParallelMessages: async (
     content: string,
     pageContext?: string,
@@ -2104,7 +2103,7 @@ ${responseContext}`;
     retryMessageId?: string,
     sourceTabId?: number
   ) => {
-    let { currentChat, groupChatModels, addMessage, pageContextEnabled, pageContextType } = get();
+    let { currentChat, groupChatModels, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController } = get();
     const { useSettingsStore } = await import('./settingsStore');
     const { operators } = useSettingsStore.getState();
     
@@ -2113,9 +2112,33 @@ ${responseContext}`;
       return;
     }
 
+    // Check if this chat is already processing a request
+    if (loadingChats.has(currentChat.id)) {
+      console.warn('[chatStore] Request already in progress for chat:', currentChat.id);
+      return;
+    }
+
+    // Cancel previous request if exists
+    if (activeRequestController) {
+      console.log('[chatStore] Cancelling previous group chat request');
+      activeRequestController.abort();
+    }
+
+    // Create new AbortController for this group chat request
+    const controller = new AbortController();
+    
+    // Mark this chat as loading
+    const newLoadingChats = new Set(loadingChats);
+    newLoadingChats.add(currentChat.id);
+
     console.log('[chatStore] Starting parallel message sending to', groupChatModels.length, 'models');
     
-    set({ isLoading: true, error: null });
+    set({ 
+      isLoading: true, 
+      error: null,
+      loadingChats: newLoadingChats,
+      activeRequestController: controller
+    });
 
     try {
       // 1. Получить информацию о текущей вкладке
@@ -2257,7 +2280,6 @@ ${responseContext}`;
       }
       currentChat = latestCurrentChat;
       
-      const allMessages = get().messages;
       let firstAiMessageId: string | undefined;
       
       // Обрабатываем модели последовательно для streaming эффекта
@@ -2274,6 +2296,10 @@ ${responseContext}`;
             continue;
           }
 
+          // ВАЖНО: Получаем АКТУАЛЬНЫЕ сообщения из store на каждой итерации
+          // чтобы модели 2 и 3 видели ответы предыдущих моделей
+          const allMessages = get().messages;
+
           // ВАЖНО: Фильтруем историю - только сообщения пользователя + ответы этой конкретной модели
           const filteredMessages = allMessages.filter(m => {
             if (m.chatId !== currentChat!.id) return false;
@@ -2285,15 +2311,31 @@ ${responseContext}`;
             return m.operator === selectedModel.operator && m.model === selectedModel.modelId;
           });
 
+          // Проверяем, есть ли у этой модели предыдущие ответы
+          const modelHasHistory = filteredMessages.some(m => !m.isUser);
+          
+          // Если у модели нет истории (первый запрос), оставляем только последнее сообщение пользователя
+          // чтобы избежать путаницы с множественными вопросами
+          let messagesToSend = filteredMessages;
+          if (!modelHasHistory && filteredMessages.length > 1) {
+            // Найти последнее пользовательское сообщение
+            const lastUserMessage = filteredMessages.reverse().find(m => m.isUser);
+            if (lastUserMessage) {
+              messagesToSend = [lastUserMessage];
+              console.log(`[chatStore] Model ${selectedModel.operator}/${selectedModel.modelId} has no history, using only last user message`);
+            }
+          }
+
           console.log(`[chatStore] Filtered history for ${selectedModel.operator}/${selectedModel.modelId}:`, {
             total: allMessages.length,
-            filtered: filteredMessages.length,
-            userMessages: filteredMessages.filter(m => m.isUser).length,
-            aiMessages: filteredMessages.filter(m => !m.isUser).length
+            filtered: messagesToSend.length,
+            userMessages: messagesToSend.filter(m => m.isUser).length,
+            aiMessages: messagesToSend.filter(m => !m.isUser).length,
+            hasHistory: modelHasHistory
           });
 
           // Подготовить сообщения для AI
-          const aiMessages: AIMessage[] = await Promise.all(filteredMessages.map(async (m) => {
+          const aiMessages: AIMessage[] = await Promise.all(messagesToSend.map(async (m) => {
             let messageContent = m.text;
             
             // Add attachments content for AI (text files and tabs)
@@ -2481,7 +2523,7 @@ ${responseContext}`;
             },
             webSearchEnabled, // ✅ webSearchEnabled
             webSearchSettings, // ✅ webSearchSettings
-            undefined // signal
+            controller.signal // ✅ AbortSignal for cancellation
           );
 
           // Обновить/создать финальное сообщение
@@ -2521,17 +2563,41 @@ ${responseContext}`;
           
         } catch (error: any) {
           console.error(`[chatStore] Error streaming model ${index + 1}:`, error);
-          // Продолжаем со следующей моделью даже при ошибке
+          
+          // Check if it's an abort error
+          if (error.name === 'AbortError' || controller.signal.aborted) {
+            console.log('[chatStore] Group chat generation was aborted');
+            break; // Exit the loop on abort
+          }
+          
+          // Продолжаем со следующей моделью при других ошибках
         }
       }
 
-      console.log('[chatStore] Group chat parallel processing completed successfully');
+      console.log('[chatStore] Group chat parallel processing completed');
 
     } catch (error: any) {
       console.error('[chatStore] Error in parallel processing:', error);
-      set({ error: error.message || 'Unknown error occurred' });
+      
+      // Don't show error message if it was aborted
+      if (error.name !== 'AbortError') {
+        set({ error: error.message || 'Unknown error occurred' });
+      }
     } finally {
-      set({ isLoading: false });
+      // Clear loading state
+      const newLoadingChats = new Set(get().loadingChats);
+      if (currentChat) {
+        newLoadingChats.delete(currentChat.id);
+      }
+      
+      set({ 
+        isLoading: false,
+        streamingContent: '',
+        streamingReasoning: '',
+        reasoningStartTime: null,
+        loadingChats: newLoadingChats,
+        activeRequestController: null
+      });
     }
   }
     }),

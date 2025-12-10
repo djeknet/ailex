@@ -1474,6 +1474,12 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
 
     // Pass attachments, web search enabled flag, and instruction data to sendUserMessage
     await sendUserMessage(content, pageContext, undefined, undefined, attachments, useWebSearch, instructionData);
+    
+    // Update autocomplete history with the new message
+    setUserMessageHistory(prev => {
+      const updated = [content, ...prev.filter(m => m !== content)];
+      return updated.slice(0, 1000); // Limit to 1000 most recent messages
+    });
   };
 
   return (

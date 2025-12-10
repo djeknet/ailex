@@ -114,10 +114,22 @@ export async function handleContextMenuClick(
     // Always open side panel (idempotent operation - no-op if already open)
     await chrome.sidePanel.open({ tabId: tab.id });
 
-    // Small delay to allow UI initialization if it was closed
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Save command to storage for reliable delivery
+    await chrome.storage.local.set({
+      pendingContextCommand: {
+        commandId,
+        selectedText,
+        instructionId,
+        toolId,
+        timestamp: Date.now()
+      }
+    });
+    console.log('[ContextMenu] Command saved to storage for reliable delivery');
 
-    // Send command to UI
+    // Increased delay to ensure UI is ready
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Send command to UI (backup method)
     chrome.runtime.sendMessage({
       type: 'CONTEXT_MENU_ACTION',
       data: {

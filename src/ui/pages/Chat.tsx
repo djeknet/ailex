@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSettingsStore } from '@shared/stores/settingsStore';
 import { useChatStore } from '@shared/stores/chatStore';
 import { useTranslation } from '@shared/i18n/useTranslation';
@@ -21,6 +21,21 @@ export default function Chat() {
   const [initialized, setInitialized] = useState(false);
   const [currentSite, setCurrentSite] = useState<string>('');
   const [pendingContextCommand, setPendingContextCommand] = useState<PendingContextCommand | null>(null);
+  
+  // Track executed commands to prevent duplicates (using ref to persist across renders)
+  const executedCommandsRef = useRef<Set<string>>(new Set());
+  
+  // Clean up old executed commands periodically (prevent memory leak)
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      if (executedCommandsRef.current.size > 100) {
+        console.log('[Chat] Cleaning up executed commands cache');
+        executedCommandsRef.current.clear();
+      }
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(cleanupInterval);
+  }, []);
 
   useEffect(() => {
     // Check for pending site prompt from widget on initialization
@@ -107,10 +122,28 @@ export default function Chat() {
     }
 
     // Listen for context menu actions
-    const handleContextMenuAction = (message: any) => {
+    const handleContextMenuAction = async (message: any) => {
       if (message.type === 'CONTEXT_MENU_ACTION') {
         console.log('[Chat] Context menu action received:', message.data);
         const { commandId, selectedText, instructionId } = message.data;
+        
+        // Get and IMMEDIATELY clear storage to prevent race condition
+        const storageResult = await chrome.storage.local.get('pendingContextCommand');
+        await chrome.storage.local.remove('pendingContextCommand');
+        
+        const timestamp = storageResult.pendingContextCommand?.timestamp || Date.now();
+        
+        // Create unique key for deduplication (use timestamp from storage)
+        const commandKey = `${commandId}_${selectedText}_${timestamp}`;
+        
+        // Check if already executed
+        if (executedCommandsRef.current.has(commandKey)) {
+          console.log('[Chat] Command already executed, skipping duplicate');
+          return;
+        }
+        
+        // Mark as executed
+        executedCommandsRef.current.add(commandKey);
         
         // Check if chat is initialized
         if (!initialized || !chatStore.currentChat) {
@@ -181,6 +214,66 @@ export default function Chat() {
       setPendingContextCommand(null);
     }
   }, [initialized, pendingContextCommand, chatStore.currentChat]);
+
+  // Check storage for pending context command on initialization
+  useEffect(() => {
+    if (!initialized || !chatStore.currentChat) return;
+
+    const checkPendingCommand = async () => {
+      try {
+        const result = await chrome.storage.local.get('pendingContextCommand');
+        
+        if (result.pendingContextCommand) {
+          const { commandId, selectedText, instructionId, toolId, timestamp } = result.pendingContextCommand;
+          
+          console.log('[Chat] Found pending context command in storage:', { 
+            commandId, 
+            hasText: !!selectedText,
+            timestamp,
+            age: Date.now() - timestamp
+          });
+          
+          // Check that command is not older than 10 seconds
+          if (timestamp && Date.now() - timestamp < 10000) {
+            // Create unique key for deduplication
+            const commandKey = `${commandId}_${selectedText}_${timestamp}`;
+            
+            // Clear storage BEFORE checking execution (prevents race condition)
+            await chrome.storage.local.remove('pendingContextCommand');
+            
+            // Check if already executed (message listener might have handled it)
+            if (!executedCommandsRef.current.has(commandKey)) {
+              // Mark as executed
+              executedCommandsRef.current.add(commandKey);
+              
+              console.log('[Chat] Executing command from storage');
+              
+              // Execute the command
+              if (toolId) {
+                // Handle tool command
+                handleContextCommand(commandId, selectedText, undefined);
+              } else {
+                handleContextCommand(commandId, selectedText, instructionId);
+              }
+            } else {
+              console.log('[Chat] Command from storage already executed by message listener, skipping');
+            }
+          } else {
+            console.log('[Chat] Pending command expired');
+            await chrome.storage.local.remove('pendingContextCommand');
+          }
+        } else {
+          console.log('[Chat] No pending command in storage (might have been processed by message listener)');
+        }
+      } catch (error) {
+        console.error('[Chat] Error checking pending context command:', error);
+      }
+    };
+
+    // Small delay to let message listener process first if UI is ready
+    const timeoutId = setTimeout(checkPendingCommand, 200);
+    return () => clearTimeout(timeoutId);
+  }, [initialized, chatStore.currentChat]);
 
   const handleContextCommand = async (commandId: string, selectedText: string, instructionId?: string) => {
     console.log('[Chat] Handling context command:', { commandId, textLength: selectedText.length, instructionId });

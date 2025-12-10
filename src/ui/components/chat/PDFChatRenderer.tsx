@@ -374,3 +374,4 @@ function getAttachments(message: ChatMessage): MessageAttachment[] {
 }
 
 
+
