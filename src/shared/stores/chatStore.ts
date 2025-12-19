@@ -65,7 +65,9 @@ interface ChatStore {
     quotedText?: string,
     previousResponseId?: string,
     retryMessageId?: string, // ID существующего сообщения для повтора
-    sourceTabId?: number // ID исходной вкладки для site prompts
+    sourceTabId?: number, // ID исходной вкладки для site prompts
+    sitePromptCapabilities?: string[], // Capabilities для site prompt
+    sitePromptTextKey?: string // Ключ локализации для site prompt
   ) => Promise<void>;
   setSelectedOperator: (operator: AIOperatorConfig | null) => void;
   setPageContextEnabled: (enabled: boolean) => void;
@@ -112,7 +114,9 @@ interface ChatStore {
     quotedText?: string,
     previousResponseId?: string,
     retryMessageId?: string,
-    sourceTabId?: number
+    sourceTabId?: number,
+    sitePromptCapabilities?: string[],
+    sitePromptTextKey?: string
   ) => Promise<void>;
 }
 
@@ -162,18 +166,59 @@ export const useChatStore = create<ChatStore>()(
     }
   },
 
-  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId) => {
+  sendUserMessage: async (content, pageContext, replyTo, actionLabel, attachments = [], webSearchEnabled = false, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId, sitePromptCapabilities, sitePromptTextKey) => {
     const { currentChat, selectedOperator, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController, editingImageResponseId, groupChatMode, groupChatModels } = get();
-    
-    // Проверка группового режима - переадресация на параллельную обработку
-    if (groupChatMode && groupChatModels.length > 0) {
-      console.log('[chatStore] Group chat mode enabled, redirecting to parallel processing');
-      return get().sendParallelMessages(content, pageContext, replyTo, actionLabel, attachments, webSearchEnabled, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId);
-    }
     
     if (!currentChat || !selectedOperator) {
       console.error('No chat or operator selected');
       return;
+    }
+
+    // Get tab information first (needed for both single and group chat)
+    let tab;
+    if (sourceTabId) {
+      try {
+        tab = await chrome.tabs.get(sourceTabId);
+      } catch (error) {
+        console.warn('[chatStore] Could not get source tab, falling back to active:', error);
+        [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      }
+    } else {
+      [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    }
+    
+    const currentUrl = tab?.url || '';
+    const isSystem = isSystemPage(currentUrl);
+    
+    // Get page context automatically if not provided and enabled
+    // Пустая строка означает "контекст явно отключен" (например, для rewrite)
+    if (pageContext === undefined && pageContextEnabled && !isSystem && tab?.id) {
+      console.log('[chatStore] Getting page context automatically');
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, {
+          type: 'GET_PAGE_CONTEXT',
+          data: { type: pageContextType }
+        });
+        
+        if (response?.success && response.data) {
+          pageContext = typeof response.data === 'string' ? response.data : response.data.content;
+          console.log('[chatStore] Got page context:', pageContext?.length || 0, 'chars');
+        }
+      } catch (error) {
+        console.warn('[chatStore] Could not get page context:', error);
+      }
+    } else if (pageContext === '') {
+      console.log('[chatStore] Page context explicitly disabled');
+      pageContext = undefined; // Преобразуем пустую строку в undefined
+    }
+    
+    // Проверка группового режима - переадресация на параллельную обработку (ПОСЛЕ получения контекста)
+    if (groupChatMode && groupChatModels.length > 0) {
+      console.log('[chatStore] Group chat mode enabled, redirecting to parallel processing with context:', {
+        hasContext: !!pageContext,
+        contextLength: pageContext?.length || 0
+      });
+      return get().sendParallelMessages(content, pageContext, replyTo, actionLabel, attachments, webSearchEnabled, instructionData, quotedText, previousResponseId, retryMessageId, sourceTabId, sitePromptCapabilities, sitePromptTextKey);
     }
 
     // Check if this chat is already processing a request
@@ -236,26 +281,11 @@ export const useChatStore = create<ChatStore>()(
     }
 
     try {
-      // Get current page URL, title and icon for context tracking
-      // If sourceTabId is provided (from site prompts), use that tab instead of active
-      let tab;
-      if (sourceTabId) {
-        try {
-          tab = await chrome.tabs.get(sourceTabId);
-        } catch (error) {
-          console.warn('[chatStore] Could not get source tab, falling back to active:', error);
-          [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        }
-      } else {
-        [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      }
-      
-      const currentUrl = tab?.url || '';
+      // Get page title and icon for context tracking (tab already obtained above)
       const pageTitle = tab?.title ? (tab.title.length > 30 ? tab.title.substring(0, 30) + '...' : tab.title) : undefined;
       const pageIcon = tab?.favIconUrl || undefined;
 
       // Disable page context for system pages ONLY if pageContext was not explicitly provided
-      const isSystem = isSystemPage(currentUrl);
       const effectivePageContextEnabled = pageContext ? true : (pageContextEnabled && !isSystem);
 
       // Calculate hash of page context if provided
@@ -376,7 +406,10 @@ export const useChatStore = create<ChatStore>()(
           pageTitle: pageContext && effectivePageContextEnabled ? pageTitle : undefined,
           pageIcon: pageContext && effectivePageContextEnabled ? pageIcon : undefined,
           // Save instruction ID
-          instructionId: instructionData?.id
+          instructionId: instructionData?.id,
+          // Save site prompt metadata
+          sitePromptCapabilities: sitePromptCapabilities,
+          sitePromptTextKey: sitePromptTextKey
         };
 
         await addMessage(userMessage);
@@ -1579,7 +1612,7 @@ ${responseContext}`;
   },
 
   sendSitePrompt: async (prompt: any) => {
-    const { sendUserMessage, selectedOperator, pageContextType } = get();
+    const { sendUserMessage, selectedOperator } = get();
     
     if (!selectedOperator) {
       console.error('[chatStore] No operator selected for site prompt');
@@ -1602,12 +1635,12 @@ ${responseContext}`;
         console.warn('[chatStore] No active tab found');
       }
 
-      // Обработка capability 'context' - получить контекст страницы
+      // Обработка capability 'context' - получить контекст страницы (только текст!)
       if (capabilities.includes('context') && tab && tab.id) {
         try {
           const response = await chrome.tabs.sendMessage(tab.id, {
             type: 'GET_PAGE_CONTEXT',
-            data: { type: pageContextType }
+            data: { type: 'text' } // Всегда используем 'text' для site-prompts
           });
           
           if (response?.success && response.data) {
@@ -1680,14 +1713,21 @@ ${responseContext}`;
       const { i18nService } = await import('@shared/i18n/i18nService');
       const localizedText = textKey ? i18nService.getMessage(textKey) : text;
 
-      // Отправляем сообщение
+      // Отправляем сообщение с capabilities
       await sendUserMessage(
         localizedText,
         pageContext,
         undefined, // replyTo
         undefined, // actionLabel
         attachments,
-        webSearchEnabled
+        webSearchEnabled,
+        undefined, // instructionData
+        undefined, // quotedText
+        undefined, // previousResponseId
+        undefined, // retryMessageId
+        undefined, // sourceTabId
+        capabilities, // sitePromptCapabilities
+        textKey // sitePromptTextKey
       );
       
       console.log('[chatStore] Site prompt sent successfully');
@@ -1702,10 +1742,9 @@ ${responseContext}`;
     console.log('[chatStore] Prompt:', prompt);
     console.log('[chatStore] TabId:', tabId);
     
-    const { sendUserMessage, selectedOperator, pageContextType } = get();
+    const { sendUserMessage, selectedOperator } = get();
     
     console.log('[chatStore] Selected operator:', selectedOperator?.operator);
-    console.log('[chatStore] Page context type:', pageContextType);
     
     if (!selectedOperator) {
       console.error('[chatStore] No operator selected for site prompt');
@@ -1721,13 +1760,13 @@ ${responseContext}`;
       let attachments: any[] = [];
       let webSearchEnabled = false;
 
-      // Обработка capability 'context' - получить контекст страницы
+      // Обработка capability 'context' - получить контекст страницы (только текст!)
       if (capabilities.includes('context')) {
         console.log('[chatStore] Requesting page context from tab:', tabId);
         try {
           const response = await chrome.tabs.sendMessage(tabId, {
             type: 'GET_PAGE_CONTEXT',
-            data: { type: pageContextType }
+            data: { type: 'text' } // Всегда используем 'text' для site-prompts
           });
           
           console.log('[chatStore] Page context response:', response);
@@ -1818,7 +1857,7 @@ ${responseContext}`;
       
       console.log('[chatStore] Page context value:', pageContext ? pageContext.substring(0, 200) + '...' : 'NONE');
 
-      // Отправляем сообщение
+      // Отправляем сообщение с capabilities
       await sendUserMessage(
         localizedText,
         pageContext,
@@ -1830,7 +1869,9 @@ ${responseContext}`;
         undefined, // quotedText
         undefined, // previousResponseId
         undefined, // retryMessageId
-        tabId // sourceTabId
+        tabId, // sourceTabId
+        capabilities, // sitePromptCapabilities
+        textKey // sitePromptTextKey
       );
 
       console.log('[chatStore] Site prompt sent successfully');
@@ -2099,9 +2140,11 @@ ${responseContext}`;
     webSearchEnabled: boolean = false,
     instructionData?: { id: string; content: string },
     quotedText?: string,
-    previousResponseId?: string,
-    retryMessageId?: string,
-    sourceTabId?: number
+    _previousResponseId?: string, // Не используется в группе
+    _retryMessageId?: string, // Не используется в группе
+    sourceTabId?: number,
+    sitePromptCapabilities?: string[],
+    sitePromptTextKey?: string
   ) => {
     let { currentChat, groupChatModels, addMessage, pageContextEnabled, pageContextType, loadingChats, activeRequestController } = get();
     const { useSettingsStore } = await import('./settingsStore');
@@ -2171,7 +2214,7 @@ ${responseContext}`;
         pageContextHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       }
 
-      // Подготовить attachments
+      // 3. Подготовить attachments
       const binaryFileAttachments = attachments.filter(a => {
         if (a.type !== 'file') return false;
         return a.data.match(/^[A-Za-z0-9+/=]+$/);
@@ -2202,7 +2245,7 @@ ${responseContext}`;
         }
       }
 
-      // Auto-generate chat title from first user message
+      // 4. Auto-generate chat title from first user message
       // Check if this is the first user message (no previous user messages in this chat)
       if (!currentChat) {
         console.error('[chatStore] currentChat is null, cannot update title');
@@ -2241,7 +2284,7 @@ ${responseContext}`;
         currentChat = updatedChat;
       }
 
-      // Создать пользовательское сообщение
+      // 5. Создать пользовательское сообщение
       const userMessage: ChatMessage = {
         id: `msg_${Date.now()}_user`,
         createdAt: Date.now(),
@@ -2266,12 +2309,15 @@ ${responseContext}`;
         pageUrl: currentUrl,
         pageTitle: pageContext && effectivePageContextEnabled ? pageTitle : undefined,
         pageIcon: pageContext && effectivePageContextEnabled ? pageIcon : undefined,
-        instructionId: instructionData?.id
+        instructionId: instructionData?.id,
+        // Save site prompt metadata
+        sitePromptCapabilities: sitePromptCapabilities,
+        sitePromptTextKey: sitePromptTextKey
       };
 
       await addMessage(userMessage);
 
-      // 3. Последовательный streaming для каждой модели
+      // 6. Последовательный streaming для каждой модели
       // Ensure currentChat is still valid
       const latestCurrentChat = get().currentChat;
       if (!latestCurrentChat) {
@@ -2335,8 +2381,39 @@ ${responseContext}`;
           });
 
           // Подготовить сообщения для AI
-          const aiMessages: AIMessage[] = await Promise.all(messagesToSend.map(async (m) => {
+          const aiMessages: AIMessage[] = await Promise.all(messagesToSend.map(async (m, idx) => {
             let messageContent = m.text;
+            
+            // Add page context dynamically for AI (only if needed)
+            if (m.pageContextEnabled && m.isUser && m.pageContextHash && pageContext && m.pageUrl === currentUrl) {
+              const prevMessages = messagesToSend.slice(0, idx);
+              const lastWithSameContext = prevMessages.reverse().find(msg => 
+                msg.pageContextEnabled && 
+                msg.pageUrl === m.pageUrl &&
+                msg.pageContextHash === m.pageContextHash
+              );
+              
+              // Add context only if it's new or changed
+              if (!lastWithSameContext) {
+                console.log('[chatStore] Group chat: Adding page context for message:', m.id);
+                
+                // Убедимся что pageContext - строка
+                let contextStr = typeof pageContext === 'string' ? pageContext : JSON.stringify(pageContext);
+                
+                // Очистка контекста страницы
+                let cleanedContext = contextStr;
+                // Убираем множественные пробелы и табы
+                cleanedContext = cleanedContext.replace(/[ \t]+/g, ' ');
+                // Убираем множественные переносы строк (оставляем максимум 2 подряд)
+                cleanedContext = cleanedContext.replace(/\n{3,}/g, '\n\n');
+                // Убираем пробелы в начале и конце строк
+                cleanedContext = cleanedContext.split('\n').map(line => line.trim()).join('\n');
+                // Убираем пустые строки в начале и конце
+                cleanedContext = cleanedContext.trim();
+                
+                messageContent = `${messageContent}\n\nPage context:\n${cleanedContext}`;
+              }
+            }
             
             // Add attachments content for AI (text files and tabs)
             if (m.isUser && m.attachments) {

@@ -58,6 +58,10 @@ export interface ChatMessage {
   
   // Instruction metadata
   instructionId?: string; // ID of the instruction used for this message
+  
+  // Site prompt metadata
+  sitePromptCapabilities?: string[]; // Capabilities used for site prompt (e.g., 'transcribe_youtube', 'vision')
+  sitePromptTextKey?: string; // Localization key for site prompt
 }
 
 // Type for individual attachment
