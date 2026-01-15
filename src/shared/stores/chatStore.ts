@@ -191,7 +191,8 @@ export const useChatStore = create<ChatStore>()(
     const isSystem = isSystemPage(currentUrl);
     
     // Get page context automatically if not provided and enabled
-    // Пустая строка означает "контекст явно отключен" (например, для rewrite)
+    // Пустая строка означает "контекст явно отключен" (например, для /transcribe)
+    // undefined означает "контекст не указан, получить автоматически если enabled"
     if (pageContext === undefined && pageContextEnabled && !isSystem && tab?.id) {
       console.log('[chatStore] Getting page context automatically');
       try {
@@ -208,8 +209,9 @@ export const useChatStore = create<ChatStore>()(
         console.warn('[chatStore] Could not get page context:', error);
       }
     } else if (pageContext === '') {
-      console.log('[chatStore] Page context explicitly disabled');
-      pageContext = undefined; // Преобразуем пустую строку в undefined
+      console.log('[chatStore] Page context explicitly disabled (empty string)');
+      // Оставляем пустую строку как есть - это сигнал "не добавлять контекст"
+      // НЕ преобразуем в undefined, чтобы не сработало автоматическое получение
     }
     
     // Проверка группового режима - переадресация на параллельную обработку (ПОСЛЕ получения контекста)
@@ -425,10 +427,16 @@ export const useChatStore = create<ChatStore>()(
         // Message text includes attachments but NOT page context
         let messageContent = m.text;
         
+        // Add quoted text if present (used for consul summary and context menu actions)
+        if (m.quotedText) {
+          messageContent = `${messageContent}\n\n${m.quotedText}`;
+        }
+        
         console.log(`[chatStore] Processing message ${idx} (${m.id}):`, {
           isUser: m.isUser,
           hasAttachments: !!m.attachments,
-          attachmentsLength: m.attachments?.length || 0
+          attachmentsLength: m.attachments?.length || 0,
+          hasQuotedText: !!m.quotedText
         });
         
         // Add page context dynamically for AI (only if needed)
@@ -2317,7 +2325,7 @@ ${responseContext}`;
 
       await addMessage(userMessage);
 
-      // 6. Последовательный streaming для каждой модели
+      // 6. Создать контейнерное сообщение для всех бранчей
       // Ensure currentChat is still valid
       const latestCurrentChat = get().currentChat;
       if (!latestCurrentChat) {
@@ -2326,27 +2334,63 @@ ${responseContext}`;
       }
       currentChat = latestCurrentChat;
       
-      let firstAiMessageId: string | undefined;
+      // Создать контейнерное AI сообщение (пустое) - все модели будут его бранчами
+      const containerMessageId = `msg_${Date.now()}_container`;
+      const containerMessage: ChatMessage = {
+        id: containerMessageId,
+        createdAt: Date.now(),
+        chatId: currentChat.id,
+        isUser: false,
+        operator: groupChatModels[0]?.operator, // Используем оператор первой модели
+        model: groupChatModels[0]?.modelId,
+        text: '', // Пустое контейнерное сообщение
+        tokens: 0
+      };
       
-      // Обрабатываем модели последовательно для streaming эффекта
-      for (let index = 0; index < groupChatModels.length; index++) {
-        const selectedModel = groupChatModels[index];
+      // Добавляем контейнер в базу данных и store
+      await addMessage(containerMessage);
+      console.log('[chatStore] Created container message:', containerMessageId);
+      
+      // Создать временные бранч-сообщения для всех моделей СРАЗУ
+      const branchMessages: ChatMessage[] = groupChatModels.map((selectedModel, index) => {
+        const branchId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_branch_${index}`;
+        return {
+          id: branchId,
+          createdAt: Date.now(),
+          chatId: currentChat!.id,
+          isUser: false,
+          operator: selectedModel.operator,
+          model: selectedModel.modelId,
+          branchId: containerMessageId, // Все ссылаются на контейнер
+          text: '', // Будет заполняться при стриминге
+          tokens: 0
+        };
+      });
+      
+      // Добавить все бранчи в store (не в базу, пока они пустые)
+      set(state => ({
+        messages: [...state.messages, ...branchMessages]
+      }));
+      console.log('[chatStore] Created', branchMessages.length, 'branch messages');
+      
+      // Параллельная обработка всех моделей
+      const processingPromises = groupChatModels.map(async (selectedModel, index) => {
+        const branchMessageId = branchMessages[index].id;
         
-        console.log(`[chatStore] Streaming model ${index + 1}/${groupChatModels.length}:`, selectedModel.operator, selectedModel.modelId);
+        console.log(`[chatStore] Starting parallel stream for model ${index + 1}/${groupChatModels.length}:`, selectedModel.operator, selectedModel.modelId);
         
         try {
           // Найти конфигурацию оператора
           const operatorConfig = operators.find(op => op.operator === selectedModel.operator);
           if (!operatorConfig) {
             console.error('[chatStore] Operator config not found:', selectedModel.operator);
-            continue;
+            throw new Error(`Operator config not found: ${selectedModel.operator}`);
           }
 
-          // ВАЖНО: Получаем АКТУАЛЬНЫЕ сообщения из store на каждой итерации
-          // чтобы модели 2 и 3 видели ответы предыдущих моделей
+          // Получаем АКТУАЛЬНЫЕ сообщения из store
           const allMessages = get().messages;
 
-          // ВАЖНО: Фильтруем историю - только сообщения пользователя + ответы этой конкретной модели
+          // Фильтруем историю - только сообщения пользователя + ответы этой конкретной модели
           const filteredMessages = allMessages.filter(m => {
             if (m.chatId !== currentChat!.id) return false;
             if (m.branchId) return false; // Исключаем branch сообщения из истории
@@ -2361,10 +2405,8 @@ ${responseContext}`;
           const modelHasHistory = filteredMessages.some(m => !m.isUser);
           
           // Если у модели нет истории (первый запрос), оставляем только последнее сообщение пользователя
-          // чтобы избежать путаницы с множественными вопросами
           let messagesToSend = filteredMessages;
           if (!modelHasHistory && filteredMessages.length > 1) {
-            // Найти последнее пользовательское сообщение
             const lastUserMessage = filteredMessages.reverse().find(m => m.isUser);
             if (lastUserMessage) {
               messagesToSend = [lastUserMessage];
@@ -2383,6 +2425,11 @@ ${responseContext}`;
           // Подготовить сообщения для AI
           const aiMessages: AIMessage[] = await Promise.all(messagesToSend.map(async (m, idx) => {
             let messageContent = m.text;
+            
+            // Add quoted text if present (used for consul summary and context menu actions)
+            if (m.quotedText) {
+              messageContent = `${messageContent}\n\n${m.quotedText}`;
+            }
             
             // Add page context dynamically for AI (only if needed)
             if (m.pageContextEnabled && m.isUser && m.pageContextHash && pageContext && m.pageUrl === currentUrl) {
@@ -2537,17 +2584,7 @@ ${responseContext}`;
             selectedModel: selectedModel.modelId
           };
 
-          // Создать уникальный ID для сообщения (используем timestamp + random для уникальности)
-          const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_ai_${index}_${selectedModel.operator}`;
-          
-          // Первое сообщение без branchId (основное), остальные - branches первого
-          if (index === 0) {
-            firstAiMessageId = messageId;
-          }
-
-          // Переменная для накопления контента - используем const для замыкания
-          const currentMessageId = messageId; // Фиксируем ID для замыкания
-          const currentIndex = index; // Фиксируем индекс для замыкания
+          // Переменная для накопления контента
           let accumulatedContent = '';
           
           // Get web search settings if enabled
@@ -2555,103 +2592,101 @@ ${responseContext}`;
             ? (await import('@shared/stores/webSearchStore')).useWebSearchStore.getState().getSettings(selectedModel.operator)
             : undefined;
           
-          // Создать временное сообщение для streaming (чтобы UI знал о branch)
-          if (currentIndex > 0) {
-            const tempMessage: ChatMessage = {
-              id: currentMessageId,
-              createdAt: Date.now(),
-              chatId: currentChat.id,
-              isUser: false,
-              operator: selectedModel.operator,
-              model: selectedModel.modelId,
-              branchId: firstAiMessageId,
-              text: '',
-              tokens: 0
-            };
-            
-            // Добавляем временное сообщение в store (не в базу)
-            set(state => ({ 
-              messages: [...state.messages, tempMessage]
-            }));
-          }
-          
-          // Запустить запрос со streaming
+          // Запустить запрос со streaming - каждый бранч обновляется независимо
           const response = await sendAIMessage(
             aiMessages,
             modelConfig,
-            // ✅ onChunk - streaming callback с фиксированными переменными
+            // onChunk - streaming callback для параллельного обновления бранча
             (chunk) => {
               accumulatedContent += chunk;
               
-              // Обновляем сообщение напрямую в messages для правильного отображения
-              if (currentIndex === 0) {
-                // Для первого сообщения используем streamingContent
-                set({ streamingContent: accumulatedContent });
-              } else {
-                // Для branches обновляем сообщение в списке по зафиксированному ID
-                set(state => ({
-                  messages: state.messages.map(m => 
-                    m.id === currentMessageId 
-                      ? { ...m, text: accumulatedContent }
-                      : m
-                  )
-                }));
-              }
+              // Обновляем конкретный бранч в messages
+              set(state => ({
+                messages: state.messages.map(m => 
+                  m.id === branchMessageId 
+                    ? { ...m, text: accumulatedContent }
+                    : m
+                )
+              }));
             },
-            webSearchEnabled, // ✅ webSearchEnabled
-            webSearchSettings, // ✅ webSearchSettings
-            controller.signal // ✅ AbortSignal for cancellation
+            webSearchEnabled,
+            webSearchSettings,
+            controller.signal // Общий signal для отмены всех запросов
           );
 
-          // Обновить/создать финальное сообщение
-          const aiMessage: ChatMessage = {
-            id: messageId,
+          // Обновить финальное бранч-сообщение с полными данными
+          const finalBranchMessage: ChatMessage = {
+            id: branchMessageId,
             createdAt: Date.now(),
-            chatId: currentChat.id,
+            chatId: currentChat!.id,
             isUser: false,
             operator: selectedModel.operator,
             model: selectedModel.modelId,
-            branchId: index === 0 ? undefined : firstAiMessageId,
+            branchId: containerMessageId,
             text: response.content || accumulatedContent,
             tokens: response.tokens?.total || 0,
             citations: response.citations,
-            responseId: response.response_id
+            responseId: response.response_id,
+            reasoningContent: response.reasoning_content
           };
 
-          // Для первого сообщения - добавить, для остальных - обновить существующее
-          if (index === 0) {
-            await addMessage(aiMessage);
-          } else {
-            // Обновляем существующее сообщение в базе через historyAPI
-            await historyAPI.addMessage(aiMessage); // Используем addMessage с тем же ID - перезапишет
-            set(state => ({
-              messages: state.messages.map(m => 
-                m.id === messageId ? aiMessage : m
-              )
-            }));
-          }
+          // Сохранить в базу данных
+          await historyAPI.addMessage(finalBranchMessage);
           
-          console.log(`[chatStore] Completed streaming ${index + 1}/${groupChatModels.length} from ${selectedModel.operator}/${selectedModel.modelId}${index === 0 ? ' (container)' : ' (branch)'}`);
+          // Обновить в store
+          set(state => ({
+            messages: state.messages.map(m => 
+              m.id === branchMessageId ? finalBranchMessage : m
+            )
+          }));
           
-          // Очистить streamingContent только для первого сообщения
-          if (index === 0) {
-            set({ streamingContent: '' });
-          }
+          console.log(`[chatStore] Completed parallel stream ${index + 1}/${groupChatModels.length} from ${selectedModel.operator}/${selectedModel.modelId}`);
+          
+          return { success: true, index, model: selectedModel };
           
         } catch (error: any) {
-          console.error(`[chatStore] Error streaming model ${index + 1}:`, error);
+          console.error(`[chatStore] Error in parallel stream ${index + 1}:`, error);
           
-          // Check if it's an abort error
+          // Проверка на отмену
           if (error.name === 'AbortError' || controller.signal.aborted) {
-            console.log('[chatStore] Group chat generation was aborted');
-            break; // Exit the loop on abort
+            console.log('[chatStore] Parallel stream was aborted for model:', selectedModel.operator);
+            return { success: false, index, model: selectedModel, aborted: true };
           }
           
-          // Продолжаем со следующей моделью при других ошибках
+          // Пометить бранч как ошибочный
+          set(state => ({
+            messages: state.messages.map(m => 
+              m.id === branchMessageId 
+                ? { ...m, text: `Error: ${error.message || 'Unknown error'}` }
+                : m
+            )
+          }));
+          
+          return { success: false, index, model: selectedModel, error: error.message };
         }
-      }
+      });
 
-      console.log('[chatStore] Group chat parallel processing completed');
+      // Ждём завершения всех параллельных запросов
+      console.log('[chatStore] Waiting for all parallel streams to complete...');
+      const results = await Promise.allSettled(processingPromises);
+      
+      // Логируем результаты
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          const { success, model, aborted, error } = result.value;
+          if (success) {
+            console.log(`[chatStore] ✓ Model ${index + 1} (${model.operator}/${model.modelId}) completed successfully`);
+          } else if (aborted) {
+            console.log(`[chatStore] ⊘ Model ${index + 1} (${model.operator}/${model.modelId}) was aborted`);
+          } else {
+            console.log(`[chatStore] ✗ Model ${index + 1} (${model.operator}/${model.modelId}) failed:`, error);
+          }
+        } else {
+          console.error(`[chatStore] ✗ Model ${index + 1} promise rejected:`, result.reason);
+        }
+      });
+
+      console.log('[chatStore] All parallel streams completed');
 
     } catch (error: any) {
       console.error('[chatStore] Error in parallel processing:', error);

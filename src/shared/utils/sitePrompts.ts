@@ -22,7 +22,7 @@ export async function loadSitePromptsConfig(): Promise<SitePromptsConfig> {
     cachedConfig = await response.json();
     console.log('[sitePrompts] Loaded configuration:', Object.keys(cachedConfig || {}).length, 'sites');
     
-    return cachedConfig;
+    return cachedConfig || {};
   } catch (error) {
     console.error('[sitePrompts] Error loading configuration:', error);
     return {};
@@ -67,23 +67,67 @@ export function findSiteConfig(domain: string, config: SitePromptsConfig): [stri
 }
 
 /**
- * Определяет тип страницы по селекторам
+ * Определяет тип страницы по селекторам и URL паттерну
  * Отправляет запрос в content script для проверки наличия элементов
  */
 export async function detectPageType(
   tabId: number,
-  pageTypes: Record<string, { selectors: string[] }>
+  url: string,
+  pageTypes: Record<string, { selectors: string[]; urlPattern?: string }>
 ): Promise<string | null> {
   try {
-    // Отправляем запрос в content script для проверки селекторов
-    const response = await chrome.tabs.sendMessage(tabId, {
-      type: 'DETECT_PAGE_TYPE',
-      data: { pageTypes }
-    });
+    // Извлекаем path из URL для проверки паттернов
+    const urlObj = new URL(url);
+    const urlPath = urlObj.pathname;
     
-    if (response?.success && response.pageType) {
-      console.log('[sitePrompts] Detected page type:', response.pageType);
-      return response.pageType;
+    // Разделяем типы страниц на те, что с urlPattern и без
+    const typesWithPattern: Record<string, { selectors: string[]; urlPattern?: string }> = {};
+    const typesWithoutPattern: Record<string, { selectors: string[]; urlPattern?: string }> = {};
+    
+    for (const [typeName, typeConfig] of Object.entries(pageTypes)) {
+      if (typeConfig.urlPattern) {
+        typesWithPattern[typeName] = typeConfig;
+      } else {
+        typesWithoutPattern[typeName] = typeConfig;
+      }
+    }
+    
+    // Сначала проверяем типы с URL паттернами (urlPattern обязателен)
+    for (const [typeName, typeConfig] of Object.entries(typesWithPattern)) {
+      try {
+        // Проверяем, содержит ли путь нужную подстроку
+        if (urlPath.includes(typeConfig.urlPattern!)) {
+          console.log('[sitePrompts] Matched URL pattern:', typeName, 'pattern:', typeConfig.urlPattern);
+          
+          // Дополнительно проверяем селекторы для подтверждения
+          const response = await chrome.tabs.sendMessage(tabId, {
+            type: 'DETECT_PAGE_TYPE',
+            data: { pageTypes: { [typeName]: typeConfig } }
+          });
+          
+          if (response?.success && response.pageType) {
+            return response.pageType;
+          }
+          
+          // Если селекторы не найдены, продолжаем проверку других типов
+          console.log('[sitePrompts] URL pattern matched but selectors not found for:', typeName);
+        }
+      } catch (error) {
+        console.warn('[sitePrompts] Error checking URL pattern:', error);
+      }
+    }
+    
+    // Если типы с URL паттернами не совпали, проверяем только типы БЕЗ urlPattern по селекторам
+    if (Object.keys(typesWithoutPattern).length > 0) {
+      const response = await chrome.tabs.sendMessage(tabId, {
+        type: 'DETECT_PAGE_TYPE',
+        data: { pageTypes: typesWithoutPattern }
+      });
+      
+      if (response?.success && response.pageType) {
+        console.log('[sitePrompts] Detected page type:', response.pageType);
+        return response.pageType;
+      }
     }
     
     // Если селекторы не найдены, возвращаем null (не показываем промпты)
@@ -135,7 +179,7 @@ export async function getPromptsForUrl(url: string, tabId?: number): Promise<Det
   let pageType: string | null = null;
   
   if (tabId) {
-    pageType = await detectPageType(tabId, siteConfig.pageTypes);
+    pageType = await detectPageType(tabId, url, siteConfig.pageTypes);
   }
   
   // Если не удалось определить тип (селекторы не найдены), не показываем промпты

@@ -166,6 +166,10 @@ export const EXTERNAL_URLS = {
   SALESPILOT_CHROME: 'https://fffem.com/sales_pilot_chrome',
   N8N_CHROME: 'https://fffem.com/n8n_chrome',
   FONTDETECTOR_PRO: 'https://fffem.com/fd',
+    
+  // Thank You Pages
+  THANK_YOU_INSTALL: (lang: string) => `https://nitiweb.net/thank-you?ext=ailex_browser_ai_agent&lang=${lang}`,
+  THANK_YOU_UPDATE: (lang: string) => `https://nitiweb.net/thank-you?ext=ailex_browser_ai_agent&upd=1&lang=${lang}`,
 } as const;
 
 // =============================================================================
@@ -567,7 +571,20 @@ export function getModelsWithSufficientContext(requiredTokens: number): string[]
 // 💬 GROUP CHAT CONFIGURATION
 // =============================================================================
 
-export const MAX_GROUP_CHAT_MODELS = 3;
+// Maximum number of models that can be selected in group chat mode
+// In development mode, there is no limit (for testing)
+// In production mode, limit is 3 models
+const isDevelopment = import.meta.env.MODE === 'development';
+
+export const MAX_GROUP_CHAT_MODELS = isDevelopment ? 999 : 3;
+
+// Log the actual value for debugging
+console.log('[Constants] MAX_GROUP_CHAT_MODELS:', MAX_GROUP_CHAT_MODELS, {
+  MODE: import.meta.env.MODE,
+  DEV: import.meta.env.DEV,
+  PROD: import.meta.env.PROD,
+  isDevelopment
+});
 
 // =============================================================================
 // 🎯 MODEL CAPABILITIES

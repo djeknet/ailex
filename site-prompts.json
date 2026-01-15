@@ -213,6 +213,7 @@
     "category": "video",
     "pageTypes": {
       "video": {
+        "urlPattern": "/watch",
         "selectors": [
           "h1.ytd-watch-metadata",
           "#title h1",
@@ -1052,9 +1053,9 @@
     "category": "social",
     "pageTypes": {
       "post": {
+        "urlPattern": "/post/",
         "selectors": [
           "article[role='article']",
-          "div[role='button']",
           "[data-pressable-container='true']",
           "meta[property='og:title']",
           "h1"

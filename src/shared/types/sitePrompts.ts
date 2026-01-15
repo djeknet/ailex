@@ -17,6 +17,7 @@ export interface SitePrompt {
  */
 export interface PageType {
   selectors: string[];
+  urlPattern?: string; // Regex pattern or substring to match URL path
   prompts: SitePrompt[];
 }
 

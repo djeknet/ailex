@@ -1,7 +1,7 @@
 import { handleMessage } from './handlers/messageHandler';
 import { handleContextMenuClick } from './handlers/contextMenuHandler';
 import { contextCommandCategories } from '@shared/constants/contextCommands';
-import { getLanguageByCode, RESPONSE_TONES } from '@shared/constants';
+import { getLanguageByCode, RESPONSE_TONES, EXTERNAL_URLS } from '@shared/constants';
 import { PersonalInfo } from '@shared/types/extension';
 
 // Background service worker entry point
@@ -85,8 +85,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Инициализация при установке расширения
-chrome.runtime.onInstalled.addListener(async () => {
-  console.log('AiLex extension installed');
+chrome.runtime.onInstalled.addListener(async (details) => {
+  console.log('[Background] onInstalled triggered:', details);
+  console.log('[Background] Reason:', details.reason);
+  console.log('[Background] Previous version:', details.previousVersion);
   
   // Установка дефолтных настроек
   const result = await chrome.storage.sync.get(['theme', 'language', 'historyMode']);
@@ -105,6 +107,30 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   // Создание контекстного меню
   createContextMenu(result.language || 'en');
+  
+  // Открытие страницы благодарности
+  const browserLanguage = chrome.i18n.getUILanguage().split('-')[0] || 'en';
+  console.log('[Background] Browser language detected:', browserLanguage);
+  
+  if (details.reason === 'install') {
+    // Первая установка расширения
+    console.log('[Background] Opening THANK_YOU_INSTALL page');
+    const thankYouUrl = EXTERNAL_URLS.THANK_YOU_INSTALL(browserLanguage);
+    console.log('[Background] Thank you URL:', thankYouUrl);
+    chrome.tabs.create({
+      url: thankYouUrl,
+      active: true
+    });
+  } else if (details.reason === 'update') {
+    // Обновление расширения
+    console.log('[Background] Opening THANK_YOU_UPDATE page');
+    const thankYouUrl = EXTERNAL_URLS.THANK_YOU_UPDATE(browserLanguage);
+    console.log('[Background] Thank you URL:', thankYouUrl);
+    chrome.tabs.create({
+      url: thankYouUrl,
+      active: true
+    });
+  }
 });
 
 // Создание контекстного меню с командами

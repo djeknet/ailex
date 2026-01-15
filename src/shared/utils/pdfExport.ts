@@ -63,8 +63,11 @@ export async function exportChatToPDF(
         const branches = getBranchesForMessage(filteredMessages, message.id);
         
         if (branches.length > 0) {
-          // Есть бранчи - выводим основное + все бранчи
-          content.push(...createAIMessageContent(message));
+          // Есть бранчи - выводим основное (если не пустое) + все бранчи
+          // Пропускаем пустое контейнерное сообщение
+          if (message.text && message.text.trim() !== '') {
+            content.push(...createAIMessageContent(message));
+          }
           branches.forEach(branch => {
             content.push({ text: '', margin: [0, 5, 0, 5] }); // Меньший отступ между бранчами
             content.push(...createAIMessageContent(branch));
@@ -416,16 +419,16 @@ function parseMarkdownForPDF(text: string): any[] {
 
   const flushParagraph = () => {
     if (currentParagraph.length > 0) {
-      // Каждая строка параграфа становится отдельным text элементом
-      // При использовании stack: они будут размещены вертикально с сохранением переносов
-      currentParagraph.forEach((line) => {
-        result.push({
-          text: parseInlineMarkdown(line),
-          margin: [0, 0, 0, 0]
-        });
+      // Объединяем строки параграфа, сохраняя переносы
+      const fullText = currentParagraph.join('\n');
+      
+      // Парсим весь параграф как единое целое для правильной обработки форматирования
+      result.push({
+        text: parseInlineMarkdown(fullText),
+        margin: [0, 0, 0, 3],
+        preserveLeadingSpaces: true
       });
-      // Добавляем небольшой отступ после параграфа
-      result.push({ text: '', margin: [0, 0, 0, 3] });
+      
       currentParagraph = [];
     }
   };

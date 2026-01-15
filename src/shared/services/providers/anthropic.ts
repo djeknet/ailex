@@ -132,14 +132,21 @@ export class AnthropicProvider implements AIProvider {
               }
             };
           }
-          return { type: 'text', text: '' };
+          return null; // Return null for invalid items
         }).filter(item => {
-          // Filter out empty text blocks
+          // Filter out null items and empty text blocks
+          if (!item) return false;
           if (item.type === 'text' && (!item.text || !item.text.trim())) {
             return false;
           }
           return true;
         });
+        
+        // Anthropic требует непустой контент - если массив пустой, добавим placeholder
+        if (content.length === 0) {
+          console.warn('[Anthropic] Empty content array after filtering, adding placeholder text');
+          content = [{ type: 'text', text: '.' }];
+        }
       } else {
         content = String(msg.content);
       }
@@ -190,6 +197,16 @@ export class AnthropicProvider implements AIProvider {
         }
       } else {
         // Обычное сообщение без tool_calls
+        // Дополнительная проверка: контент не должен быть пустым
+        if (Array.isArray(content) && content.length === 0) {
+          console.warn('[Anthropic] Skipping message with empty content array at index', i);
+          continue;
+        }
+        if (typeof content === 'string' && !content.trim()) {
+          console.warn('[Anthropic] Skipping message with empty string content at index', i);
+          continue;
+        }
+        
         anthropicMessages.push({ role, content });
       }
     }

@@ -960,12 +960,14 @@ export default function MessageList({ isFullscreen = false }: MessageListProps) 
       // Collect all responses from branches (original + all branches)
       const allResponses: Array<{ model: string; operator: string; text: string }> = [];
       
-      // Add original response
-      allResponses.push({
-        model: aiMessage.model || t('unknownModel'),
-        operator: aiMessage.operator || 'unknown',
-        text: aiMessage.text
-      });
+      // Add original response (only if not empty - skip empty container messages)
+      if (aiMessage.text && aiMessage.text.trim() !== '') {
+        allResponses.push({
+          model: aiMessage.model || t('unknownModel'),
+          operator: aiMessage.operator || 'unknown',
+          text: aiMessage.text
+        });
+      }
       
       // Add branch responses
       const branches = messageBranches[messageId] || [];
@@ -1020,12 +1022,61 @@ ${responsesText}`;
         }
       }
 
-      // Send short localized message with full prompt in pageContext
+      // Получить page context если он был в оригинальном сообщении
+      let pageContextToSend: string | undefined;
+      
+      if (userMessage.pageContextEnabled && userMessage.pageUrl === currentUrl) {
+        // Оригинальное сообщение использовало контекст страницы - получим его снова
+        // Для консула ВСЕГДА используем 'text' тип, даже если оригинал был 'html' или 'dom'
+        try {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab?.id) {
+            const response = await chrome.tabs.sendMessage(tab.id, {
+              type: 'GET_PAGE_CONTEXT',
+              data: { type: 'text' } // Всегда text для консула
+            });
+            
+            if (response?.success && response.data) {
+              const rawContext = typeof response.data === 'string' ? response.data : response.data.content;
+              // Передаем оригинальный контекст
+              pageContextToSend = rawContext;
+              console.log('[MessageList] Will send page context (text) with consul prompt');
+            }
+          }
+        } catch (error) {
+          console.warn('[MessageList] Could not get page context for consul:', error);
+          pageContextToSend = undefined;
+        }
+      } else {
+        // Контекст страницы не использовался - НЕ передаем pageContext вообще
+        pageContextToSend = undefined; // undefined = не передается, не влияет на pageContextEnabled
+      }
+
+      // Извлекаем параметры из оригинального пользовательского сообщения
+      const originalAttachments = userMessage.attachments 
+        ? JSON.parse(userMessage.attachments) 
+        : [];
+      
+      console.log('[MessageList] Using original message parameters:', {
+        hasAttachments: originalAttachments.length > 0,
+        webSearch: userMessage.webSearch,
+        pageContextEnabled: userMessage.pageContextEnabled || false,
+        pageContextWillBeSent: !!pageContextToSend,
+        instructionId: userMessage.instructionId
+      });
+      
+      // Send короткое сообщение в UI, консул промпт передаем через quotedText
       await sendUserMessage(
-        t('consulMessage'), // Короткий текст в UI
-        consulPrompt, // Полный промпт в pageContext
+        t('consulMessage'), // Короткий текст в UI (как изначально!)
+        pageContextToSend, // Оригинальный page context (если был) ИЛИ undefined
         undefined, // replyTo
-        t('consulSummary') // actionLabel
+        t('consulSummary'), // actionLabel
+        originalAttachments, // attachments из оригинального сообщения
+        userMessage.webSearch, // webSearchEnabled из оригинального сообщения
+        userMessage.instructionId 
+          ? { id: userMessage.instructionId, content: '' } // instructionData
+          : undefined,
+        consulPrompt // quotedText - консул промпт передается здесь!
       );
 
     } catch (error) {

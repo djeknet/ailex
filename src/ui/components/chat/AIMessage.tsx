@@ -483,50 +483,55 @@ export default function AIMessage({
 
   if (hasBranches) {
     // Render with Branch component if there are alternative responses
+    // Если контейнер пустой (групповой режим), показываем только бранчи
+    const isEmptyContainer = !message.text || message.text.trim() === '';
+    
     return (
       <Branch
         key={`branch-${message.id}-${branches.length}`}
-        defaultBranch={activeBranchIndex}
+        defaultBranch={isEmptyContainer ? 0 : activeBranchIndex} // Для пустого контейнера по умолчанию индекс 0 (первый бранч)
         onBranchChange={(branchIndex) => onBranchChange && onBranchChange(branchIndex)}
       >
         <BranchMessages>
           {/* Create a flat array of all pages */}
           {[
-            /* Page 0: Original message */
-            <div key="original">
-              {/* Show tool executions if any */}
-              {message.toolCalls && message.toolCalls.length > 0 && (
-                <div className="mb-4 space-y-2">
-                  {message.toolCalls.map((toolExecution) => (
-                    <ToolExecutionDisplay key={toolExecution.id} toolExecution={toolExecution} />
-                  ))}
+            /* Page 0: Original message (только если не пустой контейнер) */
+            ...(!isEmptyContainer ? [
+              <div key="original">
+                {/* Show tool executions if any */}
+                {message.toolCalls && message.toolCalls.length > 0 && (
+                  <div className="mb-4 space-y-2">
+                    {message.toolCalls.map((toolExecution) => (
+                      <ToolExecutionDisplay key={toolExecution.id} toolExecution={toolExecution} />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Show reasoning if available (DeepSeek reasoner) */}
+                {message.reasoningContent && (
+                  <Reasoning 
+                    defaultOpen={false} 
+                    isStreaming={false}
+                    duration={message.reasoningDuration}
+                    className="pl-[5px] pr-[5px]"
+                  >
+                    <ReasoningTrigger />
+                    <ReasoningContent>{message.reasoningContent}</ReasoningContent>
+                  </Reasoning>
+                )}
+                
+                <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
+                  {renderMessageWithCitations(message.text, message.citations, message.operator)}
                 </div>
-              )}
-              
-              {/* Show reasoning if available (DeepSeek reasoner) */}
-              {message.reasoningContent && (
-                <Reasoning 
-                  defaultOpen={false} 
-                  isStreaming={false}
-                  duration={message.reasoningDuration}
-                  className="pl-[5px] pr-[5px]"
-                >
-                  <ReasoningTrigger />
-                  <ReasoningContent>{message.reasoningContent}</ReasoningContent>
-                </Reasoning>
-              )}
-              
-              <div className="rounded-lg p-4 text-base max-w-full overflow-hidden" style={{ paddingLeft: '6px' }}>
-                {renderMessageWithCitations(message.text, message.citations, message.operator)}
+                
+                {/* Show generated images if any */}
+                {renderGeneratedImages(message.generatedImages, message.responseId, message.id, message.operator)}
+                
+                {renderActionButtons(message.text, message.id, message.operator, message.model)}
               </div>
-              
-              {/* Show generated images if any */}
-              {renderGeneratedImages(message.generatedImages, message.responseId, message.id, message.operator)}
-              
-              {renderActionButtons(message.text, message.id, message.operator, message.model)}
-            </div>,
+            ] : []),
             
-            /* Pages 1+: Alternative responses */
+            /* Pages 1+ (or 0+ for empty container): Alternative responses */
             ...branches.map((branch, idx) => (
               <div key={`branch-${idx}`}>
                 {/* Show reasoning if available (DeepSeek reasoner) */}
@@ -570,19 +575,27 @@ export default function AIMessage({
             <span className="text-xs text-muted-foreground">
               {/* Show current model name based on active branch */}
               {(() => {
-                if (activeBranchIndex === 0) {
-                  return message.model || t('unknownModel');
-                } else {
-                  const branch = branches[activeBranchIndex - 1];
+                // Для пустого контейнера все - бранчи, без сдвига индекса
+                if (isEmptyContainer) {
+                  const branch = branches[activeBranchIndex];
                   return branch?.model || t('unknownModel');
+                } else {
+                  if (activeBranchIndex === 0) {
+                    return message.model || t('unknownModel');
+                  } else {
+                    const branch = branches[activeBranchIndex - 1];
+                    return branch?.model || t('unknownModel');
+                  }
                 }
               })()}
             </span>
             {/* Show tokens count with dollar icon */}
             {(() => {
-              const tokens = activeBranchIndex === 0 
-                ? message.tokens 
-                : branches[activeBranchIndex - 1]?.tokens;
+              const tokens = isEmptyContainer
+                ? branches[activeBranchIndex]?.tokens
+                : (activeBranchIndex === 0 
+                    ? message.tokens 
+                    : branches[activeBranchIndex - 1]?.tokens);
               
               if (tokens && tokens > 0) {
                 return (

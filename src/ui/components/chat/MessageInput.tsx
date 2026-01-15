@@ -100,7 +100,9 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
   const [showWebSearchTooltip, setShowWebSearchTooltip] = useState(false);
   const [selectedInstruction, setSelectedInstruction] = useState<string>('none');
   const [pageContextEnabled, setPageContextEnabled] = useState(true);
-  const [pageContextType, setPageContextType] = useState<PageContextType>('text');
+  // Use pageContextType from chatStore instead of local state
+  const pageContextType = useChatStore(state => state.pageContextType);
+  const setPageContextType = useChatStore(state => state.setPageContextType);
   const [siteFavicon, setSiteFavicon] = useState<string | null>(null);
   const [isSystemPage, setIsSystemPage] = useState(false);
   const [contentScriptAvailable, setContentScriptAvailable] = useState(true);
@@ -1096,6 +1098,8 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
     }
 
     const content = message.text!.trim();
+    console.log('[MessageInput] Processing message:', { content, length: content.length });
+    
     setText('');
     setShowToolsDropdown(false); // Скрыть dropdown при отправке
     setShowTabMentionDropdown(false); // Скрыть tab dropdown при отправке
@@ -1317,12 +1321,23 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
     setAttachedImages([]);
     setAttachedTabs([]);
 
-    // Get page context if enabled
-    let pageContext = '';
+    // Get page context if enabled (but NOT for /transcribe command)
+    let pageContext: string | undefined = undefined;
     let contextWasTruncated = false;
     let originalTokenCount = 0;
     
-    if (pageContextEnabled) {
+    const isTranscribeCommand = content.toLowerCase().startsWith('/transcribe');
+    
+    console.log('[MessageInput] Context check:', {
+      content: content.substring(0, 50),
+      isTranscribeCommand,
+      pageContextEnabled
+    });
+    
+    if (isTranscribeCommand) {
+      console.log('[MessageInput] /transcribe command detected, EXPLICITLY DISABLING page context');
+      pageContext = ''; // Explicitly disable context with empty string
+    } else if (pageContextEnabled) {
       try {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab.id && tab.url) {
@@ -1376,7 +1391,7 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
                 originalTokenCount = contextData.estimatedTokens || 0;
                 
                 console.log('[MessageInput] Page context retrieved:', {
-                  length: pageContext.length,
+                  length: pageContext?.length || 0,
                   truncated: contextWasTruncated,
                   originalTokens: originalTokenCount
                 });
@@ -1431,7 +1446,7 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
                     originalTokenCount = contextData.estimatedTokens || 0;
                     
                     console.log('[MessageInput] Page context retrieved after injection:', {
-                      length: pageContext.length,
+                      length: pageContext?.length || 0,
                       truncated: contextWasTruncated,
                       originalTokens: originalTokenCount
                     });
@@ -1467,13 +1482,13 @@ export default function MessageInput({ isFullscreen = false }: MessageInputProps
     console.log('[MessageInput] Submitting message:', {
       contentLength: content.length,
       hasPageContext: !!pageContext,
-      pageContextLength: pageContext.length,
+      pageContextLength: pageContext?.length || 0,
       attachmentsCount: attachments.length,
       hasInstruction: !!instructionData
     });
 
     // Pass attachments, web search enabled flag, and instruction data to sendUserMessage
-    await sendUserMessage(content, pageContext, undefined, undefined, attachments, useWebSearch, instructionData);
+    await sendUserMessage(content, pageContext || '', undefined, undefined, attachments, useWebSearch, instructionData);
     
     // Update autocomplete history with the new message
     setUserMessageHistory(prev => {

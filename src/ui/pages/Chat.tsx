@@ -50,7 +50,7 @@ export default function Chat() {
             // Wait for chat to be ready
             if (chatStore.currentChat && chatStore.sendSitePrompt) {
               console.log('[Chat] Processing pending site prompt');
-              await chatStore.sendSitePrompt(prompt, currentUrl, tabId);
+              await chatStore.sendSitePrompt(prompt);
               // Clear the pending prompt
               await chrome.storage.local.remove('pendingSitePrompt');
               console.log('[Chat] Pending site prompt processed and cleared');
@@ -319,7 +319,7 @@ export default function Chat() {
       // Send the message with the selected text as quotedText
       await chatStore.sendUserMessage(
         fullPrompt,
-        undefined, // no page context
+        '', // explicitly disable page context
         undefined, // no replyTo (quotedText will be used instead)
         actionLabel, // action label to display
         [], // no attachments
@@ -364,7 +364,7 @@ export default function Chat() {
       // Send the message with instruction
       await chatStore.sendUserMessage(
         fullPrompt,
-        undefined, // no page context
+        '', // explicitly disable page context
         undefined, // no replyTo
         instruction.name, // action label - instruction name
         [], // no attachments

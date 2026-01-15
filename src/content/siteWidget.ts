@@ -95,11 +95,47 @@ function findSiteConfig(domain: string, config: SitePromptsConfig): [string, any
   return null;
 }
 
-// Detect page type by checking selectors
-function detectPageType(pageTypes: Record<string, { selectors: string[] }>): string | null {
+// Detect page type by checking selectors and URL pattern
+function detectPageType(pageTypes: Record<string, { selectors: string[]; urlPattern?: string }>): string | null {
+  const urlPath = window.location.pathname;
+  
+  // Разделяем типы на те, что с urlPattern и без
+  const typesWithPattern: Array<[string, { selectors: string[]; urlPattern?: string }]> = [];
+  const typesWithoutPattern: Array<[string, { selectors: string[]; urlPattern?: string }]> = [];
+  
   for (const [typeName, typeConfig] of Object.entries(pageTypes)) {
-    const selectors = typeConfig.selectors || [];
+    if (typeConfig.urlPattern) {
+      typesWithPattern.push([typeName, typeConfig]);
+    } else {
+      typesWithoutPattern.push([typeName, typeConfig]);
+    }
+  }
+  
+  // Сначала проверяем типы с URL паттернами
+  for (const [typeName, typeConfig] of typesWithPattern) {
+    // Проверяем URL паттерн
+    if (!urlPath.includes(typeConfig.urlPattern!)) {
+      continue; // URL не совпадает - пропускаем этот тип
+    }
     
+    // URL совпал - проверяем селекторы
+    const selectors = typeConfig.selectors || [];
+    for (const selector of selectors) {
+      try {
+        const element = document.querySelector(selector);
+        if (element) {
+          console.log('[siteWidget] Detected page type:', typeName, 'via URL pattern:', typeConfig.urlPattern, 'and selector:', selector);
+          return typeName;
+        }
+      } catch (error) {
+        console.warn('[siteWidget] Invalid selector:', selector);
+      }
+    }
+  }
+  
+  // Если типы с URL паттернами не совпали, проверяем типы БЕЗ urlPattern
+  for (const [typeName, typeConfig] of typesWithoutPattern) {
+    const selectors = typeConfig.selectors || [];
     for (const selector of selectors) {
       try {
         const element = document.querySelector(selector);
@@ -443,8 +479,52 @@ function setupEventListeners(prompts: SitePrompt[]) {
 export function removeSiteWidget() {
   const widget = document.getElementById('ailex-site-widget');
   const panel = document.getElementById('ailex-prompts-panel');
+  const closeBtn = document.getElementById('ailex-close-panel-btn');
   
   if (widget) widget.remove();
   if (panel) panel.remove();
+  if (closeBtn) closeBtn.remove();
+}
+
+// Watch for URL changes in SPA (Single Page Applications)
+let lastUrl = window.location.href;
+
+function checkUrlChange() {
+  const currentUrl = window.location.href;
+  if (currentUrl !== lastUrl) {
+    console.log('[siteWidget] URL changed from', lastUrl, 'to', currentUrl);
+    lastUrl = currentUrl;
+    
+    // Remove existing widget
+    removeSiteWidget();
+    
+    // Reinitialize after a short delay to allow page content to load
+    setTimeout(() => {
+      initSiteWidget();
+    }, 500);
+  }
+}
+
+// Monitor URL changes using multiple methods for better compatibility
+if (typeof window !== 'undefined') {
+  // Method 1: Listen to popstate (back/forward buttons)
+  window.addEventListener('popstate', checkUrlChange);
+  
+  // Method 2: Listen to pushState and replaceState (SPA navigation)
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+  
+  history.pushState = function(...args) {
+    originalPushState.apply(history, args);
+    checkUrlChange();
+  };
+  
+  history.replaceState = function(...args) {
+    originalReplaceState.apply(history, args);
+    checkUrlChange();
+  };
+  
+  // Method 3: Periodic check as fallback (for some edge cases)
+  setInterval(checkUrlChange, 1000);
 }
 
