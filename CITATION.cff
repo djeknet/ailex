@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "Если вы используете это программное обеспечение или его части, пожалуйста, указывайте авторство следующим образом."
+authors:
+  - given-names: "Yevhen Zakhodiakin"
+    alias: "djeknet"
+title: "AiLex - AI-powered Browser Extension"
+version: 1.0.2
+date-released: 2026-08-18
+url: "https://github.com/djeknet/ailex"
